@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista – COLMENA HUB</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+
+<body class="min-h-screen bg-offwhite p-6">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">Profesionistas disponibles</h1>
+
+    <!-- Buscador -->
+    <input type="text" id="search" placeholder="Buscar profesionistas..." class="w-full mb-8 px-4 py-3 border border-gray-300 rounded-lg">
+
+    <!-- Grid de tarjetas -->
+    <div id="list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Ejemplo de tarjeta -->
+      <a href="profile.html?prof=Abogado" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
+        <div class="font-medium">Abogado</div>
+        <div class="text-sm text-gray-500">Profesional certificado</div>
+      </a>
+      <!-- Copia-pega esta tarjeta para más profesiones -->
+    </div>
+  </div>
+
+  <!-- Script simple para filtrar (opcional) -->
+  <script>
+    const search = document.getElementById('search');
+    const list = document.getElementById('list');
+    const professions = ["Abogado", "Arquitecto", "Médico", "Ingeniero", "Diseñador gráfico"]; // agrégalo completo si quieres
+    search.addEventListener('input', () => {
+      const term = search.value.toLowerCase();
+      [...list.children].forEach(card => {
+        card.style.display = card.textContent.toLowerCase().includes(term) ? 'block' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>
