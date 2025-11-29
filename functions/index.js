@@ -1,32 +1,80 @@
 /**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
+ * Cloud Functions para COLMENA-HUB
+ * 1. Webhook de Veriff → crea perfil público de trabajador
+ * 2. Índice para búsquedas rápidas (rubro + ciudad)
  */
 
-const {setGlobalOptions} = require("firebase-functions");
-const {onRequest} = require("firebase-functions/https");
+const {onRequest} = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
+const admin = require("firebase-admin");
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+// Inicializa Firebase Admin SDK
+admin.initializeApp();
+const db = admin.firestore();
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+// CORS para que Veriff (o cualquier origen) pueda llamar el webhook
+const cors = require("cors")({origin: true});
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+/**
+ * Webhook que Veriff llama cuando termina una verificación
+ * POST -> https://us-central1-<tu-proyecto>.cloudfunctions.net/veriffWebhook
+ * Body: { verificationStatus: "approved", vendorData: "uid-del-usuario" }
+ */
+exports.veriffWebhook = onRequest({maxInstances: 10}, async (req, res) => {
+  // Aplica CORS
+  cors(req, res, async () => {
+    try {
+      const {verificationStatus, vendorData: uid} = req.body;
+
+      // Si no está aprobado, no hacemos nada
+      if (verificationStatus !== "approved") {
+        logger.log(`Verificación NO aprobada para ${uid}`);
+        return res.status(200).send("OK");
+      }
+
+      // Lee los datos básicos que ya guardaste en apply.html
+      const userSnap = await db.doc(`users/${uid}`).get();
+      if (!userSnap.exists) {
+        logger.error(`No existe users/${uid}`);
+        return res.status(404).send("Usuario no encontrado");
+      }
+
+      const {displayName, avatarURL, rubro, city} = userSnap.data();
+
+      // Crea (o actualiza) el perfil público en workers/{uid}/publicProfile
+      await db.doc(`workers/${uid}`).set({
+        publicProfile: {
+          name: displayName,
+          avatarURL,
+          rubro,
+          city,
+          rating: 0,
+          jobsDone: 0,
+          verified: true,
+          createdAt: admin.firestore.FieldValue.serverTimestamp()
+        }
+      }, {merge: true});
+
+      // Índice rápido para búsquedas (rubro + ciudad)
+      await db.collection("index").doc(uid).set({
+        rubro: rubro.toLowerCase(),
+        city: city.toLowerCase()
+      });
+
+      logger.log(`Perfil público creado para ${uid}`);
+      return res.status(200).send("Perfil creado");
+    } catch (error) {
+      logger.error("Error en veriffWebhook", error);
+      return res.status(500).send("Internal error");
+    }
+  });
+});
+
+/**
+ * Ejemplo de función adicional: notificar al trabajador cuando llega una orden
+ * Se activa al crear un documento en orders/{orderId}
+ */
+exports.notifyPro = onRequest({maxInstances: 10}, async (req, res) => {
+  // Aquí puedes poner luego un trigger real onDocumentCreated
+  res.send("Notificación pendiente");
+});
