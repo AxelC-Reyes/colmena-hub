@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Postúlate – COLMENA HUB</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+
+<body class="min-h-screen bg-offwhite">
+  <div class="max-w-2xl mx-auto p-6 space-y-8">
+    <h1 class="text-3xl font-bold text-center text-gray-800">Postúlate como profesional</h1>
+    <p class="text-center text-gray-600">Sube tus documentos y nos pondremos en contacto contigo.</p>
+
+    <!-- Formulario simulado -->
+    <form class="space-y-6" onsubmit="event.preventDefault(); alert('¡Solicitud recibida! En breve nos comunicamos contigo.');">
+      
+      <!-- Nombre -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Nombre completo</label>
+        <input type="text" required class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg">
+      </div>
+
+      <!-- CV -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">CV (PDF o imagen)</label>
+        <input type="file" accept=".pdf,.jpg,.jpeg,.png" required class="mt-1 w-full">
+      </div>
+
+      <!-- INE frente -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">INE (frente)</label>
+        <input type="file" accept=".jpg,.jpeg,.png" required class="mt-1 w-full">
+      </div>
+
+      <!-- INE reverso -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">INE (reverso)</label>
+        <input type="file" accept=".jpg,.jpeg,.png" required class="mt-1 w-full">
+      </div>
+
+      <!-- Foto personal -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Foto personal</label>
+        <input type="file" accept=".jpg,.jpeg,.png" required class="mt-1 w-full">
+      </div>
+
+      <!-- Botón -->
+      <button type="submit" class="w-full py-3 bg-yellow-500 text-white font-medium rounded-lg hover:bg-yellow-600 transition-colors">
+        Enviar solicitud
+      </button>
+    </form>
+
+    <!-- Footer mini -->
+    <div class="text-center text-xs text-gray-500">© 2025 Colmena-Hub - Todos los derechos reservados</div>
+  </div>
+</body>
+</html>
