@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>¿Qué necesitas? – COLMENA HUB</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+
+<body class="min-h-screen bg-offwhite">
+  <div class="flex flex-col items-center justify-center min-h-screen p-4 space-y-12">
+    <h1 class="text-3xl font-bold text-gray-800 mb-12">¿Qué tipo de profesional necesitas?</h1>
+
+    <div class="flex flex-col md:flex-row items-center justify-center gap-12">
+      <!-- Profesionistas -->
+      <a href="professions-list.html?cat=professionals"
+         class="relative w-48 h-52 flex items-center justify-center text-white font-bold text-xl
+                bg-yellow-500 shadow-lg hover:bg-yellow-600 transition-all duration-300"
+                style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+        Profesionistas
+      </a>
+
+      <!-- Oficiadores -->
+      <a href="oficiadores.html"
+   class="relative w-48 h-52 flex items-center justify-center text-white font-bold text-xl
+          bg-yellow-500 shadow-lg hover:bg-yellow-600 transition-all duration-300"
+   style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+  Oficiadores
+      </a>
+    </div>
+
+    <!-- Barra de búsqueda (estática) -->
+    <div class="w-full max-w-md">
+      <input type="text" placeholder="Buscar profesionales..." class="w-full px-4 py-3 border border-gray-300 rounded-lg">
+    </div>
+  </div>
+</body>
+</html>
