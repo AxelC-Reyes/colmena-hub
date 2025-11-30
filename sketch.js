@@ -7,7 +7,9 @@ const MIN_HUECO = 120;
 let abeja, tubos, velocidad, nivel, puntos, juegoCongelado, preguntaActiva;
 
 function setup() {
-  let canvas = createCanvas(800, 600);
+  let ancho = min(windowWidth, 480);
+  let canvas = createCanvas(ancho, ancho * 0.75);
+  canvas.parent('lienzo');
   canvas.parent('lienzo');
   abeja = { x: 150, y: height / 2, r: 16, vy: 0 };
   tubos = [];
@@ -110,6 +112,20 @@ function mostrarHUD() {
 function keyPressed() {
   if (preguntaActiva) return;
   if (key === ' ') abeja.vy = SALTO;
+}
+
+  // Toques en móvil
+function touchStarted() {
+  if (preguntaActiva) return;          // no saltar si hay pregunta
+  abeja.vy = SALTO;
+  return false;                        // evita scroll/zoom
+}
+
+// Doble toque = enviar respuesta (si hay pregunta)
+function touchEnded() {
+  if (preguntaActiva) {
+    window.verificar();
+  }
 }
 
 function mostrarPregunta() {

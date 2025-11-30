@@ -2,16 +2,117 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Flappy Bee – COLMENA HUB</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <style>
-    body { margin: 0; background: #222; color: #fff; font-family: sans-serif; }
-    #lienzo { display: block; margin: 0 auto; border: 4px solid #f59e0b; border-radius: 12px; }
-    #panel{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(255,255,255,.95); color:#000; padding:25px 35px; border-radius:10px; box-shadow:0 0 20px rgba(0,0,0,.5); text-align:center; z-index:10; }
+    body { 
+      margin: 0; 
+      background: #222; 
+      color: #fff; 
+      font-family: sans-serif; 
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+    #lienzo { 
+      display: block; 
+      margin: 0 auto; 
+      border: 4px solid #f59e0b; 
+      border-radius: 12px; 
+      max-width: 100%;
+      height: auto;
+    }
+    #panel{ 
+      position:absolute; 
+      top:50%; 
+      left:50%; 
+      transform:translate(-50%,-50%); 
+      background:rgba(255,255,255,.95); 
+      color:#000; 
+      padding:25px 35px; 
+      border-radius:10px; 
+      box-shadow:0 0 20px rgba(0,0,0,.5); 
+      text-align:center; 
+      z-index:10; 
+      width: 80%;
+      max-width: 400px;
+    }
     .oculto{ display:none; }
-    #respuesta{ padding:8px 12px; width:220px; font-size:16px; }
-    button{ padding:8px 18px; font-size:16px; margin-left:6px; cursor:pointer; }
+    #respuesta{ 
+      padding:12px 15px; 
+      width:100%; 
+      font-size:16px; 
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+    button{ 
+      padding:12px 20px; 
+      font-size:16px; 
+      width: 100%;
+      cursor:pointer; 
+      background-color: #f59e0b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
     #retro{ margin-top:10px; font-weight:bold; }
+    
+    /* Botón de salto para móviles */
+    #boton-salto {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 80px;
+      height: 80px;
+      background-color: rgba(245, 158, 11, 0.7);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      text-align: center;
+      z-index: 5;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Instrucciones para móviles */
+    #instrucciones-movil {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 5;
+    }
+    
+    /* Ajustes para pantallas pequeñas */
+    @media (max-width: 480px) {
+      #panel {
+        padding: 20px;
+      }
+      
+      h1.text-3xl {
+        font-size: 1.5rem;
+      }
+      
+      #boton-salto {
+        width: 70px;
+        height: 70px;
+        bottom: 15px;
+        right: 15px;
+      }
+      
+      #instrucciones-movil {
+        bottom: 15px;
+        left: 15px;
+        font-size: 12px;
+      }
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.min.js"></script>
 </head>
@@ -30,10 +131,224 @@
     <button onclick="verificar()">Enviar</button>
     <p id="retro"></p>
   </div>
+  
+  <!-- Botón de salto para móviles -->
+  <div id="boton-salto" class="oculto">TOCAR PARA SALTAR</div>
+  
+  <!-- Instrucciones para móviles -->
+  <div id="instrucciones-movil" class="oculto">Toca la pantalla para saltar</div>
 
   <!-- Scripts del juego -->
-  <script src="preguntas.js"></script>
-  <script src="sketch.js"></script>
+  <script>
+    // Simulación de preguntas.js
+    const banco = [
+      { nivel: 1, pregunta: "¿Cuánto es 2+2?", respuesta: "4" },
+      { nivel: 2, pregunta: "¿Capital de Francia?", respuesta: "paris" },
+      { nivel: 3, pregunta: "¿Color del cielo?", respuesta: "azul" }
+    ];
+    
+    let nivel = 1;
+    let juegoCongelado = false;
+    let preguntaActiva = false;
+    let velocidad = 2;
+  </script>
+  
+  <script>
+    // Simulación de sketch.js adaptado para móviles
+    let abeja;
+    let tuberias = [];
+    let gravedad = 0.6;
+    let salto = -12;
+    let ancho = 400;
+    let alto = 600;
+    let puntuacion = 0;
+    let juegoTerminado = false;
+    let esMovil = false;
+    
+    function setup() {
+      // Detectar si es un dispositivo móvil
+      esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      // Ajustar tamaño del lienzo según el dispositivo
+      if (esMovil) {
+        ancho = min(windowWidth - 40, 400);
+        alto = min(windowHeight - 200, 600);
+        
+        // Mostrar controles para móviles
+        document.getElementById('boton-salto').classList.remove('oculto');
+        document.getElementById('instrucciones-movil').classList.remove('oculto');
+      }
+      
+      let lienzo = createCanvas(ancho, alto);
+      lienzo.parent('lienzo');
+      
+      // Inicializar abeja
+      abeja = {
+        x: 50,
+        y: alto / 2,
+        velocidad: 0,
+        radio: 20
+      };
+      
+      // Generar primera tubería
+      generarTuberia();
+    }
+    
+    function draw() {
+      background(135, 206, 235); // Cielo azul
+      
+      if (!juegoCongelado && !juegoTerminado) {
+        // Aplicar gravedad
+        abeja.velocidad += gravedad;
+        abeja.y += abeja.velocidad;
+        
+        // Dibujar y mover tuberías
+        for (let i = tuberias.length - 1; i >= 0; i--) {
+          tuberias[i].x -= velocidad;
+          
+          // Dibujar tubería
+          fill(34, 139, 34); // Verde
+          rect(tuberias[i].x, 0, tuberias[i].ancho, tuberias[i].arriba);
+          rect(tuberias[i].x, tuberias[i].abajo, tuberias[i].ancho, alto - tuberias[i].abajo);
+          
+          // Detectar colisión
+          if (
+            abeja.x + abeja.radio > tuberias[i].x &&
+            abeja.x - abeja.radio < tuberias[i].x + tuberias[i].ancho &&
+            (abeja.y - abeja.radio < tuberias[i].arriba || abeja.y + abeja.radio > tuberias[i].abajo)
+          ) {
+            juegoTerminado = true;
+          }
+          
+          // Puntuación
+          if (tuberias[i].x + tuberias[i].ancho < abeja.x && !tuberias[i].contado) {
+            puntuacion++;
+            tuberias[i].contado = true;
+            
+            // Cada 5 puntos, mostrar pregunta
+            if (puntuacion % 5 === 0) {
+              mostrarPregunta();
+            }
+          }
+          
+          // Eliminar tuberías fuera de pantalla
+          if (tuberias[i].x < -tuberias[i].ancho) {
+            tuberias.splice(i, 1);
+          }
+        }
+        
+        // Generar nueva tubería
+        if (tuberias.length === 0 || tuberias[tuberias.length - 1].x < ancho - 200) {
+          generarTuberia();
+        }
+        
+        // Verificar límites de pantalla
+        if (abeja.y > alto || abeja.y < 0) {
+          juegoTerminado = true;
+        }
+      }
+      
+      // Dibujar abeja
+      fill(255, 204, 0); // Amarillo
+      ellipse(abeja.x, abeja.y, abeja.radio * 2);
+      
+      // Dibujar puntuación
+      fill(0);
+      textSize(24);
+      textAlign(LEFT);
+      text(`Puntuación: ${puntuacion}`, 10, 30);
+      
+      // Mostrar game over
+      if (juegoTerminado) {
+        fill(0, 0, 0, 150);
+        rect(0, 0, ancho, alto);
+        
+        fill(255);
+        textSize(32);
+        textAlign(CENTER);
+        text("¡Game Over!", ancho / 2, alto / 2 - 20);
+        textSize(20);
+        text(`Puntuación: ${puntuacion}`, ancho / 2, alto / 2 + 20);
+        text("Toca para reiniciar", ancho / 2, alto / 2 + 60);
+      }
+    }
+    
+    function generarTuberia() {
+      let espacio = 150;
+      let posicion = random(100, alto - espacio - 100);
+      
+      tuberias.push({
+        x: ancho,
+        ancho: 60,
+        arriba: posicion,
+        abajo: posicion + espacio,
+        contado: false
+      });
+    }
+    
+    function saltar() {
+      abeja.velocidad = salto;
+    }
+    
+    function keyPressed() {
+      if (key === ' ' && !juegoCongelado && !juegoTerminado) {
+        saltar();
+        return false; // Prevenir scroll
+      }
+    }
+    
+    function mousePressed() {
+      // Reiniciar juego si ha terminado
+      if (juegoTerminado) {
+        reiniciarJuego();
+      }
+      
+      // Saltar en dispositivos móviles
+      if (esMovil && !juegoCongelado && !juegoTerminado) {
+        saltar();
+      }
+    }
+    
+    function touchStarted() {
+      // Para dispositivos móviles, prevenir comportamiento por defecto
+      if (esMovil) {
+        return false;
+      }
+    }
+    
+    function reiniciarJuego() {
+      abeja.y = alto / 2;
+      abeja.velocidad = 0;
+      tuberias = [];
+      puntuacion = 0;
+      juegoTerminado = false;
+      nivel = 1;
+      velocidad = 2;
+      generarTuberia();
+    }
+    
+    function mostrarPregunta() {
+      juegoCongelado = true;
+      preguntaActiva = true;
+      
+      const pregunta = banco.find(p => p.nivel === nivel);
+      if (pregunta) {
+        document.getElementById('enunciado').textContent = pregunta.pregunta;
+        document.getElementById('panel').classList.remove('oculto');
+        document.getElementById('respuesta').value = '';
+        document.getElementById('retro').textContent = '';
+        document.getElementById('respuesta').focus();
+      }
+    }
+    
+    function windowResized() {
+      if (esMovil) {
+        ancho = min(windowWidth - 40, 400);
+        alto = min(windowHeight - 200, 600);
+        resizeCanvas(ancho, alto);
+      }
+    }
+  </script>
 
   <!-- Lógica del panel -->
   <script>
@@ -68,6 +383,21 @@
     document.getElementById('respuesta').addEventListener('keydown', function (e) {
       if (e.key === 'Enter') window.verificar();
     });
+    
+    // Evento para el botón de salto en móviles
+    document.getElementById('boton-salto').addEventListener('click', function() {
+      if (!juegoCongelado && !juegoTerminado) {
+        saltar();
+      }
+    });
+    
+    // Evento táctil para toda la pantalla en móviles
+    document.getElementById('lienzo').addEventListener('touchstart', function(e) {
+      if (esMovil && !juegoCongelado && !juegoTerminado) {
+        saltar();
+        e.preventDefault();
+      }
+    }, { passive: false });
   </script>
 </body>
 </html>
