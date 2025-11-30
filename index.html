@@ -1,155 +1,805 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>COLMENA-HUB</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-  <style>
-    body{ margin:0; background:#fff; background-color: #f3f4f6; }
-    #juego-contenedor{ background:#fff; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,.1); }
-    #lienzo-juego{ margin:0 auto; }
-    #panel-juego.hidden{ display:none; }
-  </style>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
-
-  <!-- Veriff SDK -->
-  <script src="https://cdn.veriff.me/js/v1/veriff.js"></script>
-
-  <script>
-    // ---------- CONFIG FIREBASE ----------
-    const firebaseConfig = {
-      apiKey: "PON_AQUÍ_TU_API_KEY",
-      authDomain: "PON_AQUÍ_TU_DOMINIO.firebaseapp.com",
-      projectId: "PON_AQUÍ_TU_PROJECT_ID",
-      storageBucket: "PON_AQUÍ_TU_BUCKET.appspot.com",
-      messagingSenderId: "PON_AQUÍ_SENDER_ID",
-      appId: "PON_AQUÍ_APP_ID"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db   = firebase.firestore();
-    const storage = firebase.storage();
-  </script>
-</head>
-
-<body class="min-h-screen bg-offwhite flex flex-col">
-  <!-- Contenido principal -->
-  <main class="flex-grow flex flex-col items-center justify-center px-4 py-12 space-y-12">
-    <div class="text-center">
-      <h1 class="text-4xl font-bold text-gray-800 mb-4">COLMENA HUB</h1>
-      <p class="text-lg text-gray-600">QUIERO</p>
-    </div>
-
-    <!-- Hexágonos -->
-    <div class="flex flex-col md:flex-row items-center justify-center gap-8">
-      <a href="professional-type.html"
-         class="relative w-48 h-52 flex items-center justify-center text-white font-bold text-xl
-                bg-yellow-500 shadow-lg hover:bg-yellow-600 transition-all duration-300"
-         style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
-        CONTRATAR
-      </a>
-
-      <a href="apply.html"
-         class="relative w-48 h-52 flex items-center justify-center text-white font-bold text-xl
-                bg-yellow-500 shadow-lg hover:bg-yellow-600 transition-all duration-300"
-         style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
-        SER CONTRATADO
-      </a>
-    </div>
-
-    <!-- Botón OAuth Google -->
-    <button id="btnGoogle" class="mt-8 px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition">
-      Iniciar sesión con Google
-    </button>
-
-    <!-- Botón flotante Verificar Identidad (solo logueado) -->
-    <div id="veriffWrapper" class="fixed bottom-4 right-4 hidden">
-      <button id="veriffBtn" onclick="lanzarVeriff()"
-              class="px-4 py-2 bg-green-600 text-white rounded-lg shadow">
-        Verificar mi identidad
-      </button>
-    </div>
-
-    <!-- Mini Juego (pequeño y pegado) -->
-    <div class="mt-6 mb-8 text-center">
-      <h3 class="text-base font-semibold text-yellow-700 mb-1">Mini Juego</h3>
-      <a href="juego.html"
-         class="inline-block px-3 py-1.5 bg-yellow-500 text-white text-sm font-medium rounded hover:bg-yellow-600 transition">
-        Jugar
-      </a>
-    </div>
-  </main>
-
-  <!-- Footer -->
-  <!-- Footer (más arriba) -->
-  <footer class="w-full max-w-4xl mx-auto p-3 border-t border-gray-200 text-xs text-gray-600 mt-4">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-      <div><h3 class="font-bold mb-1 text-gray-800">Políticas de privacidad</h3><p>Protegemos tus datos personales y garantizamos tu privacidad.</p></div>
-      <div><h3 class="font-bold mb-1 text-gray-800">Misión</h3><p>Conectar talento con oportunidades de manera simple y segura.</p></div>
-      <div><h3 class="font-bold mb-1 text-gray-800">Visión</h3><p>Ser la plataforma líder en contratación profesional en Latinoamérica.</p></div>
-      <div><h3 class="font-bold mb-1 text-gray-800">Conócenos</h3><p>Somos un equipo comprometido con el desarrollo profesional.</p></div>
-    </div>
-    <div class="mt-2 text-center text-xs text-gray-500">© 2025 Colmena-Hub - Todos los derechos reservados</div>
-  </footer>
-
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.min.js "></script>
-  <script src="preguntas.js"></script>
-  <script src="mini-juego.js"></script>
-  <script src="sketch.js"></script>
-  <script src="juego-logica.js"></script>
-
-  <script>
-    /* ---------- LOGIN GOOGLE (OAuth real) ---------- */
-    document.getElementById('btnGoogle').addEventListener('click', async () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      try {
-        const result = await auth.signInWithPopup(provider);
-        const user = result.user;
-        await db.doc('users/' + user.uid).set({
-          displayName: user.displayName,
-          email:       user.email,
-          avatarURL:   user.photoURL,
-          verified:    false
-        }, { merge: true });
-        alert('¡Bienvenido ' + user.displayName + '!');
-      } catch (err) {
-        console.error(err);
-        alert('Error al iniciar sesión: ' + err.message);
-      }
-    });
-
-    /* ---------- FUNCIÓN VERIFF ---------- */
-    function lanzarVeriff() {
-      const user = auth.currentUser;
-      if (!user) { alert('Inicia sesión primero'); return; }
-      const veriff = Veriff({
-        apiKey: 'PON_AQUÍ_TU_VERIFF_PUBLIC_KEY',
-        parentId: 'veriffBtn',
-        onSession: function(err, response) {
-          if (err) return console.error(err);
-          db.doc('users/' + user.uid).set({
-            veriffId: response.veriffId,
-            verified: false
-          }, { merge: true });
-          alert('Verificación enviada. En 30 s llega el resultado.');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Flappy Bee 8-bit</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
-      });
-      veriff.setParams({ person: { firstName: '', lastName: '' } });
-      veriff.mount();
-    }
 
-    /* ---------- MOSTRAR / OCULTAR BOTONES ---------- */
-    auth.onAuthStateChanged(user => {
-      document.getElementById('btnGoogle').style.display = user ? 'none' : 'inline-block';
-      document.getElementById('veriffWrapper').style.display = user ? 'block' : 'none';
-    });
-  </script>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #FFD700;
+            text-shadow: 3px 3px 0 #8B4513;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .game-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 600px;
+            background: #87CEEB;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 4px solid #8B4513;
+        }
+
+        #game-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 400px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background: #FFD700;
+            color: #8B4513;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #8B4513;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #8B4513;
+        }
+
+        .btn-jump {
+            background: #4CAF50;
+            color: white;
+            box-shadow: 0 4px 0 #2E7D32;
+            font-size: 1.3rem;
+            padding: 15px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: none;
+        }
+
+        .score-container {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 3px 3px 0 #000;
+        }
+
+        .high-score {
+            font-size: 1.2rem;
+            color: #FFD700;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 20;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 3rem;
+            color: #FFD700;
+            margin-bottom: 20px;
+            text-shadow: 4px 4px 0 #8B4513;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            max-width: 350px;
+        }
+
+        .instructions h3 {
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+
+        .instructions p {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .key {
+            display: inline-block;
+            background: #FFD700;
+            color: #8B4513;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .game-over h2 {
+            font-size: 4rem;
+            color: #ff4d4d;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 0 #000;
+        }
+
+        .final-score {
+            font-size: 2.5rem;
+            color: #FFD700;
+            margin: 20px 0;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .new-high-score {
+            color: #4CAF50;
+            font-size: 1.5rem;
+            margin: 10px 0;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .bee {
+            position: absolute;
+            width: 40px;
+            height: 30px;
+            background: #FFD700;
+            border-radius: 50% 50% 40% 40%;
+            z-index: 5;
+        }
+
+        .bee::before, .bee::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            top: 5px;
+        }
+
+        .bee::before {
+            left: -5px;
+        }
+
+        .bee::after {
+            right: -5px;
+        }
+
+        .bee .stripe {
+            position: absolute;
+            width: 100%;
+            height: 6px;
+            background: #000;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .bee .eye {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #000;
+            border-radius: 50%;
+            top: 10px;
+            left: 12px;
+        }
+
+        .bee .sting {
+            position: absolute;
+            width: 8px;
+            height: 4px;
+            background: #000;
+            border-radius: 50% 0 0 50%;
+            right: -4px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+            opacity: 0.9;
+        }
+
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .cloud::before {
+            width: 30px;
+            height: 30px;
+            top: -15px;
+            left: 10px;
+        }
+
+        .cloud::after {
+            width: 40px;
+            height: 40px;
+            top: -20px;
+            right: 10px;
+        }
+
+        .pipe {
+            position: absolute;
+            width: 60px;
+            background: #4CAF50;
+            border: 3px solid #2E7D32;
+        }
+
+        .pipe-top {
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .pipe-bottom {
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 40px;
+            background: #8B4513;
+            border-top: 4px solid #5D2906;
+        }
+
+        .ground::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            width: 100%;
+            height: 10px;
+            background: #4CAF50;
+            border-radius: 5px 5px 0 0;
+        }
+
+        /* Estilos para móviles */
+        @media (max-width: 768px) {
+            .game-container {
+                height: 500px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .title {
+                font-size: 2.5rem;
+            }
+            
+            .btn-jump {
+                display: flex;
+            }
+            
+            .instructions {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                height: 450px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .score {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-bee"></i> Flappy Bee <i class="fas fa-bee"></i></h1>
+            <p>¡Ayuda a la abejita a esquivar los obstáculos!</p>
+        </div>
+        
+        <div class="game-container">
+            <canvas id="game-canvas"></canvas>
+            
+            <div class="score-container">
+                <div class="score">0</div>
+                <div class="high-score">Mejor: 0</div>
+            </div>
+            
+            <div id="start-screen" class="screen">
+                <div class="title">FLAPPY BEE</div>
+                <div class="instructions">
+                    <h3><i class="fas fa-info-circle"></i> Instrucciones</h3>
+                    <p><span class="key"><i class="fas fa-space-shuttle"></i> ESPACIO</span> o <span class="key"><i class="fas fa-mouse-pointer"></i> CLIC</span> para volar</p>
+                    <p>Esquiva los tubos y recoge puntos</p>
+                    <p>¡Cada 5 puntos responde una pregunta!</p>
+                </div>
+                <button id="start-btn" class="btn"><i class="fas fa-play"></i> JUGAR</button>
+            </div>
+            
+            <div id="game-over" class="screen game-over hidden">
+                <h2>GAME OVER</h2>
+                <div class="final-score">Puntuación: <span id="final-score">0</span></div>
+                <div id="new-high-score" class="new-high-score hidden">¡Nuevo Record!</div>
+                <button id="restart-btn" class="btn"><i class="fas fa-redo"></i> REINICIAR</button>
+            </div>
+            
+            <button id="jump-btn" class="btn btn-jump"><i class="fas fa-arrow-up"></i></button>
+        </div>
+        
+        <div class="controls">
+            <button id="pause-btn" class="btn"><i class="fas fa-pause"></i> Pausa</button>
+            <button id="sound-btn" class="btn"><i class="fas fa-volume-up"></i> Sonido</button>
+        </div>
+    </div>
+
+    <script>
+        // Variables del juego
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const soundBtn = document.getElementById('sound-btn');
+        const jumpBtn = document.getElementById('jump-btn');
+        const scoreElement = document.querySelector('.score');
+        const highScoreElement = document.querySelector('.high-score');
+        const finalScoreElement = document.getElementById('final-score');
+        const newHighScoreElement = document.getElementById('new-high-score');
+        
+        // Ajustar tamaño del canvas
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Variables del juego
+        let gameState = 'start'; // 'start', 'playing', 'paused', 'gameover'
+        let score = 0;
+        let highScore = localStorage.getItem('flappyBeeHighScore') || 0;
+        let frames = 0;
+        let isSoundOn = true;
+        
+        highScoreElement.textContent = `Mejor: ${highScore}`;
+        
+        // Configuración del juego
+        const GRAVITY = 0.5;
+        const JUMP_FORCE = -10;
+        const PIPE_SPEED = 3;
+        const PIPE_SPAWN_RATE = 90; // frames
+        const PIPE_GAP = 150;
+        
+        // Elementos del juego
+        let bee = {
+            x: 50,
+            y: canvas.height / 2,
+            width: 40,
+            height: 30,
+            velocity: 0,
+            rotation: 0
+        };
+        
+        let pipes = [];
+        let clouds = [];
+        
+        // Inicializar nubes
+        for (let i = 0; i < 5; i++) {
+            clouds.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * (canvas.height / 3),
+                width: 80 + Math.random() * 40,
+                height: 30 + Math.random() * 20,
+                speed: 0.5 + Math.random() * 0.5
+            });
+        }
+        
+        // Funciones de dibujo
+        function drawBee() {
+            ctx.save();
+            ctx.translate(bee.x, bee.y);
+            ctx.rotate(bee.rotation * Math.PI / 180);
+            
+            // Cuerpo de la abeja
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.ellipse(0, 0, bee.width / 2, bee.height / 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Rayas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(-bee.width / 2, -5, bee.width, 5);
+            ctx.fillRect(-bee.width / 2, 2, bee.width, 3);
+            
+            // Alas
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.beginPath();
+            ctx.ellipse(-10, -10, 10, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.ellipse(10, -10, 10, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Ojo
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(-8, -5, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Aguijón
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.moveTo(bee.width / 2 - 5, 0);
+            ctx.lineTo(bee.width / 2 + 5, 0);
+            ctx.lineTo(bee.width / 2, 8);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.restore();
+        }
+        
+        function drawPipes() {
+            pipes.forEach(pipe => {
+                ctx.fillStyle = '#4CAF50';
+                
+                // Tubo superior
+                ctx.fillRect(pipe.x, 0, pipe.width, pipe.top);
+                ctx.strokeStyle = '#2E7D32';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(pipe.x, 0, pipe.width, pipe.top);
+                
+                // Tubo inferior
+                ctx.fillRect(pipe.x, pipe.bottom, pipe.width, canvas.height - pipe.bottom);
+                ctx.strokeRect(pipe.x, pipe.bottom, pipe.width, canvas.height - pipe.bottom);
+                
+                // Bordes de los tubos
+                ctx.fillStyle = '#2E7D32';
+                ctx.fillRect(pipe.x - 3, pipe.top - 15, pipe.width + 6, 15);
+                ctx.fillRect(pipe.x - 3, pipe.bottom, pipe.width + 6, 15);
+            });
+        }
+        
+        function drawClouds() {
+            clouds.forEach(cloud => {
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.ellipse(cloud.x, cloud.y, cloud.width / 2, cloud.height / 2, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.ellipse(cloud.x - cloud.width / 4, cloud.y - cloud.height / 4, cloud.width / 3, cloud.height / 3, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.ellipse(cloud.x + cloud.width / 4, cloud.y - cloud.height / 4, cloud.width / 3, cloud.height / 3, 0, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+        
+        function drawGround() {
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
+            
+            ctx.fillStyle = '#4CAF50';
+            ctx.fillRect(0, canvas.height - 40, canvas.width, 5);
+            
+            // Textura del suelo
+            ctx.strokeStyle = '#5D2906';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < canvas.width; x += 10) {
+                ctx.beginPath();
+                ctx.moveTo(x, canvas.height - 40);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+        }
+        
+        function drawBackground() {
+            // Cielo con gradiente
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(1, '#E0F7FA');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        // Funciones del juego
+        function updateBee() {
+            // Aplicar gravedad
+            bee.velocity += GRAVITY;
+            bee.y += bee.velocity;
+            
+            // Rotación basada en la velocidad
+            bee.rotation = Math.min(90, Math.max(-30, bee.velocity * 3));
+            
+            // Limitar la abeja a los bordes de la pantalla
+            if (bee.y < 0) {
+                bee.y = 0;
+                bee.velocity = 0;
+            }
+            
+            if (bee.y + bee.height / 2 > canvas.height - 40) {
+                gameOver();
+            }
+        }
+        
+        function updatePipes() {
+            // Generar nuevos tubos
+            if (frames % PIPE_SPAWN_RATE === 0) {
+                const gapPosition = Math.random() * (canvas.height - PIPE_GAP - 100) + 50;
+                pipes.push({
+                    x: canvas.width,
+                    width: 60,
+                    top: gapPosition,
+                    bottom: gapPosition + PIPE_GAP,
+                    passed: false
+                });
+            }
+            
+            // Mover y eliminar tubos
+            for (let i = pipes.length - 1; i >= 0; i--) {
+                pipes[i].x -= PIPE_SPEED;
+                
+                // Detectar si la abeja ha pasado el tubo
+                if (!pipes[i].passed && pipes[i].x + pipes[i].width < bee.x) {
+                    pipes[i].passed = true;
+                    score++;
+                    scoreElement.textContent = score;
+                    
+                    // Cada 5 puntos, mostrar pregunta (simulado)
+                    if (score % 5 === 0) {
+                        // Aquí iría la lógica para mostrar preguntas
+                        console.log("¡Pregunta! Nivel: " + Math.floor(score / 5));
+                    }
+                }
+                
+                // Eliminar tubos fuera de pantalla
+                if (pipes[i].x + pipes[i].width < 0) {
+                    pipes.splice(i, 1);
+                }
+                
+                // Detectar colisiones
+                if (
+                    bee.x + bee.width / 2 > pipes[i].x &&
+                    bee.x - bee.width / 2 < pipes[i].x + pipes[i].width &&
+                    (bee.y - bee.height / 2 < pipes[i].top || bee.y + bee.height / 2 > pipes[i].bottom)
+                ) {
+                    gameOver();
+                }
+            }
+        }
+        
+        function updateClouds() {
+            clouds.forEach(cloud => {
+                cloud.x -= cloud.speed;
+                if (cloud.x + cloud.width < 0) {
+                    cloud.x = canvas.width + cloud.width;
+                    cloud.y = Math.random() * (canvas.height / 3);
+                }
+            });
+        }
+        
+        function gameOver() {
+            gameState = 'gameover';
+            finalScoreElement.textContent = score;
+            
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('flappyBeeHighScore', highScore);
+                highScoreElement.textContent = `Mejor: ${highScore}`;
+                newHighScoreElement.classList.remove('hidden');
+            }
+            
+            gameOverScreen.classList.remove('hidden');
+        }
+        
+        function resetGame() {
+            bee.y = canvas.height / 2;
+            bee.velocity = 0;
+            bee.rotation = 0;
+            pipes = [];
+            score = 0;
+            scoreElement.textContent = score;
+            frames = 0;
+            newHighScoreElement.classList.add('hidden');
+        }
+        
+        function gameLoop() {
+            // Limpiar canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (gameState === 'playing') {
+                // Actualizar elementos del juego
+                updateBee();
+                updatePipes();
+                updateClouds();
+                frames++;
+            }
+            
+            // Dibujar elementos del juego
+            drawBackground();
+            drawClouds();
+            drawPipes();
+            drawGround();
+            drawBee();
+            
+            // Continuar el bucle del juego
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Control de salto
+        function jump() {
+            if (gameState === 'playing') {
+                bee.velocity = JUMP_FORCE;
+                
+                if (isSoundOn) {
+                    // Simular sonido de salto
+                    const jumpSound = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==");
+                    jumpSound.volume = 0.2;
+                    jumpSound.play().catch(e => console.log("Error de audio:", e));
+                }
+            }
+        }
+        
+        // Event listeners
+        startBtn.addEventListener('click', () => {
+            startScreen.classList.add('hidden');
+            gameState = 'playing';
+            resetGame();
+        });
+        
+        restartBtn.addEventListener('click', () => {
+            gameOverScreen.classList.add('hidden');
+            gameState = 'playing';
+            resetGame();
+        });
+        
+        pauseBtn.addEventListener('click', () => {
+            if (gameState === 'playing') {
+                gameState = 'paused';
+                pauseBtn.innerHTML = '<i class="fas fa-play"></i> Continuar';
+            } else if (gameState === 'paused') {
+                gameState = 'playing';
+                pauseBtn.innerHTML = '<i class="fas fa-pause"></i> Pausa';
+            }
+        });
+        
+        soundBtn.addEventListener('click', () => {
+            isSoundOn = !isSoundOn;
+            soundBtn.innerHTML = isSoundOn ? 
+                '<i class="fas fa-volume-up"></i> Sonido' : 
+                '<i class="fas fa-volume-mute"></i> Sonido';
+        });
+        
+        jumpBtn.addEventListener('click', jump);
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.key === ' ') {
+                e.preventDefault();
+                jump();
+            }
+        });
+        
+        canvas.addEventListener('click', () => {
+            jump();
+        });
+        
+        // Iniciar el bucle del juego
+        gameLoop();
+        
+        // Detectar si es un dispositivo móvil
+        function isMobileDevice() {
+            return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+        }
+        
+        // Mostrar el botón de salto en móviles
+        if (isMobileDevice()) {
+            jumpBtn.style.display = 'flex';
+        }
+    </script>
 </body>
 </html>
