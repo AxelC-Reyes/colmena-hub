@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil - COLMENA HUB</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <!-- Stripe -->
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    .loading {
+      display: none;
+    }
+    .spinner {
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #f59e0b;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 8px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-gray-100 p-6">
+  <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6">
+    <div class="md:flex">
+      <!-- Foto del profesional -->
+      <div class="md:flex-shrink-0">
+        <img id="avatar" class="h-48 w-full md:h-full md:w-48 object-cover rounded-lg" src="" alt="Foto del profesional">
+      </div>
+
+      <!-- Datos del perfil -->
+      <div class="p-8 flex-1">
+        <div class="uppercase tracking-wide text-sm text-yellow-600 font-semibold">Perfil profesional</div>
+        <h1 id="profName" class="block mt-1 text-2xl font-medium text-gray-900">Cargando...</h1>
+        <p id="profDesc" class="mt-2 text-gray-500">Descripción detallada del profesional y sus servicios.</p>
+
+        <!-- Precio y botón de pago -->
+        <div class="mt-6 flex items-center justify-between">
+          <div>
+            <span class="text-3xl font-bold text-gray-900">$200 <span class="text-lg text-gray-500">MXN</span></span>
+            <p class="text-sm text-gray-500 mt-1">Pago único por consulta</p>
+          </div>
+          <div>
+            <button id="checkoutBtn" class="px-6 py-3 bg-yellow-500 text-white font-medium rounded-lg hover:bg-yellow-600 transition-colors flex items-center">
+              <span class="spinner loading" id="spinner"></span>
+              <span id="buttonText">Pagar con tarjeta</span>
+            </button>
+            <p class="text-xs text-gray-500 mt-2 text-center">Pago seguro con Stripe</p>
+          </div>
+        </div>
+        
+        <!-- Información adicional -->
+        <div class="mt-8 border-t pt-6">
+          <h3 class="text-lg font-medium text-gray-900">¿Cómo funciona?</h3>
+          <ol class="list-decimal list-inside mt-2 text-gray-600 space-y-2">
+            <li>Haz clic en "Pagar con tarjeta"</li>
+            <li>Serás redirigido a Stripe Checkout</li>
+            <li>Ingresa tus datos de pago de forma segura</li>
+            <li>Recibirás confirmación inmediata</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div id="errorMessage" class="max-w-4xl mx-auto mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded hidden">
+    <p id="errorText"></p>
+  </div>
+
+  <!-- Stripe Checkout -->
+  <script>
+    // ---------- CONFIGURACIÓN SEGURA ----------
+    // Claves de PRUEBA para GitHub (seguras para hacer público)
+    const stripePublicKey = 'pk_test_1ABC123';
+    const stripePriceId = 'price_1ABC123...';
+    
+    const stripe = Stripe(stripePublicKey);
+    const priceId = stripePriceId;
+
+    // ---------- ELEMENTOS DEL DOM ----------
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    const buttonText = document.getElementById('buttonText');
+    const spinner = document.getElementById('spinner');
+    const errorMessage = document.getElementById('errorMessage');
+    const errorText = document.getElementById('errorText');
+
+    // ---------- LEE EL PROFESIONAL DE LA URL ----------
+    const params = new URLSearchParams(location.search);
+    const prof = params.get('prof') || 'Profesional';
+
+    // ---------- RELLENA DATOS ----------
+    document.getElementById('profName').textContent = prof;
+    document.getElementById('profDesc').textContent = `Servicio profesional de ${prof}. Experiencia comprobada y calificaciones verificadas.`;
+    document.getElementById('avatar').src = `https://ui-avatars.com/api/?name=${prof}&size=256&background=random`;
+
+    // ---------- MANEJO DE ERRORES ----------
+    function showError(message) {
+      errorText.textContent = message;
+      errorMessage.classList.remove('hidden');
+      setTimeout(() => {
+        errorMessage.classList.add('hidden');
+      }, 5000);
+    }
+
+    function hideError() {
+      errorMessage.classList.add('hidden');
+    }
+
+    // ---------- MANEJO DEL ESTADO DE CARGA ----------
+    function setLoadingState(isLoading) {
+      if (isLoading) {
+        spinner.classList.remove('loading');
+        buttonText.textContent = 'Procesando...';
+        checkoutBtn.disabled = true;
+      } else {
+        spinner.classList.add('loading');
+        buttonText.textContent = 'Pagar con tarjeta';
+        checkoutBtn.disabled = false;
+      }
+    }
+
+    // ---------- REDIRIGE A STRIPE ----------
+    checkoutBtn.addEventListener('click', async () => {
+      hideError();
+      setLoadingState(true);
+
+      try {
+        const { error } = await stripe.redirectToCheckout({
+          lineItems: [{ price: priceId, quantity: 1 }],
+          mode: 'payment',
+          successUrl: window.location.origin + '/exito.html?prof=' + encodeURIComponent(prof),
+          cancelUrl: window.location.origin + '/cancelado.html?prof=' + encodeURIComponent(prof)
+        });
+        
+        if (error) {
+          showError('Error al procesar el pago: ' + error.message);
+        }
+      } catch (err) {
+        showError('Error inesperado: ' + err.message);
+      } finally {
+        setLoadingState(false);
+      }
+    });
+  </script>
+</body>
+</html>
