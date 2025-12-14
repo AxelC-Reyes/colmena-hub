@@ -1,58 +1,885 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Postúlate – COLMENA HUB</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación de Profesionales – COLMENA HUB</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-yellow: #FFD700;
+            --secondary-brown: #8B4513;
+            --accent-green: #4CAF50;
+            --light-beige: #FFF8DC;
+            --dark-gray: #333333;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--light-beige) 0%, #f5f5f5 100%);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-yellow), #FFA500);
+            color: var(--secondary-brown);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3);
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: linear-gradient(90deg, var(--accent-green) 0%, var(--primary-yellow) 100%);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.7);
+        }
+        
+        .file-upload-area:hover, .file-upload-area.dragover {
+            border-color: var(--primary-yellow);
+            background: rgba(255, 215, 0, 0.05);
+        }
+        
+        .veriff-iframe {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-title {
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--primary-yellow);
+            border-radius: 2px;
+        }
+    </style>
 </head>
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-3 mb-4 md:mb-0">
+                    <i class="fas fa-bee text-3xl"></i>
+                    <div>
+                        <h1 class="text-2xl font-bold">COLMENA HUB</h1>
+                        <p class="text-yellow-100 text-sm">Verificación de Profesionales</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="px-3 py-1 bg-white/20 rounded-full text-sm">
+                        <i class="fas fa-shield-alt mr-2"></i>100% Seguro
+                    </span>
+                    <a href="#" class="text-white hover:text-yellow-200 transition">
+                        <i class="fas fa-question-circle text-xl"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
 
-<body class="min-h-screen bg-offwhite">
-  <div class="max-w-2xl mx-auto p-6 space-y-8">
-    <h1 class="text-3xl font-bold text-center text-gray-800">Postúlate como profesional</h1>
-    <p class="text-center text-gray-600">Sube tus documentos y nos pondremos en contacto contigo.</p>
+    <!-- Contenedor Principal -->
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Barra de Progreso -->
+        <div class="glass-card rounded-xl p-6 mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Proceso de Verificación</h2>
+                    <p class="text-gray-600">Completa todos los pasos para ser verificad@</p>
+                </div>
+                <span id="progress-text" class="font-bold text-yellow-600 text-lg">0/5</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div id="progress-bar" class="progress-bar h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+            <div class="grid grid-cols-5 gap-4 mt-4">
+                <div class="text-center">
+                    <div class="w-8 h-8 mx-auto bg-yellow-500 text-white rounded-full flex items-center justify-center mb-2">1</div>
+                    <p class="text-xs font-medium">Información</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-8 h-8 mx-auto bg-gray-300 text-gray-600 rounded-full flex items-center justify-center mb-2">2</div>
+                    <p class="text-xs text-gray-500">Veriff ID</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-8 h-8 mx-auto bg-gray-300 text-gray-600 rounded-full flex items-center justify-center mb-2">3</div>
+                    <p class="text-xs text-gray-500">CV/Trayectoria</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-8 h-8 mx-auto bg-gray-300 text-gray-600 rounded-full flex items-center justify-center mb-2">4</div>
+                    <p class="text-xs text-gray-500">Documentos</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-8 h-8 mx-auto bg-gray-300 text-gray-600 rounded-full flex items-center justify-center mb-2">5</div>
+                    <p class="text-xs text-gray-500">Revisión</p>
+                </div>
+            </div>
+        </div>
 
-    <!-- Formulario simulado -->
-    <form class="space-y-6" onsubmit="event.preventDefault(); alert('¡Solicitud recibida! En breve nos comunicamos contigo.');">
-      
-      <!-- Nombre -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Nombre completo</label>
-        <input type="text" required class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg">
-      </div>
+        <!-- Formulario Principal -->
+        <div id="main-form" class="glass-card rounded-xl p-6">
+            <form id="verification-form" class="space-y-8">
+                <!-- Paso 1: Información Básica -->
+                <section id="step-1" class="step">
+                    <h3 class="section-title text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-user-circle mr-3 text-yellow-500"></i>Información Personal
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user mr-2"></i>Nombre Completo *
+                            </label>
+                            <input type="text" id="fullName" required 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-envelope mr-2"></i>Correo Electrónico *
+                            </label>
+                            <input type="email" id="email" required 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-phone mr-2"></i>Teléfono *
+                            </label>
+                            <input type="tel" id="phone" required 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-briefcase mr-2"></i>Profesión/Oficio *
+                            </label>
+                            <input type="text" id="profession" required 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-map-marker-alt mr-2"></i>Dirección
+                        </label>
+                        <textarea id="address" rows="2"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"></textarea>
+                    </div>
+                </section>
 
-      <!-- CV -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700">CV (PDF o imagen)</label>
-        <input type="file" accept=".pdf,.jpg,.jpeg,.png" required class="mt-1 w-full">
-      </div>
+                <!-- Paso 2: Verificación con Veriff -->
+                <section id="step-2" class="step hidden">
+                    <h3 class="section-title text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-shield-alt mr-3 text-green-500"></i>Verificación de Identidad
+                    </h3>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-blue-500 text-xl mr-3 mt-1"></i>
+                            <div>
+                                <h4 class="font-bold text-blue-800 mb-2">¿Por qué verificamos tu identidad?</h4>
+                                <p class="text-blue-700">Usamos <span class="font-bold">Veriff</span> para garantizar la seguridad de todos nuestros profesionales. Este proceso es rápido, seguro y toma solo 2-3 minutos. Necesitarás tu INE/IFE y acceso a tu cámara.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center py-8">
+                        <div class="inline-block p-8 bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl border-2 border-dashed border-green-300">
+                            <i class="fas fa-camera text-6xl text-green-500 mb-4"></i>
+                            <h4 class="text-xl font-bold text-gray-800 mb-2">Verificación de Identidad</h4>
+                            <p class="text-gray-600 mb-6">Haz clic para iniciar el proceso con Veriff</p>
+                            <button type="button" id="start-veriff-btn" 
+                                    class="btn-primary px-8 py-3 rounded-lg font-bold text-lg">
+                                <i class="fas fa-play mr-2"></i>Iniciar Verificación
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Este div se llenará con el iframe de Veriff -->
+                    <div id="veriff-container" class="hidden veriff-iframe">
+                        <iframe id="veriff-iframe" class="w-full h-96" frameborder="0"></iframe>
+                    </div>
+                    
+                    <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 text-xl mr-3"></i>
+                            <span id="veriff-status" class="text-gray-700">Verificación pendiente</span>
+                        </div>
+                    </div>
+                </section>
 
-      <!-- INE frente -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700">INE (frente)</label>
-        <input type="file" accept=".jpg,.jpeg,.png" required class="mt-1 w-full">
-      </div>
+                <!-- Paso 3: CV y Trayectoria -->
+                <section id="step-3" class="step hidden">
+                    <h3 class="section-title text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-file-alt mr-3 text-purple-500"></i>CV y Trayectoria Profesional
+                    </h3>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-pencil-alt mr-2"></i>Breve Resumen de tu Trayectoria *
+                        </label>
+                        <p class="text-sm text-gray-500 mb-3">Describe tu experiencia, habilidades principales y logros profesionales.</p>
+                        <textarea id="career-summary" required rows="6"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"
+                                  placeholder="Ejemplo: Más de 10 años de experiencia en construcción residencial, especializado en acabados finos. Certificado en seguridad industrial y manejo de maquinaria pesada. He liderado equipos de hasta 15 personas en proyectos de mediana escala..."></textarea>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-graduation-cap mr-2"></i>Años de Experiencia *
+                            </label>
+                            <select id="experience-years" required 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
+                                <option value="">Selecciona...</option>
+                                <option value="0-2">0-2 años</option>
+                                <option value="3-5">3-5 años</option>
+                                <option value="6-10">6-10 años</option>
+                                <option value="10+">Más de 10 años</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-star mr-2"></i>Especialidades Principales
+                            </label>
+                            <input type="text" id="specialties" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"
+                                   placeholder="Ej: Electricidad, Plomería, Carpintería">
+                        </div>
+                    </div>
+                    
+                    <!-- Subir CV -->
+                    <div class="mt-8">
+                        <label class="block text-sm font-medium text-gray-700 mb-4">
+                            <i class="fas fa-upload mr-2"></i>Curriculum Vitae (PDF opcional)
+                        </label>
+                        <div class="file-upload-area" id="cv-drop-area">
+                            <i class="fas fa-file-pdf text-5xl text-red-500 mb-4"></i>
+                            <p class="text-lg font-medium text-gray-700 mb-2">Sube tu CV en PDF</p>
+                            <p class="text-gray-500 mb-4">Arrastra tu archivo o haz clic para buscarlo</p>
+                            <input type="file" id="cv-file" accept=".pdf" class="hidden">
+                            <label for="cv-file" class="btn-primary inline-block px-6 py-2 rounded-lg cursor-pointer">
+                                Seleccionar Archivo
+                            </label>
+                            <p class="text-sm text-gray-500 mt-4" id="cv-file-name">No se ha seleccionado ningún archivo</p>
+                        </div>
+                    </div>
+                </section>
 
-      <!-- INE reverso -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700">INE (reverso)</label>
-        <input type="file" accept=".jpg,.jpeg,.png" required class="mt-1 w-full">
-      </div>
+                <!-- Paso 4: Documentos Profesionales -->
+                <section id="step-4" class="step hidden">
+                    <h3 class="section-title text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-file-certificate mr-3 text-red-500"></i>Documentos Profesionales
+                    </h3>
+                    
+                    <div class="mb-8">
+                        <div class="flex items-center mb-4">
+                            <input type="checkbox" id="is-professional" class="w-5 h-5 text-yellow-600 rounded">
+                            <label for="is-professional" class="ml-2 text-gray-700 font-medium">
+                                Soy profesional titulado (médico, ingeniero, abogado, etc.)
+                            </label>
+                        </div>
+                        
+                        <div id="professional-docs" class="hidden space-y-6 pl-6 border-l-2 border-yellow-300">
+                            <!-- Título Profesional -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-scroll mr-2"></i>Título Profesional *
+                                </label>
+                                <div class="file-upload-area" id="title-drop-area">
+                                    <i class="fas fa-file-contract text-4xl text-blue-500 mb-3"></i>
+                                    <p class="text-gray-700 mb-2">Sube tu título profesional escaneado</p>
+                                    <p class="text-gray-500 text-sm mb-3">Formato: PDF, JPG o PNG (máx. 5MB)</p>
+                                    <input type="file" id="title-file" accept=".pdf,.jpg,.jpeg,.png" class="hidden">
+                                    <label for="title-file" class="btn-primary inline-block px-6 py-2 rounded-lg cursor-pointer">
+                                        Subir Título
+                                    </label>
+                                    <p class="text-sm text-gray-500 mt-2" id="title-file-name">No se ha subido ningún archivo</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Cédula Profesional -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-id-card mr-2"></i>Cédula Profesional *
+                                </label>
+                                <div class="file-upload-area" id="cedula-drop-area">
+                                    <i class="fas fa-id-badge text-4xl text-green-500 mb-3"></i>
+                                    <p class="text-gray-700 mb-2">Sube tu cédula profesional escaneada</p>
+                                    <p class="text-gray-500 text-sm mb-3">Formato: PDF, JPG o PNG (máx. 5MB)</p>
+                                    <input type="file" id="cedula-file" accept=".pdf,.jpg,.jpeg,.png" class="hidden">
+                                    <label for="cedula-file" class="btn-primary inline-block px-6 py-2 rounded-lg cursor-pointer">
+                                        Subir Cédula
+                                    </label>
+                                    <p class="text-sm text-gray-500 mt-2" id="cedula-file-name">No se ha subido ningún archivo</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Certificaciones Adicionales -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-4">
+                            <i class="fas fa-award mr-2"></i>Certificaciones Adicionales (opcional)
+                        </label>
+                        <div class="file-upload-area" id="certs-drop-area">
+                            <i class="fas fa-certificate text-4xl text-purple-500 mb-3"></i>
+                            <p class="text-gray-700 mb-2">Sube certificados, diplomas o constancias</p>
+                            <p class="text-gray-500 text-sm mb-3">Puedes subir múltiples archivos (PDF, JPG, PNG)</p>
+                            <input type="file" id="cert-files" multiple accept=".pdf,.jpg,.jpeg,.png" class="hidden">
+                            <label for="cert-files" class="btn-primary inline-block px-6 py-2 rounded-lg cursor-pointer">
+                                Subir Certificados
+                            </label>
+                            <div id="certs-list" class="mt-3 text-sm text-gray-600"></div>
+                        </div>
+                    </div>
+                </section>
 
-      <!-- Foto personal -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Foto personal</label>
-        <input type="file" accept=".jpg,.jpeg,.png" required class="mt-1 w-full">
-      </div>
+                <!-- Paso 5: Revisión y Envío -->
+                <section id="step-5" class="step hidden">
+                    <h3 class="section-title text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-clipboard-check mr-3 text-green-500"></i>Revisión Final
+                    </h3>
+                    
+                    <div class="bg-gray-50 rounded-xl p-6 mb-6">
+                        <h4 class="font-bold text-lg text-gray-800 mb-4">Resumen de tu solicitud</h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Nombre:</span>
+                                <span id="review-name" class="font-medium">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Verificación de Identidad:</span>
+                                <span id="review-veriff" class="text-red-500 font-medium">Pendiente</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">CV Subido:</span>
+                                <span id="review-cv" class="font-medium">No</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Documentos Profesionales:</span>
+                                <span id="review-docs" class="font-medium">No aplica</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Certificaciones:</span>
+                                <span id="review-certs" class="font-medium">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-triangle text-yellow-500 text-xl mr-3 mt-1"></i>
+                            <div>
+                                <h4 class="font-bold text-yellow-800 mb-2">Confirmación final</h4>
+                                <p class="text-yellow-700 mb-4">Al enviar esta solicitud, confirmas que toda la información proporcionada es verídica y aceptas nuestro proceso de verificación.</p>
+                                
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="terms-accept" required class="w-5 h-5 text-yellow-600 rounded">
+                                    <label for="terms-accept" class="ml-2 text-gray-700">
+                                        Acepto los <a href="#" class="text-yellow-600 hover:underline">términos y condiciones</a> y autorizo la verificación de mis documentos.
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
-      <!-- Botón -->
-      <button type="submit" class="w-full py-3 bg-yellow-500 text-white font-medium rounded-lg hover:bg-yellow-600 transition-colors">
-        Enviar solicitud
-      </button>
-    </form>
+                <!-- Navegación -->
+                <div class="flex justify-between pt-8 border-t border-gray-200">
+                    <button type="button" id="prev-btn" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition hidden">
+                        <i class="fas fa-arrow-left mr-2"></i>Anterior
+                    </button>
+                    
+                    <button type="button" id="next-btn" class="ml-auto btn-primary px-8 py-3 rounded-lg font-bold">
+                        Siguiente <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                    
+                    <button type="submit" id="submit-btn" class="btn-primary px-8 py-3 rounded-lg font-bold hidden">
+                        <i class="fas fa-paper-plane mr-2"></i>Enviar Solicitud
+                    </button>
+                </div>
+            </form>
+        </div>
 
-    <!-- Footer mini -->
-    <div class="text-center text-xs text-gray-500">© 2025 Colmena-Hub - Todos los derechos reservados</div>
-  </div>
+        <!-- Modal de éxito -->
+        <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="glass-card rounded-xl p-8 max-w-md w-full mx-4 transform transition-all duration-500 scale-95 opacity-0" id="modal-content">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-check text-4xl text-green-500"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">¡Solicitud Enviada!</h3>
+                    <p class="text-gray-600 mb-6">Tu solicitud de verificación ha sido recibida. Te contactaremos en un plazo de 3-5 días hábiles con el resultado.</p>
+                    <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                        <p class="text-sm text-gray-500">ID de seguimiento:</p>
+                        <p id="tracking-id" class="font-mono font-bold text-gray-800">COL-##########</p>
+                    </div>
+                    <button id="close-modal" class="btn-primary px-8 py-3 rounded-lg font-bold">
+                        <i class="fas fa-home mr-2"></i>Volver al Inicio
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-bee text-2xl text-yellow-400"></i>
+                        <span class="text-xl font-bold">COLMENA HUB</span>
+                    </div>
+                    <p class="text-gray-400 mt-2">Conectando profesionales confiables</p>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="text-gray-400">© 2024 COLMENA HUB. Todos los derechos reservados.</p>
+                    <p class="text-gray-400 text-sm mt-1">
+                        <i class="fas fa-lock mr-1"></i>Tus datos están protegidos con encriptación SSL
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Configuración (reemplaza con tus credenciales reales)
+        const CONFIG = {
+            VERIFF_API_KEY: 'tu_api_key_de_veriff', // Obtén esto de https://dashboard.veriff.com
+            FIREBASE_CONFIG: {
+                apiKey: "tu_api_key_firebase",
+                authDomain: "tu_proyecto.firebaseapp.com",
+                projectId: "tu_proyecto",
+                storageBucket: "tu_proyecto.appspot.com",
+                messagingSenderId: "tu_sender_id",
+                appId: "tu_app_id"
+            }
+        };
+
+        // Estado de la aplicación
+        let currentStep = 1;
+        let totalSteps = 5;
+        let formData = {
+            personalInfo: {},
+            veriffData: null,
+            cvFile: null,
+            professionalDocs: {
+                isProfessional: false,
+                titleFile: null,
+                cedulaFile: null,
+                certifications: []
+            },
+            verificationId: null
+        };
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar Firestore (comentar si no estás usando Firebase)
+            // initializeFirebase();
+            
+            setupEventListeners();
+            updateProgress();
+            updateReviewSection();
+        });
+
+        function setupEventListeners() {
+            // Navegación entre pasos
+            document.getElementById('next-btn').addEventListener('click', nextStep);
+            document.getElementById('prev-btn').addEventListener('click', prevStep);
+            document.getElementById('submit-btn').addEventListener('click', submitForm);
+            
+            // Veriff
+            document.getElementById('start-veriff-btn').addEventListener('click', startVeriffVerification);
+            
+            // Archivos
+            setupFileUpload('cv-file', 'cv-file-name', 'cv-drop-area');
+            setupFileUpload('title-file', 'title-file-name', 'title-drop-area');
+            setupFileUpload('cedula-file', 'cedula-file-name', 'cedula-drop-area');
+            setupFileUpload('cert-files', null, 'certs-drop-area', true);
+            
+            // Checkbox profesional
+            document.getElementById('is-professional').addEventListener('change', function() {
+                const docsSection = document.getElementById('professional-docs');
+                docsSection.classList.toggle('hidden', !this.checked);
+                formData.professionalDocs.isProfessional = this.checked;
+                updateReviewSection();
+            });
+            
+            // Modal
+            document.getElementById('close-modal').addEventListener('click', function() {
+                document.getElementById('success-modal').classList.add('hidden');
+                location.reload();
+            });
+        }
+
+        function setupFileUpload(inputId, fileNameId, dropAreaId, multiple = false) {
+            const input = document.getElementById(inputId);
+            const dropArea = document.getElementById(dropAreaId);
+            
+            if (!input || !dropArea) return;
+            
+            dropArea.addEventListener('click', () => input.click());
+            
+            dropArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropArea.classList.add('dragover');
+            });
+            
+            dropArea.addEventListener('dragleave', () => {
+                dropArea.classList.remove('dragover');
+            });
+            
+            dropArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropArea.classList.remove('dragover');
+                input.files = e.dataTransfer.files;
+                handleFileSelection(input, fileNameId, multiple);
+            });
+            
+            input.addEventListener('change', () => handleFileSelection(input, fileNameId, multiple));
+        }
+
+        function handleFileSelection(input, fileNameId, multiple) {
+            if (multiple && input.id === 'cert-files') {
+                const files = Array.from(input.files);
+                formData.professionalDocs.certifications = files;
+                const certsList = document.getElementById('certs-list');
+                certsList.innerHTML = files.map(file => 
+                    `<div class="flex items-center justify-between p-2 bg-gray-50 rounded mb-1">
+                        <span class="truncate">${file.name}</span>
+                        <span class="text-xs text-gray-500">${(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                    </div>`
+                ).join('');
+                updateReviewSection();
+            } else {
+                const file = input.files[0];
+                if (file) {
+                    if (fileNameId) {
+                        document.getElementById(fileNameId).textContent = 
+                            `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                    }
+                    
+                    // Guardar referencia al archivo
+                    switch(input.id) {
+                        case 'cv-file':
+                            formData.cvFile = file;
+                            break;
+                        case 'title-file':
+                            formData.professionalDocs.titleFile = file;
+                            break;
+                        case 'cedula-file':
+                            formData.professionalDocs.cedulaFile = file;
+                            break;
+                    }
+                    updateReviewSection();
+                }
+            }
+        }
+
+        function nextStep() {
+            if (!validateCurrentStep()) return;
+            
+            if (currentStep < totalSteps) {
+                document.querySelector(`#step-${currentStep}`).classList.add('hidden');
+                currentStep++;
+                document.querySelector(`#step-${currentStep}`).classList.remove('hidden');
+                
+                updateNavigation();
+                updateProgress();
+                
+                if (currentStep === totalSteps) {
+                    updateReviewSection();
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                document.querySelector(`#step-${currentStep}`).classList.add('hidden');
+                currentStep--;
+                document.querySelector(`#step-${currentStep}`).classList.remove('hidden');
+                updateNavigation();
+                updateProgress();
+            }
+        }
+
+        function validateCurrentStep() {
+            switch(currentStep) {
+                case 1:
+                    const requiredFields = ['fullName', 'email', 'phone', 'profession'];
+                    for (const fieldId of requiredFields) {
+                        const field = document.getElementById(fieldId);
+                        if (!field.value.trim()) {
+                            alert(`Por favor completa el campo: ${field.previousElementSibling.textContent}`);
+                            field.focus();
+                            return false;
+                        }
+                    }
+                    
+                    // Guardar datos personales
+                    formData.personalInfo = {
+                        fullName: document.getElementById('fullName').value,
+                        email: document.getElementById('email').value,
+                        phone: document.getElementById('phone').value,
+                        profession: document.getElementById('profession').value,
+                        address: document.getElementById('address').value
+                    };
+                    return true;
+                    
+                case 2:
+                    if (!formData.veriffData) {
+                        alert('Por favor completa la verificación de identidad con Veriff primero.');
+                        return false;
+                    }
+                    return true;
+                    
+                case 3:
+                    if (!document.getElementById('career-summary').value.trim()) {
+                        alert('Por favor proporciona un resumen de tu trayectoria profesional.');
+                        return false;
+                    }
+                    if (!document.getElementById('experience-years').value) {
+                        alert('Por favor selecciona tus años de experiencia.');
+                        return false;
+                    }
+                    return true;
+                    
+                case 5:
+                    if (!document.getElementById('terms-accept').checked) {
+                        alert('Debes aceptar los términos y condiciones para continuar.');
+                        return false;
+                    }
+                    return true;
+                    
+                default:
+                    return true;
+            }
+        }
+
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const submitBtn = document.getElementById('submit-btn');
+            
+            prevBtn.classList.toggle('hidden', currentStep === 1);
+            nextBtn.classList.toggle('hidden', currentStep === totalSteps);
+            submitBtn.classList.toggle('hidden', currentStep !== totalSteps);
+        }
+
+        function updateProgress() {
+            const percentage = (currentStep / totalSteps) * 100;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+            document.getElementById('progress-text').textContent = `${currentStep}/${totalSteps}`;
+        }
+
+        async function startVeriffVerification() {
+            try {
+                // Nota: Necesitas crear una sesión en tu backend
+                // Este es un ejemplo simplificado
+                const sessionData = await createVeriffSession();
+                
+                if (sessionData && sessionData.verification) {
+                    document.getElementById('veriff-container').classList.remove('hidden');
+                    document.getElementById('veriff-iframe').src = sessionData.verification.url;
+                    
+                    // Monitorear el estado de la verificación
+                    monitorVerificationStatus(sessionData.verification.id);
+                }
+            } catch (error) {
+                console.error('Error con Veriff:', error);
+                alert('Error al iniciar la verificación. Por favor intenta de nuevo.');
+            }
+        }
+
+        async function createVeriffSession() {
+            // Esto debería hacerse en tu servidor por seguridad
+            // Ejemplo de llamada a tu backend:
+            /*
+            const response = await fetch('/api/create-veriff-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: formData.personalInfo.fullName,
+                    email: formData.personalInfo.email,
+                    phone: formData.personalInfo.phone
+                })
+            });
+            return await response.json();
+            */
+           
+            // Simulación (reemplaza con tu implementación real)
+            return {
+                verification: {
+                    id: `session_${Date.now()}`,
+                    url: 'https://magic.veriff.me'
+                }
+            };
+        }
+
+        async function monitorVerificationStatus(sessionId) {
+            // En una implementación real, usarías Webhooks o polling
+            // Esto es solo un ejemplo
+            setTimeout(() => {
+                // Simulación de verificación exitosa
+                formData.veriffData = {
+                    sessionId: sessionId,
+                    status: 'approved',
+                    timestamp: new Date().toISOString()
+                };
+                
+                document.getElementById('veriff-status').textContent = '✅ Verificación completada';
+                document.getElementById('veriff-status').classList.add('text-green-600');
+                updateReviewSection();
+            }, 5000);
+        }
+
+        function updateReviewSection() {
+            // Información personal
+            if (formData.personalInfo.fullName) {
+                document.getElementById('review-name').textContent = formData.personalInfo.fullName;
+            }
+            
+            // Veriff
+            document.getElementById('review-veriff').textContent = 
+                formData.veriffData ? '✅ Completada' : '❌ Pendiente';
+            document.getElementById('review-veriff').className = 
+                formData.veriffData ? 'text-green-500 font-medium' : 'text-red-500 font-medium';
+            
+            // CV
+            document.getElementById('review-cv').textContent = 
+                formData.cvFile ? '✅ Sí' : '❌ No';
+            
+            // Documentos profesionales
+            if (formData.professionalDocs.isProfessional) {
+                const hasTitle = formData.professionalDocs.titleFile ? '✅' : '❌';
+                const hasCedula = formData.professionalDocs.cedulaFile ? '✅' : '❌';
+                document.getElementById('review-docs').textContent = `Título: ${hasTitle}, Cédula: ${hasCedula}`;
+            }
+            
+            // Certificaciones
+            const certCount = formData.professionalDocs.certifications.length;
+            document.getElementById('review-certs').textContent = `${certCount} archivo(s)`;
+        }
+
+        async function submitForm() {
+            if (!validateCurrentStep()) return;
+            
+            try {
+                // Mostrar carga
+                document.getElementById('submit-btn').innerHTML = 
+                    '<i class="fas fa-spinner fa-spin mr-2"></i>Procesando...';
+                document.getElementById('submit-btn').disabled = true;
+                
+                // 1. Subir archivos a Firebase Storage
+                const uploadedFiles = await uploadFilesToFirebase();
+                
+                // 2. Guardar datos en Firestore
+                const applicationId = await saveToFirestore(uploadedFiles);
+                
+                // 3. Mostrar éxito
+                document.getElementById('tracking-id').textContent = applicationId;
+                document.getElementById('success-modal').classList.remove('hidden');
+                
+                // Animación del modal
+                setTimeout(() => {
+                    document.getElementById('modal-content').classList.remove('scale-95', 'opacity-0');
+                    document.getElementById('modal-content').classList.add('scale-100', 'opacity-100');
+                }, 100);
+                
+            } catch (error) {
+                console.error('Error al enviar:', error);
+                alert('Error al enviar la solicitud. Por favor intenta de nuevo.');
+                document.getElementById('submit-btn').innerHTML = 
+                    '<i class="fas fa-paper-plane mr-2"></i>Enviar Solicitud';
+                document.getElementById('submit-btn').disabled = false;
+            }
+        }
+
+        async function uploadFilesToFirebase() {
+            // En una implementación real, subirías los archivos a Firebase Storage
+            // Ejemplo:
+            /*
+            const storage = firebase.storage();
+            const uploadPromises = [];
+            
+            if (formData.cvFile) {
+                const cvRef = storage.ref(`applications/${applicationId}/cv.pdf`);
+                uploadPromises.push(cvRef.put(formData.cvFile));
+            }
+            
+            await Promise.all(uploadPromises);
+            */
+            
+            return { success: true }; // Simulación
+        }
+
+        async function saveToFirestore(uploadedFiles) {
+            // En una implementación real
+            /*
+            const db = firebase.firestore();
+            const applicationId = `COL-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+            
+            await db.collection('applications').doc(applicationId).set({
+                ...formData.personalInfo,
+                veriffData: formData.veriffData,
+                professionalDocs: formData.professionalDocs,
+                careerSummary: document.getElementById('career-summary').value,
+                experienceYears: document.getElementById('experience-years').value,
+                specialties: document.getElementById('specialties').value,
+                status: 'pending',
+                submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                applicationId: applicationId
+            });
+            
+            return applicationId;
+            */
+            
+            // Simulación
+            return `COL-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+        }
+
+        function initializeFirebase() {
+            // Inicializar Firebase (comenta si no lo usas)
+            /*
+            if (!firebase.apps.length) {
+                firebase.initializeApp(CONFIG.FIREBASE_CONFIG);
+            }
+            */
+        }
+    </script>
 </body>
 </html>
