@@ -12,7 +12,7 @@
     #panel-juego.hidden{ display:none; }
   </style>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase SDK (v compat, sin imports) -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -24,14 +24,13 @@
   <script>
     // ---------- CONFIG FIREBASE (copia TUS 6 valores reales) ----------
     const firebaseConfig = {
-    apiKey: "AIzaSyAeLIJ8ee9xUBduMKkijW4GdnY45W32Eew",
-    authDomain: "colmena-hub.firebaseapp.com",
-    projectId: "colmena-hub",
-    storageBucket: "colmena-hub.firebasestorage.app",
-    messagingSenderId: "806697924814",
-    appId: "1:806697924814:web:b11c9b057bc6d1dd71789f",
-    measurementId: "G-LQ9GLGJCX8"
-  };
+      apiKey: "PON_AQUÍ_TU_API_KEY",
+      authDomain: "PON_AQUÍ_TU_DOMINIO.firebaseapp.com",
+      projectId: "PON_AQUÍ_TU_PROJECT_ID",
+      storageBucket: "PON_AQUÍ_TU_BUCKET.appspot.com",
+      messagingSenderId: "PON_AQUÍ_SENDER_ID",
+      appId: "PON_AQUÍ_APP_ID"
+    };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db   = firebase.firestore();
@@ -64,8 +63,9 @@
       </a>
     </div>
 
-    <!-- Botón OAuth Google (POPUP sin redirigir) -->
-    <button id="btnGoogle" class="mt-8 px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition">
+    <!-- Botón con logo de Google (POPUP sin redirigir) -->
+    <button id="btnGoogle" class="mt-8 px-6 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 transition flex items-center gap-2">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5" alt="Google">
       Iniciar sesión con Google
     </button>
 
