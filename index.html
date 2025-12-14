@@ -22,16 +22,15 @@
   <script src="https://cdn.veriff.me/js/v1/veriff.js"></script>
 
   <script>
-    // ---------- CONFIG FIREBASE ----------// 
+    // ---------- CONFIG FIREBASE (copia TUS 6 valores reales) ----------
     const firebaseConfig = {
-    apiKey: "AIzaSyAeLIJ8ee9xUBduMKkijW4GdnY45W32Eew",
-    authDomain: "colmena-hub.firebaseapp.com",
-    projectId: "colmena-hub",
-    storageBucket: "colmena-hub.firebasestorage.app",
-    messagingSenderId: "806697924814",
-    appId: "1:806697924814:web:b11c9b057bc6d1dd71789f",
-    measurementId: "G-LQ9GLGJCX8"
-  };
+      apiKey: "PON_AQUÍ_TU_API_KEY",
+      authDomain: "PON_AQUÍ_TU_DOMINIO.firebaseapp.com",
+      projectId: "PON_AQUÍ_TU_PROJECT_ID",
+      storageBucket: "PON_AQUÍ_TU_BUCKET.appspot.com",
+      messagingSenderId: "PON_AQUÍ_SENDER_ID",
+      appId: "PON_AQUÍ_APP_ID"
+    };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db   = firebase.firestore();
@@ -64,7 +63,7 @@
       </a>
     </div>
 
-    <!-- Botón OAuth Google -->
+    <!-- Botón OAuth Google (POPUP sin redirigir) -->
     <button id="btnGoogle" class="mt-8 px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition">
       Iniciar sesión con Google
     </button>
@@ -87,7 +86,6 @@
     </div>
   </main>
 
-  <!-- Footer -->
   <!-- Footer (más arriba) -->
   <footer class="w-full max-w-4xl mx-auto p-3 border-t border-gray-200 text-xs text-gray-600 mt-4">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -100,14 +98,14 @@
   </footer>
 
   <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.min.js "></script>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.min.js"></script>
   <script src="preguntas.js"></script>
   <script src="mini-juego.js"></script>
   <script src="sketch.js"></script>
   <script src="juego-logica.js"></script>
 
   <script>
-    /* ---------- LOGIN GOOGLE (OAuth real) ---------- */
+    /* ---------- LOGIN GOOGLE (POPUP sin redirigir) ---------- */
     document.getElementById('btnGoogle').addEventListener('click', async () => {
       const provider = new firebase.auth.GoogleAuthProvider();
       try {
