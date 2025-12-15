@@ -16,6 +16,7 @@
       image-rendering: pixelated;
       image-rendering: -moz-crisp-edges;
       image-rendering: crisp-edges;
+      -webkit-tap-highlight-color: transparent;
     }
     #lienzo { 
       display: block; 
@@ -25,6 +26,7 @@
       box-shadow: 0 0 20px rgba(0,0,0,0.3);
       max-width: 100%;
       height: auto;
+      touch-action: none; /* Solo para el lienzo */
     }
     #panel{ 
       position:absolute; 
@@ -42,6 +44,7 @@
       max-width: 350px;
       border: 3px solid #8B4513;
       font-family: 'Press Start 2P', cursive;
+      touch-action: auto; /* Permitir interacción táctil normal */
     }
     .oculto{ display:none; }
     #respuesta{ 
@@ -54,10 +57,9 @@
       border-radius: 5px;
       font-family: 'Press Start 2P', cursive;
       background: #FFFACD;
-      /* IMPORTANTE para móviles */
-      touch-action: manipulation;
-      -webkit-user-select: text;
-      user-select: text;
+      touch-action: auto;
+      -webkit-user-select: auto;
+      user-select: auto;
     }
     button{ 
       padding:12px 20px; 
@@ -108,6 +110,7 @@
       font-family: 'Press Start 2P', cursive;
       line-height: 1.2;
       padding: 5px;
+      touch-action: manipulation;
     }
     
     /* Instrucciones para móviles */
@@ -613,23 +616,19 @@
         document.getElementById('respuesta').value = '';
         document.getElementById('retro').textContent = '';
         
-        // Enfocar el input y asegurar que el teclado se abra en móviles
-        const input = document.getElementById('respuesta');
-        input.focus();
-        
-        // En móviles, necesitamos un pequeño delay y un enfoque forzado
-        if (esMovil) {
-          setTimeout(() => {
-            input.focus();
-            // Para iOS, necesitamos un enfoque adicional
-            if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-              input.setAttribute('readonly', 'readonly');
-              setTimeout(() => {
-                input.removeAttribute('readonly');
-              }, 100);
-            }
-          }, 300);
-        }
+        // SOLUCIÓN SIMPLE: Enfocar el input después de un pequeño delay
+        setTimeout(() => {
+          const input = document.getElementById('respuesta');
+          input.focus();
+          
+          // Para iOS necesitamos un enfoque especial
+          if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+            input.blur();
+            setTimeout(() => {
+              input.focus();
+            }, 100);
+          }
+        }, 100);
       }
     }
     
@@ -643,7 +642,7 @@
     }
   </script>
 
-  <!-- Lógica del panel CORREGIDA -->
+  <!-- Lógica del panel - VERSIÓN SIMPLIFICADA -->
   <script>
     // Sincroniza variables globales
     setInterval(() => {
@@ -682,61 +681,41 @@
       if (gameStarted && !juegoCongelado && !juegoTerminado) {
         saltar();
       }
-      // NO prevenir el comportamiento por defecto aquí
     });
     
-    // Evento táctil MEJORADO - no previene el comportamiento por defecto cuando hay pregunta activa
+    // **SOLUCIÓN PRINCIPAL**: Eventos MUY simples para el lienzo
     document.getElementById('lienzo').addEventListener('touchstart', function(e) {
-      if (esMovil) {
-        // NO hacer preventDefault si hay una pregunta activa (para permitir el teclado)
-        if (preguntaActiva) {
-          return;
-        }
-        
+      // SOLO manejar el lienzo cuando NO hay pregunta activa
+      if (!preguntaActiva) {
         if (juegoTerminado) {
           reiniciarJuego();
-          e.preventDefault();
         } else if (gameStarted && !juegoCongelado && !juegoTerminado) {
           saltar();
-          e.preventDefault();
         }
+        e.preventDefault(); // Solo prevenir cuando estamos en el juego
       }
+      // Cuando hay pregunta activa, NO hacer nada - el teclado funcionará
     }, { passive: false });
     
-    // Evento para reiniciar al tocar cualquier parte en móviles
-    document.addEventListener('DOMContentLoaded', function() {
-      if (esMovil) {
-        document.body.addEventListener('touchstart', function(e) {
-          // Si hay una pregunta activa, NO hacer preventDefault para permitir el teclado
-          if (preguntaActiva) {
-            return;
-          }
-          
-          if (juegoTerminado && gameStarted) {
-            reiniciarJuego();
-            e.preventDefault();
-          }
-        }, { passive: false });
-        
-        // IMPORTANTE: Permitir que el input en el panel reciba toques sin interferencia
-        document.getElementById('respuesta').addEventListener('touchstart', function(e) {
-          // Esto permite que el teclado se abra normalmente
-          e.stopPropagation();
-        });
-        
-        document.getElementById('panel').addEventListener('touchstart', function(e) {
-          // Permitir interacción normal con el panel de pregunta
-          e.stopPropagation();
-        });
+    // **SOLUCIÓN CRÍTICA**: Remover TODOS los eventos complejos del body
+    // Solo mantener el evento simple del lienzo
+    
+    // Agregar evento táctil al botón de salto
+    document.getElementById('boton-salto').addEventListener('touchstart', function(e) {
+      if (gameStarted && !juegoCongelado && !juegoTerminado) {
+        saltar();
+        e.stopPropagation(); // No propagar al lienzo
       }
     });
     
-    // Asegurar que el input pueda recibir foco correctamente
-    document.getElementById('respuesta').addEventListener('focus', function() {
-      // Cuando el input está enfocado, no interferir con los eventos táctiles
-      if (esMovil) {
-        this.style.pointerEvents = 'auto';
-      }
+    // Asegurar que el panel NO interfiera con los eventos del juego
+    document.getElementById('panel').addEventListener('touchstart', function(e) {
+      e.stopPropagation(); // No propagar eventos táctiles
+    });
+    
+    document.getElementById('respuesta').addEventListener('touchstart', function(e) {
+      e.stopPropagation(); // No propagar eventos táctiles
+      this.focus(); // Enfocar inmediatamente
     });
   </script>
 </body>
