@@ -54,6 +54,10 @@
       border-radius: 5px;
       font-family: 'Press Start 2P', cursive;
       background: #FFFACD;
+      /* IMPORTANTE para móviles */
+      touch-action: manipulation;
+      -webkit-user-select: text;
+      user-select: text;
     }
     button{ 
       padding:12px 20px; 
@@ -608,7 +612,24 @@
         document.getElementById('panel').classList.remove('oculto');
         document.getElementById('respuesta').value = '';
         document.getElementById('retro').textContent = '';
-        document.getElementById('respuesta').focus();
+        
+        // Enfocar el input y asegurar que el teclado se abra en móviles
+        const input = document.getElementById('respuesta');
+        input.focus();
+        
+        // En móviles, necesitamos un pequeño delay y un enfoque forzado
+        if (esMovil) {
+          setTimeout(() => {
+            input.focus();
+            // Para iOS, necesitamos un enfoque adicional
+            if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+              input.setAttribute('readonly', 'readonly');
+              setTimeout(() => {
+                input.removeAttribute('readonly');
+              }, 100);
+            }
+          }, 300);
+        }
       }
     }
     
@@ -622,7 +643,7 @@
     }
   </script>
 
-  <!-- Lógica del panel -->
+  <!-- Lógica del panel CORREGIDA -->
   <script>
     // Sincroniza variables globales
     setInterval(() => {
@@ -657,21 +678,28 @@
     });
     
     // Evento para el botón de salto en móviles
-    document.getElementById('boton-salto').addEventListener('click', function() {
+    document.getElementById('boton-salto').addEventListener('click', function(e) {
       if (gameStarted && !juegoCongelado && !juegoTerminado) {
         saltar();
       }
+      // NO prevenir el comportamiento por defecto aquí
     });
     
-    // Evento táctil para toda la pantalla en móviles - AHORA TAMBIÉN REINICIA
+    // Evento táctil MEJORADO - no previene el comportamiento por defecto cuando hay pregunta activa
     document.getElementById('lienzo').addEventListener('touchstart', function(e) {
       if (esMovil) {
+        // NO hacer preventDefault si hay una pregunta activa (para permitir el teclado)
+        if (preguntaActiva) {
+          return;
+        }
+        
         if (juegoTerminado) {
           reiniciarJuego();
+          e.preventDefault();
         } else if (gameStarted && !juegoCongelado && !juegoTerminado) {
           saltar();
+          e.preventDefault();
         }
-        e.preventDefault();
       }
     }, { passive: false });
     
@@ -679,11 +707,35 @@
     document.addEventListener('DOMContentLoaded', function() {
       if (esMovil) {
         document.body.addEventListener('touchstart', function(e) {
+          // Si hay una pregunta activa, NO hacer preventDefault para permitir el teclado
+          if (preguntaActiva) {
+            return;
+          }
+          
           if (juegoTerminado && gameStarted) {
             reiniciarJuego();
             e.preventDefault();
           }
         }, { passive: false });
+        
+        // IMPORTANTE: Permitir que el input en el panel reciba toques sin interferencia
+        document.getElementById('respuesta').addEventListener('touchstart', function(e) {
+          // Esto permite que el teclado se abra normalmente
+          e.stopPropagation();
+        });
+        
+        document.getElementById('panel').addEventListener('touchstart', function(e) {
+          // Permitir interacción normal con el panel de pregunta
+          e.stopPropagation();
+        });
+      }
+    });
+    
+    // Asegurar que el input pueda recibir foco correctamente
+    document.getElementById('respuesta').addEventListener('focus', function() {
+      // Cuando el input está enfocado, no interferir con los eventos táctiles
+      if (esMovil) {
+        this.style.pointerEvents = 'auto';
       }
     });
   </script>
