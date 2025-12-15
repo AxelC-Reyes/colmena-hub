@@ -518,9 +518,10 @@
         text("¡NUEVO RECORD!", ancho / 2, alto / 2 + 20);
       }
       
-      // Instrucciones para reiniciar
+      // Instrucciones para reiniciar - MEJORADO PARA MÓVILES
       textSize(10);
-      text("ESPACIO/TOCAR PARA REINICIAR", ancho / 2, alto / 2 + 50);
+      text("TOCA LA PANTALLA", ancho / 2, alto / 2 + 50);
+      text("PARA REINICIAR", ancho / 2, alto / 2 + 65);
     }
     
     function generarTuberia() {
@@ -559,6 +560,7 @@
         return;
       }
       
+      // REINICIO AL TOCAR LA PANTALLA CUANDO EL JUEGO TERMINÓ
       if (juegoTerminado) {
         reiniciarJuego();
         return;
@@ -573,6 +575,9 @@
       if (esMovil) {
         if (!gameStarted) {
           gameStarted = true;
+        } else if (juegoTerminado) {
+          // REINICIAR AL TOCAR CUANDO EL JUEGO TERMINÓ
+          reiniciarJuego();
         } else if (!juegoCongelado && !juegoTerminado) {
           saltar();
         }
@@ -658,13 +663,29 @@
       }
     });
     
-    // Evento táctil para toda la pantalla en móviles
+    // Evento táctil para toda la pantalla en móviles - AHORA TAMBIÉN REINICIA
     document.getElementById('lienzo').addEventListener('touchstart', function(e) {
-      if (esMovil && gameStarted && !juegoCongelado && !juegoTerminado) {
-        saltar();
+      if (esMovil) {
+        if (juegoTerminado) {
+          reiniciarJuego();
+        } else if (gameStarted && !juegoCongelado && !juegoTerminado) {
+          saltar();
+        }
         e.preventDefault();
       }
     }, { passive: false });
+    
+    // Evento para reiniciar al tocar cualquier parte en móviles
+    document.addEventListener('DOMContentLoaded', function() {
+      if (esMovil) {
+        document.body.addEventListener('touchstart', function(e) {
+          if (juegoTerminado && gameStarted) {
+            reiniciarJuego();
+            e.preventDefault();
+          }
+        }, { passive: false });
+      }
+    });
   </script>
 </body>
 </html>
