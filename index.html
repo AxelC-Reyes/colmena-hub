@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +11,20 @@
     #juego-contenedor{ background:#fff; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,.1); }
     #lienzo-juego{ margin:0 auto; }
     #panel-juego.hidden{ display:none; }
+    .logo-container { 
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
+      padding: 20px 0 10px 0;
+    }
+    .logo-img {
+      height: 100px;
+      width: auto;
+      transition: transform 0.3s ease;
+    }
+    .logo-img:hover {
+      transform: scale(1.05);
+    }
   </style>
 
   <!-- Firebase SDK (v compat, sin imports) -->
@@ -24,15 +38,15 @@
 
   <script>
     // ---------- CONFIG FIREBASE (copia TUS 6 valores reales) ----------
-  const firebaseConfig = {
-    apiKey: "AIzaSyAeLIJ8ee9xUBduMKkijW4GdnY45W32Eew",
-    authDomain: "colmena-hub.firebaseapp.com",
-    projectId: "colmena-hub",
-    storageBucket: "colmena-hub.firebasestorage.app",
-    messagingSenderId: "806697924814",
-    appId: "1:806697924814:web:b11c9b057bc6d1dd71789f",
-    measurementId: "G-LQ9GLGJCX8"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeLIJ8ee9xUBduMKkijW4GdnY45W32Eew",
+      authDomain: "colmena-hub.firebaseapp.com",
+      projectId: "colmena-hub",
+      storageBucket: "colmena-hub.firebasestorage.app",
+      messagingSenderId: "806697924814",
+      appId: "1:806697924814:web:b11c9b057bc6d1dd71789f",
+      measurementId: "G-LQ9GLGJCX8"
+    };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db   = firebase.firestore();
@@ -41,12 +55,25 @@
 </head>
 
 <body class="min-h-screen bg-offwhite flex flex-col">
+
   <!-- Contenido principal -->
-  <main class="flex-grow flex flex-col items-center justify-center px-4 py-12 space-y-12">
-    <div class="text-center">
-      <h1 class="text-4xl font-bold text-gray-800 mb-4">COLMENA HUB</h1>
-      <p class="text-lg text-gray-600">QUIERO</p>
+  <main class="flex-grow flex flex-col items-center justify-center px-4 py-12 space-y-10">
+    
+    <!-- Logo y Título en línea -->
+    <div class="flex flex-row items-center justify-center gap-4 mb-2">
+      <!-- Logo al lado izquierdo -->
+      <div>
+        <img src="colmena-hubLOGO.png" alt="COLMENA HUB Logo" class="h-40 w-auto">
+      </div>
+      
+      <!-- Título al lado derecho -->
+      <div>
+        <h1 class="text-4xl font-bold text-gray-800">COLMENA-HUB</h1>
+      </div>
     </div>
+    
+    <!-- Subtítulo debajo -->
+    <p class="text-lg text-gray-600 text-center">QUIERO</p>
 
     <!-- Hexágonos -->
     <div class="flex flex-col md:flex-row items-center justify-center gap-8">
@@ -66,13 +93,13 @@
     </div>
 
     <!-- Botón con logo de Google (POPUP sin redirigir) -->
-      <!-- Botón con logo de Google (POPUP sin redirigir) -->
-     <button id="btnGoogle" class="mt-8 px-5 py-2.5 bg-white text-gray-700 rounded-md border border-gray-300 hover:bg-gray-50 transition inline-flex items-center justify-center gap-2">
+    <button id="btnGoogle" class="mt-6 px-5 py-2.5 bg-white text-gray-700 rounded-md border border-gray-300 hover:bg-gray-50 transition inline-flex items-center justify-center gap-2">
       <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
-       class="w-4 h-4 inline-block align-baseline" 
-       alt="Google">
+           class="w-4 h-4 inline-block align-baseline" 
+           alt="Google">
       <span class="inline-block align-middle text-sm">Ingresar con Google</span>
-     </button>
+    </button>
+
     <!-- Botón flotante Verificar Identidad (solo logueado) -->
     <div id="veriffWrapper" class="fixed bottom-4 right-4 hidden">
       <button id="veriffBtn" onclick="lanzarVeriff()"
@@ -81,183 +108,179 @@
       </button>
     </div>
 
-    <!-- Mini Juego (pequeño y pegado) -->
-    <div class="mt-6 mb-8 text-center">
-      <h3 class="text-base font-semibold text-yellow-700 mb-1">Mini Juego</h3>
+    <!-- Mini Juego -->
+    <div class="mt-8 text-center">
+      <h3 class="text-base font-semibold text-yellow-700 mb-2">Mini Juego</h3>
       <a href="juego.html"
-         class="inline-block px-3 py-1.5 bg-yellow-500 text-white text-sm font-medium rounded hover:bg-yellow-600 transition">
-        Jugar
+         class="inline-block px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-lg hover:bg-yellow-600 transition shadow-md">
+        Jugar Ahora
       </a>
     </div>
   </main>
 
-  <!-- Footer (más arriba) -->
-  <footer class="w-full bg-gradient-to-b from-gray-50 to-gray-100 border-t border-yellow-200">
-  <div class="max-w-6xl mx-auto px-4 py-8">
-    <!-- Grid principal -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-      
-      <!-- Enlaces legales -->
-      <div class="space-y-4">
-        <div class="flex items-center gap-2 mb-3">
-          <div class="w-6 h-6 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center">
-            <i class="fas fa-shield-alt text-white text-xs"></i>
+  <!-- Footer -->
+  <footer class="w-full bg-gradient-to-b from-gray-50 to-gray-100 border-t border-yellow-200 mt-8">
+    <div class="max-w-6xl mx-auto px-4 py-8">
+      <!-- Grid principal -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <!-- Enlaces legales -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-6 h-6 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center">
+              <i class="fas fa-shield-alt text-white text-xs"></i>
+            </div>
+            <h3 class="font-bold text-gray-800 text-sm uppercase tracking-wider">Legal</h3>
           </div>
-          <h3 class="font-bold text-gray-800 text-sm uppercase tracking-wider">Legal</h3>
-        </div>
-        <div class="space-y-2">
-          <a href="politica-privacidad.html" 
-             class="flex items-center gap-2 text-gray-600 hover:text-yellow-600 transition-colors group">
-            <i class="fas fa-file-contract text-yellow-500 text-xs group-hover:scale-110 transition-transform"></i>
-            <span class="text-sm">Política de Privacidad</span>
-          </a>
-          <a href="#" 
-             class="flex items-center gap-2 text-gray-600 hover:text-yellow-600 transition-colors group">
-            <i class="fas fa-balance-scale text-yellow-500 text-xs group-hover:scale-110 transition-transform"></i>
-            <span class="text-sm">Términos y Condiciones</span>
-          </a>
-          <a href="#" 
-             class="flex items-center gap-2 text-gray-600 hover:text-yellow-600 transition-colors group">
-            <i class="fas fa-question-circle text-yellow-500 text-xs group-hover:scale-110 transition-transform"></i>
-            <span class="text-sm">Preguntas Frecuentes</span>
-          </a>
-        </div>
-      </div>
-      
-      <!-- Misión -->
-      <div class="space-y-3">
-        <div class="flex items-center gap-2 mb-2">
-          <div class="w-6 h-6 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center">
-            <i class="fas fa-bullseye text-white text-xs"></i>
-          </div>
-          <h3 class="font-bold text-gray-800">Misión</h3>
-        </div>
-        <p class="text-gray-600 text-sm leading-relaxed">
-          Conectar talento con oportunidades de manera simple, segura y confiable, 
-          construyendo puentes entre profesionales y oportunidades.
-        </p>
-      </div>
-      
-      <!-- Visión -->
-      <div class="space-y-3">
-        <div class="flex items-center gap-2 mb-2">
-          <div class="w-6 h-6 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center">
-            <i class="fas fa-eye text-white text-xs"></i>
-          </div>
-          <h3 class="font-bold text-gray-800">Visión</h3>
-        </div>
-        <p class="text-gray-600 text-sm leading-relaxed">
-          Ser la plataforma líder en contratación profesional en Latinoamérica, 
-          transformando la manera en que empresas y profesionales se conectan.
-        </p>
-      </div>
-      
-      <!-- Conócenos + Redes -->
-      <div class="space-y-4">
-        <div class="flex items-center gap-2 mb-2">
-          <div class="w-6 h-6 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center">
-            <i class="fas fa-users text-white text-xs"></i>
-          </div>
-          <h3 class="font-bold text-gray-800">Conócenos</h3>
-        </div>
-        
-        <p class="text-gray-600 text-sm mb-4 leading-relaxed">
-          Somos un equipo comprometido con el desarrollo profesional y la innovación 
-          en el mercado laboral.
-        </p>
-        
-        <!-- Redes Sociales -->
-        <div>
-          <h4 class="font-semibold text-gray-700 text-xs mb-3 uppercase tracking-wider">Síguenos</h4>
-          <div class="flex space-x-3">
-            <!-- Instagram -->
-            <a href="https://www.instagram.com/colmena_hub?igsh=cTN3cDBwN3FmMm9k&utm_source=qr" 
-               target="_blank" 
-               rel="noopener noreferrer"
-               class="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white hover:shadow-lg hover:scale-110 transition-all duration-200"
-               title="Instagram">
-              <i class="fab fa-instagram"></i>
+          <div class="space-y-2">
+            <a href="politica-privacidad.html" 
+               class="flex items-center gap-2 text-gray-600 hover:text-yellow-600 transition-colors group">
+              <i class="fas fa-file-contract text-yellow-500 text-xs group-hover:scale-110 transition-transform"></i>
+              <span class="text-sm">Política de Privacidad</span>
             </a>
-            
-            <!-- LinkedIn -->
-            <a href="https://linkedin.com/company/tu_empresa" 
-               target="_blank" 
-               rel="noopener noreferrer"
-               class="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white hover:shadow-lg hover:scale-110 transition-all duration-200"
-               title="LinkedIn">
-              <i class="fab fa-linkedin-in"></i>
+            <a href="#" 
+               class="flex items-center gap-2 text-gray-600 hover:text-yellow-600 transition-colors group">
+              <i class="fas fa-balance-scale text-yellow-500 text-xs group-hover:scale-110 transition-transform"></i>
+              <span class="text-sm">Términos y Condiciones</span>
             </a>
-            
-            <!-- WhatsApp -->
-            <a href="https://wa.me/5215512345678" 
-               target="_blank" 
-               rel="noopener noreferrer"
-               class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white hover:shadow-lg hover:scale-110 transition-all duration-200"
-               title="WhatsApp">
-              <i class="fab fa-whatsapp"></i>
+            <a href="#" 
+               class="flex items-center gap-2 text-gray-600 hover:text-yellow-600 transition-colors group">
+              <i class="fas fa-question-circle text-yellow-500 text-xs group-hover:scale-110 transition-transform"></i>
+              <span class="text-sm">Preguntas Frecuentes</span>
             </a>
           </div>
         </div>
         
-        <!-- Contacto directo -->
-        <div class="pt-3 border-t border-gray-200">
-          <a href="mailto:contacto@colmena-hub.com" 
-             class="flex items-center gap-2 text-gray-600 hover:text-yellow-600 transition-colors text-sm group">
-            <i class="fas fa-envelope text-yellow-500 group-hover:animate-bounce"></i>
-            <span>contacto@colmena-hub.com</span>
-          </a>
+        <!-- Misión -->
+        <div class="space-y-3">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-6 h-6 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center">
+              <i class="fas fa-bullseye text-white text-xs"></i>
+            </div>
+            <h3 class="font-bold text-gray-800">Misión</h3>
+          </div>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Conectar talento con oportunidades de manera simple, segura y confiable, 
+            construyendo puentes entre profesionales y oportunidades.
+          </p>
         </div>
-      </div>
-    </div>
-    
-    <!-- Línea divisoria -->
-    <div class="h-px bg-gradient-to-r from-transparent via-yellow-300 to-transparent my-6"></div>
-    
-    <!-- Copyright y marca -->
-    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
-          <i class="fas fa-bee text-white"></i>
+        
+        <!-- Visión -->
+        <div class="space-y-3">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-6 h-6 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center">
+              <i class="fas fa-eye text-white text-xs"></i>
+            </div>
+            <h3 class="font-bold text-gray-800">Visión</h3>
+          </div>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Ser la plataforma líder en contratación profesional en Latinoamérica, 
+            transformando la manera en que empresas y profesionales se conectan.
+          </p>
         </div>
-        <div>
-          <div class="font-bold text-gray-800 text-lg">COLMENA HUB</div>
-          <div class="text-xs text-gray-500">Conectando talento, construyendo futuro</div>
+        
+        <!-- Conócenos + Redes -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-6 h-6 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center">
+              <i class="fas fa-users text-white text-xs"></i>
+            </div>
+            <h3 class="font-bold text-gray-800">Conócenos</h3>
+          </div>
+          
+          <p class="text-gray-600 text-sm mb-4 leading-relaxed">
+            Somos un equipo comprometido con el desarrollo profesional y la innovación 
+            en el mercado laboral.
+          </p>
+          
+          <!-- Redes Sociales -->
+          <div>
+            <h4 class="font-semibold text-gray-700 text-xs mb-3 uppercase tracking-wider">Síguenos</h4>
+            <div class="flex space-x-3">
+              <!-- Instagram -->
+              <a href="https://www.instagram.com/colmena_hub?igsh=cTN3cDBwN3FmMm9k&utm_source=qr" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 class="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white hover:shadow-lg hover:scale-110 transition-all duration-200"
+                 title="Instagram">
+                <i class="fab fa-instagram"></i>
+              </a>
+              
+              <!-- LinkedIn -->
+              <a href="https://www.linkedin.com/company/colmena-hub/" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 class="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white hover:shadow-lg hover:scale-110 transition-all duration-200"
+                 title="LinkedIn">
+                <i class="fab fa-linkedin-in"></i>
+              </a>
+              
+              <!-- WhatsApp -->
+              <a href="https://wa.me/5215512345678" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white hover:shadow-lg hover:scale-110 transition-all duration-200"
+                 title="WhatsApp">
+                <i class="fab fa-whatsapp"></i>
+              </a>
+            </div>
+          </div>
+          
+          <!-- Contacto directo -->
+          <div class="pt-3 border-t border-gray-200">
+            <a href="mailto:contacto@colmena-hub.com" 
+               class="flex items-center gap-2 text-gray-600 hover:text-yellow-600 transition-colors text-sm group">
+              <i class="fas fa-envelope text-yellow-500 group-hover:animate-bounce"></i>
+              <span>contacto@colmena-hub.com</span>
+            </a>
+          </div>
         </div>
       </div>
       
-      <div class="text-center md:text-right">
-        <div class="text-xs text-gray-500 mb-1">
-          © 2025 Colmena-Hub. Todos los derechos reservados.
+      <!-- Línea divisoria -->
+      <div class="h-px bg-gradient-to-r from-transparent via-yellow-300 to-transparent my-6"></div>
+      
+      <!-- Copyright y marca -->
+      <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
+            <i class="fas fa-bee text-white"></i>
+          </div>
+          <div>
+            <div class="font-bold text-gray-800 text-lg">COLMENA HUB</div>
+            <div class="text-xs text-gray-500">Conectando talento, construyendo futuro</div>
+          </div>
         </div>
-        <div class="flex items-center justify-center md:justify-end gap-4 text-xs text-gray-500">
-          <span class="flex items-center gap-1">
-            <i class="fas fa-shield-alt text-green-500"></i>
-            <span>100% Seguro</span>
-          </span>
-          <span class="flex items-center gap-1">
-            <i class="fas fa-lock text-blue-500"></i>
-            <span>Encriptación SSL</span>
-          </span>
-          <span class="flex items-center gap-1">
-            <i class="fas fa-check-circle text-yellow-500"></i>
-            <span>Profesionales Verificados</span>
-          </span>
+        
+        <div class="text-center md:text-right">
+          <div class="text-xs text-gray-500 mb-1">
+            © 2025 Colmena-Hub. Todos los derechos reservados.
+          </div>
+          <div class="flex items-center justify-center md:justify-end gap-4 text-xs text-gray-500">
+            <span class="flex items-center gap-1">
+              <i class="fas fa-shield-alt text-green-500"></i>
+              <span>100% Seguro</span>
+            </span>
+            <span class="flex items-center gap-1">
+              <i class="fas fa-lock text-blue-500"></i>
+              <span>Encriptación SSL</span>
+            </span>
+            <span class="flex items-center gap-1">
+              <i class="fas fa-check-circle text-yellow-500"></i>
+              <span>Profesionales Verificados</span>
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Badge de seguridad móvil -->
+      <div class="md:hidden mt-4 flex justify-center">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-yellow-50 border border-yellow-200 rounded-full">
+          <i class="fas fa-shield-alt text-yellow-600"></i>
+          <span class="text-xs text-gray-700">Plataforma segura y verificada</span>
         </div>
       </div>
     </div>
-    
-    <!-- Badge de seguridad móvil -->
-    <div class="md:hidden mt-4 flex justify-center">
-      <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-yellow-50 border border-yellow-200 rounded-full">
-        <i class="fas fa-shield-alt text-yellow-600"></i>
-        <span class="text-xs text-gray-700">Plataforma segura y verificada</span>
-      </div>
-    </div>
-  </div>
-</footer>
-
-<!-- No olvides incluir FontAwesome en el <head> si no lo tienes -->
-<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> -->
+  </footer>
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.min.js"></script>
