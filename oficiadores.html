@@ -5,436 +5,473 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Oficiadores – COLMENA HUB</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-yellow: #FBBF24;
+      --secondary-brown: #92400E;
+      --light-beige: #FFFBEB;
+      --dark-gray: #1F2937;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    }
+    
+    .glass-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .bee-pattern {
+      background-image: radial-gradient(circle at 10px 10px, rgba(251, 191, 36, 0.1) 2px, transparent 3px);
+      background-size: 40px 40px;
+    }
+    
+    .category-card {
+      transition: all 0.3s ease;
+      border-left: 4px solid transparent;
+    }
+    
+    .category-card:hover {
+      transform: translateY(-4px);
+      border-left-color: var(--primary-yellow);
+      box-shadow: 0 8px 25px rgba(251, 191, 36, 0.15);
+    }
+    
+    .section-divider {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--primary-yellow), transparent);
+      margin: 2rem 0;
+    }
+  </style>
 </head>
+<body class="min-h-screen bee-pattern">
+  <!-- Header con logo de abeja -->
+  <header class="glass-card sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="relative">
+            <div class="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center">
+              <i class="fas fa-bee text-white text-xl"></i>
+              <div class="absolute -top-1 -right-1 w-4 h-4 bg-amber-300 rounded-full"></div>
+            </div>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">COLMENA HUB</h1>
+            <p class="text-xs text-amber-700 font-medium">Conectando talento</p>
+          </div>
+        </div>
+        <nav class="hidden md:flex space-x-6">
+          <a href="index.html" class="text-gray-600 hover:text-amber-600 transition-colors">
+            <i class="fas fa-home mr-1"></i>Inicio
+          </a>
+          <a href="professions-list.html" class="text-gray-600 hover:text-amber-600 transition-colors">
+            <i class="fas fa-user-tie mr-1"></i>Profesionistas
+          </a>
+          <a href="apply.html" class="text-amber-600 font-semibold">
+            <i class="fas fa-user-plus mr-1"></i>Regístrate
+          </a>
+        </nav>
+      </div>
+    </div>
+  </header>
 
-<body class="min-h-screen bg-offwhite p-6">
-  <div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800">Oficiadores disponibles</h1>
+  <!-- Contenido principal -->
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Título y buscador -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-gray-900 mb-3">
+        <i class="fas fa-tools text-amber-500 mr-3"></i>
+        Oficiadores Disponibles
+      </h1>
+      <p class="text-gray-600 max-w-2xl mx-auto">
+        Encuentra talento especializado y verificado para cualquier trabajo. Cada profesional pasa por nuestro proceso de verificación.
+      </p>
+      
+      <div class="mt-8 max-w-xl mx-auto">
+        <div class="relative">
+          <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          <input type="text" 
+                 id="search" 
+                 placeholder="Buscar oficiadores por nombre o especialidad..." 
+                 class="w-full pl-12 pr-4 py-4 glass-card rounded-xl border border-gray-200 focus:border-amber-300 focus:ring-2 focus:ring-amber-200 outline-none transition-all">
+        </div>
+      </div>
+    </div>
 
-    <!-- Buscador -->
-    <input type="text" id="search" placeholder="Buscar oficiadores..." class="w-full mb-8 px-4 py-3 border border-gray-300 rounded-lg">
-
-    <!-- Grid de tarjetas -->
-    <div id="list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-
+    <!-- Grid de categorías -->
+    <div id="list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      
       <!-- Oficios técnicos y mecánicos -->
-      <a href="profile.html?prof=Electricista" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Electricista</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
+      <div class="section-divider md:col-span-2 lg:col-span-3 xl:col-span-4">
+        <span class="px-4 bg-white text-gray-700 font-medium">🔧 Oficios técnicos y mecánicos</span>
+      </div>
+      
+      <a href="listings.html?category=Electricista" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-bolt text-amber-600"></i>
+          </div>
+          <i class="fas fa-chevron-right text-gray-300"></i>
+        </div>
+        <h3 class="font-semibold text-gray-900 text-lg mb-2">Electricista</h3>
+        <p class="text-gray-600 text-sm mb-4">Instalación y mantenimiento eléctrico residencial e industrial</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-shield-alt mr-2"></i>
+          <span>Profesionales verificados</span>
+        </div>
       </a>
 
-      <a href="profile.html?prof=Plomero" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Plomero / Fontanero</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
+      <a href="listings.html?category=Plomero" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-faucet text-blue-600"></i>
+          </div>
+          <i class="fas fa-chevron-right text-gray-300"></i>
+        </div>
+        <h3 class="font-semibold text-gray-900 text-lg mb-2">Plomero / Fontanero</h3>
+        <p class="text-gray-600 text-sm mb-4">Reparación e instalación de sistemas de agua y drenaje</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-shield-alt mr-2"></i>
+          <span>Profesionales verificados</span>
+        </div>
       </a>
 
-      <a href="profile.html?prof=Carpintero" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Carpintero</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
+      <a href="listings.html?category=Carpintero" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-hammer text-amber-700"></i>
+          </div>
+          <i class="fas fa-chevron-right text-gray-300"></i>
+        </div>
+        <h3 class="font-semibold text-gray-900 text-lg mb-2">Carpintero</h3>
+        <p class="text-gray-600 text-sm mb-4">Muebles, estructuras y trabajos en madera personalizados</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-shield-alt mr-2"></i>
+          <span>Profesionales verificados</span>
+        </div>
       </a>
 
-      <a href="profile.html?prof=Soldador" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Soldador</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
+      <a href="listings.html?category=Soldador" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-fire text-red-600"></i>
+          </div>
+          <i class="fas fa-chevron-right text-gray-300"></i>
+        </div>
+        <h3 class="font-semibold text-gray-900 text-lg mb-2">Soldador</h3>
+        <p class="text-gray-600 text-sm mb-4">Uniones metálicas para construcción y reparación</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-shield-alt mr-2"></i>
+          <span>Profesionales verificados</span>
+        </div>
       </a>
 
-      <a href="profile.html?prof=Mecánico automotriz" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Mecánico automotriz</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
+      <a href="listings.html?category=Mecánico automotriz" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-car text-gray-700"></i>
+          </div>
+          <i class="fas fa-chevron-right text-gray-300"></i>
+        </div>
+        <h3 class="font-semibold text-gray-900 text-lg mb-2">Mecánico Automotriz</h3>
+        <p class="text-gray-600 text-sm mb-4">Reparación y mantenimiento de vehículos</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-shield-alt mr-2"></i>
+          <span>Profesionales verificados</span>
+        </div>
       </a>
 
-      <a href="profile.html?prof=Técnico en aire acondicionado" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Técnico en aire acondicionado</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
+      <a href="listings.html?category=Albañil" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-hard-hat text-yellow-700"></i>
+          </div>
+          <i class="fas fa-chevron-right text-gray-300"></i>
+        </div>
+        <h3 class="font-semibold text-gray-900 text-lg mb-2">Albañil</h3>
+        <p class="text-gray-600 text-sm mb-4">Construcción y reparación de estructuras</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-shield-alt mr-2"></i>
+          <span>Profesionales verificados</span>
+        </div>
       </a>
 
-      <a href="profile.html?prof=Técnico en refrigeración" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Técnico en refrigeración</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
+      <!-- Oficios de transporte -->
+      <div class="section-divider md:col-span-2 lg:col-span-3 xl:col-span-4">
+        <span class="px-4 bg-white text-gray-700 font-medium">🚗 Oficios de transporte y movilidad</span>
+      </div>
+
+      <a href="listings.html?category=Conductor de taxi" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-taxi text-green-600"></i>
+          </div>
+          <i class="fas fa-chevron-right text-gray-300"></i>
+        </div>
+        <h3 class="font-semibold text-gray-900 text-lg mb-2">Conductor de Taxi</h3>
+        <p class="text-gray-600 text-sm mb-4">Transporte seguro y confiable</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-shield-alt mr-2"></i>
+          <span>Verificación de antecedentes</span>
+        </div>
       </a>
 
-      <a href="profile.html?prof=Técnico en celulares" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Técnico en celulares</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
+      <a href="listings.html?category=Mensajero" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-shipping-fast text-orange-600"></i>
+          </div>
+          <i class="fas fa-chevron-right text-gray-300"></i>
+        </div>
+        <h3 class="font-semibold text-gray-900 text-lg mb-2">Mensajero / Delivery</h3>
+        <p class="text-gray-600 text-sm mb-4">Entrega rápida de paquetes y alimentos</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-shield-alt mr-2"></i>
+          <span>Verificación de identidad</span>
+        </div>
       </a>
 
-      <a href="profile.html?prof=Técnico en computadoras" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Técnico en computadoras</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
+      <!-- Oficios de reparación -->
+      <div class="section-divider md:col-span-2 lg:col-span-3 xl:col-span-4">
+        <span class="px-4 bg-white text-gray-700 font-medium">🔨 Oficios de reparación y mantenimiento</span>
+      </div>
+
+      <a href="listings.html?category=Reparador de electrodomésticos" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-plug text-purple-600"></i>
+          </div>
+          <i class="fas fa-chevron-right text-gray-300"></i>
+        </div>
+        <h3 class="font-semibold text-gray-900 text-lg mb-2">Reparador de Electrodomésticos</h3>
+        <p class="text-gray-600 text-sm mb-4">Reparación de refrigeradores, lavadoras, etc.</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-shield-alt mr-2"></i>
+          <span>Especialistas certificados</span>
+        </div>
       </a>
 
-      <a href="profile.html?prof=Técnico en motos" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Técnico en motos</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
+      <a href="listings.html?category=Jardinero" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-leaf text-emerald-600"></i>
+          </div>
+          <i class="fas fa-chevron-right text-gray-300"></i>
+        </div>
+        <h3 class="font-semibold text-gray-900 text-lg mb-2">Jardinero</h3>
+        <p class="text-gray-600 text-sm mb-4">Diseño y mantenimiento de jardines</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-shield-alt mr-2"></i>
+          <span>Profesionales verificados</span>
+        </div>
       </a>
 
-      <a href="profile.html?prof=Instalador de cámaras de seguridad" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Instalador de cámaras de seguridad (CCTV)</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
-      </a>
-
-      <a href="profile.html?prof=Instalador de paneles solares" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Instalador de paneles solares</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
-      </a>
-
-      <a href="profile.html?prof=Albañil" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Albañil</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
-      </a>
-
-      <a href="profile.html?prof=Maestro de obra" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Maestro de obra</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
-      </a>
-
-      <a href="profile.html?prof=Pintor" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Pintor (de casas y edificios)</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
-      </a>
-
-      <a href="profile.html?prof=Herrero" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Herrero</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
-      </a>
-
-      <a href="profile.html?prof=Gasista" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Gasista / Técnico en gas</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
-      </a>
-
-      <a href="profile.html?prof=Técnico en alarmas" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Técnico en alarmas</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
-      </a>
-
-      <a href="profile.html?prof=Técnico en fibra óptica" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Técnico en fibra óptica</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
-      </a>
-
-      <a href="profile.html?prof=Instalador de cable e internet" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Instalador de cable e internet</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
-      </a>
-
-      <!-- Oficios de transporte y movilidad -->
-      <a href="profile.html?prof=Conductor de taxi" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Conductor de taxi</div>
-        <div class="text-sm text-gray-500">Servicio de transporte</div>
-      </a>
-
-      <a href="profile.html?prof=Chofer particular" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Chofer particular</div>
-        <div class="text-sm text-gray-500">Servicio de transporte</div>
-      </a>
-
-      <a href="profile.html?prof=Conductor de plataformas" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Conductor de plataformas</div>
-        <div class="text-sm text-gray-500">Servicio de transporte</div>
-      </a>
-
-      <a href="profile.html?prof=Mensajero" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Mensajero / Rappi / delivery</div>
-        <div class="text-sm text-gray-500">Servicio de entrega</div>
-      </a>
-
-      <a href="profile.html?prof=Repartidor en moto" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Repartidor en moto</div>
-        <div class="text-sm text-gray-500">Servicio de entrega</div>
-      </a>
-
-      <a href="profile.html?prof=Transportista de carga ligera" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Transportista de carga ligera</div>
-        <div class="text-sm text-gray-500">Servicio de transporte</div>
-      </a>
-
-      <a href="profile.html?prof=Mototaxista" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Mototaxista</div>
-        <div class="text-sm text-gray-500">Servicio de transporte</div>
-      </a>
-
-      <!-- Oficios de reparación y mantenimiento -->
-      <a href="profile.html?prof=Reparador de electrodomésticos" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Reparador de electrodomésticos</div>
-        <div class="text-sm text-gray-500">Servicio de reparación</div>
-      </a>
-
-      <a href="profile.html?prof=Reparador de lavadoras" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Reparador de lavadoras</div>
-        <div class="text-sm text-gray-500">Servicio de reparación</div>
-      </a>
-
-      <a href="profile.html?prof=Reparador de televisores" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Reparador de televisores</div>
-        <div class="text-sm text-gray-500">Servicio de reparación</div>
-      </a>
-
-      <a href="profile.html?prof=Reparador de muebles" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Reparador de muebles</div>
-        <div class="text-sm text-gray-500">Servicio de reparación</div>
-      </a>
-
-      <a href="profile.html?prof=Tapicero" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Tapicero</div>
-        <div class="text-sm text-gray-500">Servicio de reparación</div>
-      </a>
-
-      <a href="profile.html?prof=Jardinero" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Jardinero</div>
-        <div class="text-sm text-gray-500">Servicio de mantenimiento</div>
-      </a>
-
-      <a href="profile.html?prof=Fumigador" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Fumigador / Control de plagas</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
-      </a>
-
-      <a href="profile.html?prof=Limpieza profesional de casas" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Limpieza profesional de casas</div>
-        <div class="text-sm text-gray-500">Servicio de limpieza</div>
-      </a>
-
-      <a href="profile.html?prof=Limpieza de oficinas" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Limpieza de oficinas</div>
-        <div class="text-sm text-gray-500">Servicio de limpieza</div>
-      </a>
-
-      <a href="profile.html?prof=Mantenimiento de piscinas" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Mantenimiento de piscinas</div>
-        <div class="text-sm text-gray-500">Servicio de mantenimiento</div>
-      </a>
-
-      <a href="profile.html?prof=Vidriero" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Vidriero</div>
-        <div class="text-sm text-gray-500">Servicio especializado</div>
+      <a href="listings.html?category=Limpieza profesional de casas" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-broom text-cyan-600"></i>
+          </div>
+          <i class="fas fa-chevron-right text-gray-300"></i>
+        </div>
+        <h3 class="font-semibold text-gray-900 text-lg mb-2">Limpieza Profesional</h3>
+        <p class="text-gray-600 text-sm mb-4">Limpieza de casas y oficinas</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-shield-alt mr-2"></i>
+          <span>Personal confiable</span>
+        </div>
       </a>
 
       <!-- Oficios artesanales -->
-      <a href="profile.html?prof=Panadero" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Panadero</div>
-        <div class="text-sm text-gray-500">Artesanía alimentaria</div>
+      <div class="section-divider md:col-span-2 lg:col-span-3 xl:col-span-4">
+        <span class="px-4 bg-white text-gray-700 font-medium">🎨 Oficios artesanales</span>
+      </div>
+
+      <a href="listings.html?category=Panadero" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-bread-slice text-yellow-700"></i>
+          </div>
+          <i class="fas fa-chevron-right text-gray-300"></i>
+        </div>
+        <h3 class="font-semibold text-gray-900 text-lg mb-2">Panadero</h3>
+        <p class="text-gray-600 text-sm mb-4">Panadería artesanal tradicional</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-shield-alt mr-2"></i>
+          <span>Higiénico y certificado</span>
+        </div>
       </a>
 
-      <a href="profile.html?prof=Repostero" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Repostero</div>
-        <div class="text-sm text-gray-500">Artesanía alimentaria</div>
+      <a href="listings.html?category=Sastre" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-tshirt text-pink-600"></i>
+          </div>
+          <i class="fas fa-chevron-right text-gray-300"></i>
+        </div>
+        <h3 class="font-semibold text-gray-900 text-lg mb-2">Sastre / Modista</h3>
+        <p class="text-gray-600 text-sm mb-4">Confección y arreglo de prendas</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-shield-alt mr-2"></i>
+          <span>Artesanos certificados</span>
+        </div>
       </a>
 
-      <a href="profile.html?prof=Cocinero tradicional" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Cocinero tradicional</div>
-        <div class="text-sm text-gray-500">Artesanía alimentaria</div>
+      <!-- Oficios comerciales -->
+      <div class="section-divider md:col-span-2 lg:col-span-3 xl:col-span-4">
+        <span class="px-4 bg-white text-gray-700 font-medium">💈 Oficios comerciales y de servicios</span>
+      </div>
+
+      <a href="listings.html?category=Barbería" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-cut text-blue-600"></i>
+          </div>
+          <i class="fas fa-chevron-right text-gray-300"></i>
+        </div>
+        <h3 class="font-semibold text-gray-900 text-lg mb-2">Barbería</h3>
+        <p class="text-gray-600 text-sm mb-4">Corte de cabello y cuidado personal</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-shield-alt mr-2"></i>
+          <span>Certificación sanitaria</span>
+        </div>
       </a>
 
-      <a href="profile.html?prof=Pastelero" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Pastelero</div>
-        <div class="text-sm text-gray-500">Artesanía alimentaria</div>
+      <a href="listings.html?category=Fotógrafo" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-camera text-indigo-600"></i>
+          </div>
+          <i class="fas fa-chevron-right text-gray-300"></i>
+        </div>
+        <h3 class="font-semibold text-gray-900 text-lg mb-2">Fotógrafo</h3>
+        <p class="text-gray-600 text-sm mb-4">Fotografía profesional para eventos</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-shield-alt mr-2"></i>
+          <span>Portafolio verificado</span>
+        </div>
       </a>
 
-      <a href="profile.html?prof=Sastre" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Sastre / Modista</div>
-        <div class="text-sm text-gray-500">Artesanía textil</div>
+      <!-- Oficios emergentes -->
+      <div class="section-divider md:col-span-2 lg:col-span-3 xl:col-span-4">
+        <span class="px-4 bg-white text-gray-700 font-medium">🚀 Oficios emergentes / modernos</span>
+      </div>
+
+      <a href="listings.html?category=Operador de drones" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-drone text-gray-700"></i>
+          </div>
+          <i class="fas fa-chevron-right text-gray-300"></i>
+        </div>
+        <h3 class="font-semibold text-gray-900 text-lg mb-2">Operador de Drones</h3>
+        <p class="text-gray-600 text-sm mb-4">Fotografía aérea y levantamientos</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-shield-alt mr-2"></i>
+          <span>Licencia certificada</span>
+        </div>
       </a>
 
-      <a href="profile.html?prof=Zapatero" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Zapatero</div>
-        <div class="text-sm text-gray-500">Artesanía en calzado</div>
-      </a>
-
-      <a href="profile.html?prof=Joyería artesanal" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Joyería artesanal</div>
-        <div class="text-sm text-gray-500">Artesanía en metales</div>
-      </a>
-
-      <a href="profile.html?prof=Ceramista" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Ceramista</div>
-        <div class="text-sm text-gray-500">Artesanía en cerámica</div>
-      </a>
-
-      <a href="profile.html?prof=Tejedor artesanal" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Tejedor artesanal</div>
-        <div class="text-sm text-gray-500">Artesanía textil</div>
-      </a>
-
-      <a href="profile.html?prof=Barista" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Barista</div>
-        <div class="text-sm text-gray-500">Artesanía en café</div>
-      </a>
-
-      <!-- Oficios comerciales y de servicios -->
-      <a href="profile.html?prof=Barbería" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Barbería</div>
-        <div class="text-sm text-gray-500">Servicio personal</div>
-      </a>
-
-      <a href="profile.html?prof=Estilista" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Estilista / Peluquero</div>
-        <div class="text-sm text-gray-500">Servicio personal</div>
-      </a>
-
-      <a href="profile.html?prof=Maquillista" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Maquillista</div>
-        <div class="text-sm text-gray-500">Servicio personal</div>
-      </a>
-
-      <a href="profile.html?prof=Manicurista" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Manicurista</div>
-        <div class="text-sm text-gray-500">Servicio personal</div>
-      </a>
-
-      <a href="profile.html?prof=Masajista" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Masajista</div>
-        <div class="text-sm text-gray-500">Servicio de bienestar</div>
-      </a>
-
-      <a href="profile.html?prof=Instructor de gimnasio" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Instructor de gimnasio</div>
-        <div class="text-sm text-gray-500">Servicio deportivo</div>
-      </a>
-
-      <a href="profile.html?prof=Entrenador personal" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Entrenador personal</div>
-        <div class="text-sm text-gray-500">Servicio deportivo</div>
-      </a>
-
-      <a href="profile.html?prof=Asistente de eventos" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Asistente de eventos</div>
-        <div class="text-sm text-gray-500">Servicio de eventos</div>
-      </a>
-
-      <a href="profile.html?prof=Catering" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Catering / comida para eventos</div>
-        <div class="text-sm text-gray-500">Servicio de eventos</div>
-      </a>
-
-      <a href="profile.html?prof=Fotógrafo" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Fotógrafo</div>
-        <div class="text-sm text-gray-500">Servicio creativo</div>
-      </a>
-
-      <a href="profile.html?prof=Videógrafo" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Videógrafo</div>
-        <div class="text-sm text-gray-500">Servicio creativo</div>
-      </a>
-
-      <a href="profile.html?prof=Impresiones y papelería" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Impresiones y papelería</div>
-        <div class="text-sm text-gray-500">Servicio comercial</div>
-      </a>
-
-      <a href="profile.html?prof=Ventas ambulantes" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Ventas ambulantes</div>
-        <div class="text-sm text-gray-500">Comercio local</div>
-      </a>
-
-      <a href="profile.html?prof=Comercio en mercados locales" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Comercio en mercados locales</div>
-        <div class="text-sm text-gray-500">Comercio local</div>
-      </a>
-
-      <a href="profile.html?prof=Community manager" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Community manager básico</div>
-        <div class="text-sm text-gray-500">Servicio digital</div>
-      </a>
-
-      <a href="profile.html?prof=Venta de ropa" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Venta de ropa</div>
-        <div class="text-sm text-gray-500">Comercio local</div>
-      </a>
-
-      <a href="profile.html?prof=Venta de comida" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Venta de comida (street food)</div>
-        <div class="text-sm text-gray-500">Comercio alimentario</div>
-      </a>
-
-      <!-- Oficios rurales y de campo -->
-      <a href="profile.html?prof=Apicultor" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Apicultor (miel)</div>
-        <div class="text-sm text-gray-500">Servicio rural</div>
-      </a>
-
-      <a href="profile.html?prof=Agricultor" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Agricultor</div>
-        <div class="text-sm text-gray-500">Servicio rural</div>
-      </a>
-
-      <a href="profile.html?prof=Ganadero" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Ganadero básico</div>
-        <div class="text-sm text-gray-500">Servicio rural</div>
-      </a>
-
-      <a href="profile.html?prof=Cultivador de flores" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Cultivador de flores o plantas</div>
-        <div class="text-sm text-gray-500">Servicio rural</div>
-      </a>
-
-      <a href="profile.html?prof=Pescador artesanal" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Pescador artesanal</div>
-        <div class="text-sm text-gray-500">Servicio rural</div>
-      </a>
-
-      <!-- Oficios emergentes / modernos -->
-      <a href="profile.html?prof=Operador de drones" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Operador de drones</div>
-        <div class="text-sm text-gray-500">Servicio tecnológico</div>
-      </a>
-
-      <a href="profile.html?prof=Creador de contenido" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Creador de contenido</div>
-        <div class="text-sm text-gray-500">Servicio digital</div>
-      </a>
-
-      <a href="profile.html?prof=Reparación de drones" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Reparación de drones</div>
-        <div class="text-sm text-gray-500">Servicio tecnológico</div>
-      </a>
-
-      <a href="profile.html?prof=Impresión 3D" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Impresión 3D</div>
-        <div class="text-sm text-gray-500">Servicio tecnológico</div>
-      </a>
-
-      <a href="profile.html?prof=Técnico en redes WiFi" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Técnico en redes WiFi domésticas</div>
-        <div class="text-sm text-gray-500">Servicio tecnológico</div>
-      </a>
-
-      <a href="profile.html?prof=Programación básica" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Programación básica freelance</div>
-        <div class="text-sm text-gray-500">Servicio digital</div>
-      </a>
-
-      <a href="profile.html?prof=Diseño gráfico" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Diseño gráfico básico</div>
-        <div class="text-sm text-gray-500">Servicio creativo</div>
-      </a>
-
-      <a href="profile.html?prof=Delivery independiente" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Delivery independiente por redes</div>
-        <div class="text-sm text-gray-500">Servicio de entrega</div>
-      </a>
-
-      <a href="profile.html?prof=Lavado de autos" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Lavado de autos a domicilio</div>
-        <div class="text-sm text-gray-500">Servicio automotriz</div>
-      </a>
-
-      <a href="profile.html?prof=Detailing automotriz" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Detailing automotriz</div>
-        <div class="text-sm text-gray-500">Servicio automotriz</div>
+      <a href="listings.html?category=Programación básica" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-code text-gray-700"></i>
+          </div>
+          <i class="fas fa-chevron-right text-gray-300"></i>
+        </div>
+        <h3 class="font-semibold text-gray-900 text-lg mb-2">Programación Freelance</h3>
+        <p class="text-gray-600 text-sm mb-4">Desarrollo web y aplicaciones básicas</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-shield-alt mr-2"></i>
+          <span>Portafolio verificado</span>
+        </div>
       </a>
 
     </div>
-  </div>
 
-  <!-- Script simple para filtrar (opcional) -->
+    <!-- Llamada a la acción -->
+    <div class="mt-12 text-center">
+      <div class="glass-card rounded-2xl p-8 max-w-2xl mx-auto">
+        <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <i class="fas fa-bee text-3xl text-amber-600"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">¿No encuentras tu oficio?</h3>
+        <p class="text-gray-600 mb-6">Si tienes habilidades especializadas que no aparecen en la lista, regístrate y únete a nuestra comunidad.</p>
+        <a href="apply.html" class="inline-flex items-center bg-amber-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-600 transition-colors">
+          <i class="fas fa-user-plus mr-2"></i>
+          Regístrate como Profesional
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-16 border-t border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-6 md:mb-0">
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
+              <i class="fas fa-bee text-white text-sm"></i>
+            </div>
+            <span class="text-lg font-bold text-gray-900">COLMENA HUB</span>
+          </div>
+          <p class="text-gray-500 text-sm mt-2">Conectando talento con oportunidades</p>
+        </div>
+        <div class="text-center md:text-right">
+          <p class="text-gray-500 text-sm">© 2024 COLMENA HUB. Todos los derechos reservados.</p>
+          <div class="flex space-x-4 mt-3 justify-center md:justify-end">
+            <a href="#" class="text-gray-400 hover:text-amber-500">
+              <i class="fab fa-facebook"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-amber-500">
+              <i class="fab fa-instagram"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-amber-500">
+              <i class="fab fa-whatsapp"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script de búsqueda -->
   <script>
     const search = document.getElementById('search');
-    const list   = document.getElementById('list');
+    const cards = document.querySelectorAll('.category-card');
+    
     search.addEventListener('input', () => {
-      const term = search.value.toLowerCase();
-      [...list.children].forEach(card => {
-        card.style.display = card.textContent.toLowerCase().includes(term) ? 'block' : 'none';
+      const term = search.value.toLowerCase().trim();
+      
+      cards.forEach(card => {
+        const title = card.querySelector('h3').textContent.toLowerCase();
+        const description = card.querySelector('p').textContent.toLowerCase();
+        
+        if (title.includes(term) || description.includes(term)) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      
+      // Mostrar/Ocultar divisores
+      document.querySelectorAll('.section-divider').forEach(divider => {
+        const nextCards = [...divider.parentNode.children].slice(
+          [...divider.parentNode.children].indexOf(divider) + 1
+        );
+        
+        const hasVisibleCards = nextCards.some((card, index) => {
+          if (card.classList.contains('section-divider')) return false;
+          return card.style.display !== 'none';
+        });
+        
+        divider.style.display = hasVisibleCards ? 'block' : 'none';
       });
     });
   </script>

@@ -2,14 +2,648 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Pago exitoso – COLMENA HUB</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pago Exitoso - COLMENA HUB</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-amber: #FBBF24;
+      --amber-light: #FEF3C7;
+    }
+    
+    .hexagon-bg {
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23fbbf24' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(251, 191, 36, 0.1);
+    }
+    
+    .hexagon-badge {
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      background: linear-gradient(135deg, #FBBF24, #F59E0B);
+    }
+    
+    /* Abeja deslizable */
+    .bee-slider-container {
+      height: 80px;
+      position: relative;
+      margin: 2rem 0;
+    }
+    
+    .honey-track {
+      height: 12px;
+      background: linear-gradient(90deg, #FEF3C7, #FBBF24, #FEF3C7);
+      border-radius: 6px;
+      position: relative;
+      overflow: visible;
+    }
+    
+    .honey-drip {
+      position: absolute;
+      bottom: -8px;
+      width: 3px;
+      height: 15px;
+      background: #F59E0B;
+      border-radius: 0 0 3px 3px;
+    }
+    
+    .bee-slider {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      cursor: grab;
+      transition: left 0.1s ease;
+      z-index: 10;
+    }
+    
+    .bee-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #FBBF24, #92400E);
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+      box-shadow: 0 4px 15px rgba(146, 64, 14, 0.3);
+    }
+    
+    .bee-icon:active {
+      cursor: grabbing;
+      transform: translate(-50%, -50%) scale(0.95);
+    }
+    
+    .rating-number {
+      font-size: 32px;
+      font-weight: bold;
+      color: #92400E;
+      text-align: center;
+      margin-top: 10px;
+    }
+    
+    .rating-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #6B7280;
+    }
+    
+    .honey-drip-1 { left: 10%; }
+    .honey-drip-2 { left: 20%; }
+    .honey-drip-3 { left: 30%; }
+    .honey-drip-4 { left: 40%; }
+    .honey-drip-5 { left: 50%; }
+    .honey-drip-6 { left: 60%; }
+    .honey-drip-7 { left: 70%; }
+    .honey-drip-8 { left: 80%; }
+    .honey-drip-9 { left: 90%; }
+    
+    .rating-description {
+      text-align: center;
+      font-size: 14px;
+      color: #6B7280;
+      margin-top: 5px;
+      min-height: 40px;
+    }
+  </style>
 </head>
-<body class="min-h-screen bg-offwhite flex items-center justify-center">
-  <div class="bg-white rounded-xl shadow-md p-8 text-center">
-    <h1 class="text-2xl font-bold text-green-600 mb-2">¡Pago recibido!</h1>
-    <p class="text-gray-600">Tu profesional ya fue notificado y se pondrá en contacto contigo.</p>
-    <a href="index.html" class="mt-4 inline-block px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Volver al inicio</a>
-  </div>
+<body class="min-h-screen hexagon-bg p-4 md:p-6">
+  
+  <!-- Header -->
+  <header class="max-w-4xl mx-auto mb-8">
+    <div class="flex items-center justify-center space-x-3">
+      <div class="hexagon-badge w-12 h-12 flex items-center justify-center">
+        <i class="fas fa-bee text-white text-xl"></i>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">COLMENA HUB</h1>
+        <p class="text-sm text-amber-600 font-medium">Pago exitoso</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="max-w-4xl mx-auto">
+    <!-- Mensaje de éxito -->
+    <div class="glass-card rounded-2xl p-8 mb-8 text-center">
+      <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <i class="fas fa-check text-green-500 text-3xl"></i>
+      </div>
+      
+      <h2 class="text-3xl font-bold text-gray-900 mb-4">¡Pago Completado!</h2>
+      <p class="text-gray-600 mb-2">Tu pago ha sido procesado exitosamente.</p>
+      <p class="text-gray-600 mb-6">El profesional ha sido notificado y se pondrá en contacto contigo pronto.</p>
+      
+      <div class="bg-gray-50 rounded-xl p-4 max-w-md mx-auto mb-6">
+        <p class="text-sm text-gray-500">ID de transacción:</p>
+        <p id="transactionId" class="font-mono text-gray-900">STRIPE-${Date.now()}</p>
+      </div>
+    </div>
+
+    <!-- Formulario de reseña -->
+    <div id="reviewSection" class="glass-card rounded-2xl p-8">
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 hexagon-badge flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-star text-white"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">Califica tu experiencia</h3>
+        <p class="text-gray-600">Tu opinión ayuda a otros usuarios y mejora nuestro servicio</p>
+      </div>
+
+      <!-- Calificación con abeja deslizable -->
+      <div class="mb-8">
+        <div class="text-center mb-4">
+          <h4 class="font-bold text-gray-800 mb-2">¿Cómo calificarías el servicio?</h4>
+          <p class="text-sm text-gray-600">Desliza la abejita para dar tu calificación</p>
+        </div>
+        
+        <!-- Abeja deslizable -->
+        <div class="bee-slider-container">
+          <!-- Pista de miel -->
+          <div class="honey-track relative">
+            <!-- Gotas de miel -->
+            <div class="honey-drip honey-drip-1"></div>
+            <div class="honey-drip honey-drip-2"></div>
+            <div class="honey-drip honey-drip-3"></div>
+            <div class="honey-drip honey-drip-4"></div>
+            <div class="honey-drip honey-drip-5"></div>
+            <div class="honey-drip honey-drip-6"></div>
+            <div class="honey-drip honey-drip-7"></div>
+            <div class="honey-drip honey-drip-8"></div>
+            <div class="honey-drip honey-drip-9"></div>
+            
+            <!-- Abeja deslizable -->
+            <div class="bee-slider" id="beeSlider" style="left: 50%">
+              <div class="bee-icon">
+                <i class="fas fa-bee"></i>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Número de calificación -->
+          <div class="rating-number">
+            <span id="ratingValue">5</span>/10
+          </div>
+          
+          <!-- Descripción -->
+          <div class="rating-description" id="ratingDescription">
+            Bueno - El servicio cumplió con lo esperado
+          </div>
+          
+          <!-- Etiquetas -->
+          <div class="rating-labels">
+            <span>Malo</span>
+            <span>Excelente</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario de reseña -->
+      <div class="space-y-6">
+        <!-- Comentario -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-3">
+            <span class="flex items-center">
+              <i class="fas fa-comment mr-2 text-amber-500"></i>
+              Comentario (opcional)
+            </span>
+          </label>
+          <textarea id="reviewComment" 
+                    rows="4" 
+                    placeholder="¿Qué fue lo mejor del servicio? ¿Algo que podría mejorar?"
+                    class="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-300 focus:border-amber-500 outline-none transition-all"></textarea>
+          <p class="text-xs text-gray-500 mt-2">Tu comentario será publicado en el perfil del profesional.</p>
+        </div>
+        
+        <!-- Anonimato -->
+        <div class="flex items-center">
+          <input type="checkbox" id="anonymousReview" class="w-5 h-5 text-amber-600 rounded">
+          <label for="anonymousReview" class="ml-2 text-sm text-gray-700">
+            Publicar reseña de forma anónima
+          </label>
+        </div>
+        
+        <!-- Botones -->
+        <div class="flex flex-col sm:flex-row gap-4 pt-4">
+          <button onclick="skipReview()" 
+                  class="flex-1 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors">
+            <i class="fas fa-forward mr-2"></i>Omitir reseña
+          </button>
+          
+          <button id="submitReviewBtn" 
+                  onclick="submitReview()"
+                  class="flex-1 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold rounded-xl hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg hover:shadow-xl">
+            <i class="fas fa-paper-plane mr-2"></i>Enviar reseña
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Siguientes pasos -->
+    <div class="glass-card rounded-2xl p-6 mt-8">
+      <h3 class="text-xl font-bold text-gray-900 mb-6">¿Qué sigue?</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="text-center p-4">
+          <div class="w-12 h-12 hexagon-badge flex items-center justify-center mx-auto mb-3">
+            <i class="fas fa-clock text-white"></i>
+          </div>
+          <h4 class="font-bold text-gray-900 mb-2">Espera contacto</h4>
+          <p class="text-sm text-gray-600">El profesional se pondrá en contacto contigo en las próximas 24 horas</p>
+        </div>
+        
+        <div class="text-center p-4">
+          <div class="w-12 h-12 hexagon-badge flex items-center justify-center mx-auto mb-3">
+            <i class="fas fa-calendar-alt text-white"></i>
+          </div>
+          <h4 class="font-bold text-gray-900 mb-2">Coordina la cita</h4>
+          <p class="text-sm text-gray-600">Acuerda fecha y hora para el servicio</p>
+        </div>
+        
+        <div class="text-center p-4">
+          <div class="w-12 h-12 hexagon-badge flex items-center justify-center mx-auto mb-3">
+            <i class="fas fa-history text-white"></i>
+          </div>
+          <h4 class="font-bold text-gray-900 mb-2">Revisa tu historial</h4>
+          <p class="text-sm text-gray-600">Sigue el estado de tu servicio en tu perfil</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="max-w-4xl mx-auto mt-12 pt-8 border-t border-amber-200 text-center">
+    <div class="flex items-center justify-center space-x-3 mb-4">
+      <div class="w-8 h-8 hexagon-badge flex items-center justify-center">
+        <i class="fas fa-bee text-white"></i>
+      </div>
+      <span class="text-lg font-bold text-gray-900">COLMENA HUB</span>
+    </div>
+    <p class="text-gray-600 text-sm">Gracias por confiar en nuestra comunidad</p>
+    <p class="text-gray-400 text-xs mt-4">© 2024 COLMENA HUB. Todos los derechos reservados.</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Datos de la transacción
+    let transactionData = {
+      professionalId: null,
+      professionalName: null,
+      serviceType: null,
+      transactionId: null,
+      rating: 5,
+      review: '',
+      anonymous: false
+    };
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', function() {
+      // Obtener datos de la URL
+      const urlParams = new URLSearchParams(window.location.search);
+      transactionData.professionalId = urlParams.get('professionalId') || urlParams.get('professional');
+      transactionData.professionalName = urlParams.get('professionalName') || 'Profesional';
+      transactionData.serviceType = urlParams.get('service') || 'consulta';
+      
+      // Generar ID de transacción
+      transactionData.transactionId = `COL-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      document.getElementById('transactionId').textContent = transactionData.transactionId;
+      
+      // Inicializar slider de abeja
+      initBeeSlider();
+      
+      // Cargar datos de localStorage si existen (por si regresa a la página)
+      const savedReview = localStorage.getItem('colmena_review');
+      if (savedReview) {
+        try {
+          const reviewData = JSON.parse(savedReview);
+          if (reviewData.rating) {
+            setBeePosition(reviewData.rating);
+            document.getElementById('reviewComment').value = reviewData.review || '';
+            document.getElementById('anonymousReview').checked = reviewData.anonymous || false;
+          }
+        } catch (e) {
+          console.log('No hay reseña guardada');
+        }
+      }
+    });
+
+    // Slider de abeja
+    function initBeeSlider() {
+      const slider = document.getElementById('beeSlider');
+      const track = document.querySelector('.honey-track');
+      const ratingValue = document.getElementById('ratingValue');
+      const ratingDesc = document.getElementById('ratingDescription');
+      
+      let isDragging = false;
+      
+      // Descripciones para cada calificación
+      const descriptions = {
+        1: 'Muy deficiente - No cumplió con lo acordado',
+        2: 'Deficiente - Tuvo varios problemas',
+        3: 'Regular - Podría mejorar',
+        4: 'Aceptable - Cumplió lo básico',
+        5: 'Bueno - El servicio cumplió con lo esperado',
+        6: 'Muy bueno - Superó expectativas básicas',
+        7: 'Excelente - Servicio de buena calidad',
+        8: 'Sobresaliente - Muy profesional',
+        9: 'Excepcional - Altamente recomendado',
+        10: 'Increíble - Servicio perfecto'
+      };
+      
+      // Calcular posición inicial (5/10)
+      function setBeePosition(rating) {
+        const percentage = ((rating - 1) / 9) * 100;
+        slider.style.left = `${percentage}%`;
+        ratingValue.textContent = rating;
+        ratingDesc.textContent = descriptions[rating] || '';
+        transactionData.rating = rating;
+      }
+      
+      // Obtener rating de posición
+      function getRatingFromPosition(pos) {
+        const percentage = (pos / track.offsetWidth) * 100;
+        const rating = Math.round((percentage / 100) * 9) + 1;
+        return Math.max(1, Math.min(10, rating));
+      }
+      
+      // Eventos del mouse
+      slider.addEventListener('mousedown', startDrag);
+      track.addEventListener('mousedown', function(e) {
+        if (e.target === track) {
+          startDrag(e);
+          updateSlider(e);
+        }
+      });
+      
+      // Eventos táctiles
+      slider.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        startDrag(e.touches[0]);
+      });
+      
+      track.addEventListener('touchstart', function(e) {
+        if (e.target === track) {
+          e.preventDefault();
+          startDrag(e.touches[0]);
+          updateSlider(e.touches[0]);
+        }
+      });
+      
+      function startDrag(e) {
+        isDragging = true;
+        slider.style.cursor = 'grabbing';
+        document.addEventListener('mousemove', onDrag);
+        document.addEventListener('touchmove', onTouchDrag);
+        document.addEventListener('mouseup', stopDrag);
+        document.addEventListener('touchend', stopDrag);
+      }
+      
+      function onDrag(e) {
+        if (!isDragging) return;
+        updateSlider(e);
+      }
+      
+      function onTouchDrag(e) {
+        if (!isDragging || !e.touches[0]) return;
+        e.preventDefault();
+        updateSlider(e.touches[0]);
+      }
+      
+      function updateSlider(e) {
+        const rect = track.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        
+        // Limitar dentro del track
+        x = Math.max(0, Math.min(x, rect.width));
+        
+        // Actualizar posición
+        slider.style.left = `${(x / rect.width) * 100}%`;
+        
+        // Calcular y actualizar rating
+        const rating = getRatingFromPosition(x);
+        ratingValue.textContent = rating;
+        ratingDesc.textContent = descriptions[rating] || '';
+        transactionData.rating = rating;
+        
+        // Efecto visual
+        slider.style.transform = `translate(-50%, -50%) scale(${1 + (rating / 50)})`;
+      }
+      
+      function stopDrag() {
+        isDragging = false;
+        slider.style.cursor = 'grab';
+        slider.style.transform = 'translate(-50%, -50%) scale(1)';
+        document.removeEventListener('mousemove', onDrag);
+        document.removeEventListener('touchmove', onTouchDrag);
+        document.removeEventListener('mouseup', stopDrag);
+        document.removeEventListener('touchend', stopDrag);
+        
+        // Guardar en localStorage
+        saveReviewDraft();
+      }
+      
+      // Inicializar en 5
+      setBeePosition(5);
+    }
+
+    // Funciones de reseña
+    function saveReviewDraft() {
+      transactionData.review = document.getElementById('reviewComment').value;
+      transactionData.anonymous = document.getElementById('anonymousReview').checked;
+      
+      localStorage.setItem('colmena_review', JSON.stringify({
+        rating: transactionData.rating,
+        review: transactionData.review,
+        anonymous: transactionData.anonymous,
+        timestamp: Date.now()
+      }));
+    }
+
+    async function submitReview() {
+      const submitBtn = document.getElementById('submitReviewBtn');
+      const originalText = submitBtn.innerHTML;
+      
+      try {
+        // Validar
+        if (transactionData.rating < 1 || transactionData.rating > 10) {
+          alert('Por favor, selecciona una calificación válida');
+          return;
+        }
+        
+        // Mostrar loading
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Enviando...';
+        submitBtn.disabled = true;
+        
+        // Guardar datos
+        transactionData.review = document.getElementById('reviewComment').value;
+        transactionData.anonymous = document.getElementById('anonymousReview').checked;
+        
+        // Aquí enviarías los datos a tu backend/Firebase
+        await saveReviewToFirebase(transactionData);
+        
+        // Limpiar localStorage
+        localStorage.removeItem('colmena_review');
+        
+        // Mostrar mensaje de éxito
+        showSuccessMessage();
+        
+        // Redirigir después de 3 segundos
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 3000);
+        
+      } catch (error) {
+        console.error('Error al enviar reseña:', error);
+        alert('Error al enviar la reseña. Intenta de nuevo.');
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    }
+
+    async function saveReviewToFirebase(reviewData) {
+      // Implementación con Firebase
+      try {
+        // Verificar si Firebase está disponible
+        if (typeof firebase === 'undefined') {
+          console.warn('Firebase no está cargado, simulando guardado');
+          return simulateSave(reviewData);
+        }
+        
+        const db = firebase.firestore();
+        
+        // 1. Guardar la reseña
+        await db.collection('reviews').add({
+          professionalId: reviewData.professionalId,
+          transactionId: reviewData.transactionId,
+          rating: reviewData.rating,
+          review: reviewData.review,
+          anonymous: reviewData.anonymous,
+          serviceType: reviewData.serviceType,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          status: 'published'
+        });
+        
+        // 2. Actualizar el promedio del profesional
+        await updateProfessionalRating(reviewData.professionalId);
+        
+        console.log('Reseña guardada exitosamente');
+        
+      } catch (error) {
+        console.error('Error en Firebase:', error);
+        // Fallback a localStorage
+        saveToLocalStorage(reviewData);
+        throw error;
+      }
+    }
+
+    async function updateProfessionalRating(professionalId) {
+      if (typeof firebase === 'undefined') return;
+      
+      const db = firebase.firestore();
+      
+      // Obtener todas las reseñas del profesional
+      const reviewsSnapshot = await db.collection('reviews')
+        .where('professionalId', '==', professionalId)
+        .where('status', '==', 'published')
+        .get();
+      
+      let totalRating = 0;
+      let reviewCount = 0;
+      
+      reviewsSnapshot.forEach(doc => {
+        const data = doc.data();
+        totalRating += data.rating;
+        reviewCount++;
+      });
+      
+      // Calcular nuevo promedio (convertir 1-10 a 1-5 para compatibilidad)
+      const averageRating = totalRating / reviewCount;
+      const starRating = (averageRating / 2).toFixed(1); // Convertir a escala 1-5
+      
+      // Actualizar profesional
+      await db.collection('professionals').doc(professionalId).update({
+        rating: parseFloat(starRating),
+        reviewCount: reviewCount,
+        lastReviewUpdate: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      
+      console.log(`Rating actualizado: ${starRating} (${reviewCount} reseñas)`);
+    }
+
+    function simulateSave(reviewData) {
+      // Simular guardado para desarrollo
+      return new Promise(resolve => {
+        setTimeout(() => {
+          console.log('Reseña simulada:', reviewData);
+          // Guardar en localStorage como backup
+          const reviews = JSON.parse(localStorage.getItem('colmena_reviews') || '[]');
+          reviews.push({
+            ...reviewData,
+            id: `sim_${Date.now()}`,
+            timestamp: Date.now()
+          });
+          localStorage.setItem('colmena_reviews', JSON.stringify(reviews));
+          resolve();
+        }, 1000);
+      });
+    }
+
+    function saveToLocalStorage(reviewData) {
+      const reviews = JSON.parse(localStorage.getItem('colmena_reviews') || '[]');
+      reviews.push({
+        ...reviewData,
+        id: `local_${Date.now()}`,
+        timestamp: Date.now()
+      });
+      localStorage.setItem('colmena_reviews', JSON.stringify(reviews));
+    }
+
+    function showSuccessMessage() {
+      const reviewSection = document.getElementById('reviewSection');
+      reviewSection.innerHTML = `
+        <div class="text-center py-12">
+          <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-check text-green-500 text-3xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-4">¡Reseña Enviada!</h3>
+          <p class="text-gray-600 mb-6">Gracias por compartir tu experiencia. Tu opinión ayuda a otros usuarios.</p>
+          <div class="bg-amber-50 rounded-xl p-4 max-w-md mx-auto mb-6">
+            <p class="text-sm text-amber-800">
+              <i class="fas fa-star mr-2"></i>
+              Calificación: ${transactionData.rating}/10
+            </p>
+            ${transactionData.review ? `
+              <p class="text-sm text-amber-800 mt-2">
+                <i class="fas fa-comment mr-2"></i>
+                "${transactionData.review.substring(0, 100)}${transactionData.review.length > 100 ? '...' : ''}"
+              </p>
+            ` : ''}
+          </div>
+          <p class="text-sm text-gray-500">Redirigiendo a la página principal...</p>
+        </div>
+      `;
+    }
+
+    function skipReview() {
+      if (confirm('¿Seguro que quieres omitir la reseña? Tu opinión es importante para la comunidad.')) {
+        window.location.href = 'index.html';
+      }
+    }
+
+    // Auto-guardar borrador cada 10 segundos
+    document.getElementById('reviewComment').addEventListener('input', saveReviewDraft);
+    document.getElementById('anonymousReview').addEventListener('change', saveReviewDraft);
+    
+    // También guardar al salir de la página
+    window.addEventListener('beforeunload', function() {
+      saveReviewDraft();
+    });
+  </script>
 </body>
 </html>

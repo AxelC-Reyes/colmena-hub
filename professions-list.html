@@ -3,304 +3,437 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lista – COLMENA HUB</title>
+  <title>Profesionistas – COLMENA HUB</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-blue: #3B82F6;
+      --secondary-navy: #1E40AF;
+      --light-gray: #F8FAFC;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #F0F9FF 0%, #EFF6FF 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    }
+    
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+    
+    .hex-pattern {
+      background-image: 
+        radial-gradient(circle at 25px 25px, rgba(59, 130, 246, 0.05) 2px, transparent 3px),
+        radial-gradient(circle at 75px 75px, rgba(59, 130, 246, 0.05) 2px, transparent 3px);
+      background-size: 100px 100px;
+    }
+    
+    .category-card {
+      transition: all 0.3s ease;
+      border-top: 3px solid transparent;
+    }
+    
+    .category-card:hover {
+      transform: translateY(-4px);
+      border-top-color: var(--primary-blue);
+      box-shadow: 0 12px 30px rgba(59, 130, 246, 0.12);
+    }
+    
+    .badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+    }
+    
+    .badge-tech { background: #DBEAFE; color: #1E40AF; }
+    .badge-health { background: #D1FAE5; color: #065F46; }
+    .badge-engineering { background: #FEF3C7; color: #92400E; }
+    .badge-science { background: #E0E7FF; color: #3730A3; }
+    .badge-business { background: #FCE7F3; color: #9D174D; }
+    .badge-art { background: #FEF3C7; color: #92400E; }
+    .badge-security { background: #FEE2E2; color: #991B1B; }
+  </style>
 </head>
-
-<body class="min-h-screen bg-offwhite p-6">
-  <div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800">Profesionistas disponibles</h1>
-
-    <!-- Buscador -->
-    <input type="text" id="search" placeholder="Buscar profesionistas..." class="w-full mb-8 px-4 py-3 border border-gray-300 rounded-lg">
-
-    <!-- Grid de tarjetas -->
-    <div id="list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-
-      <!-- 🔹 Profesiones del sector tecnológico y digital -->
-      <a href="profile.html?prof=Analista de datos" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Analista de datos</div>
-        <div class="text-sm text-gray-500">Sector tecnológico</div>
-      </a>
-
-      <a href="profile.html?prof=Especialista en ciberseguridad" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Especialista en ciberseguridad</div>
-        <div class="text-sm text-gray-500">Sector tecnológico</div>
-      </a>
-
-      <a href="profile.html?prof=Ingeniero en inteligencia artificial" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Ingeniero/a en inteligencia artificial</div>
-        <div class="text-sm text-gray-500">Sector tecnológico</div>
-      </a>
-
-      <a href="profile.html?prof=Científico de datos" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Científico/a de datos</div>
-        <div class="text-sm text-gray-500">Sector tecnológico</div>
-      </a>
-
-      <a href="profile.html?prof=Técnico en redes y telecomunicaciones" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Técnico/a en redes y telecomunicaciones</div>
-        <div class="text-sm text-gray-500">Sector tecnológico</div>
-      </a>
-
-      <a href="profile.html?prof=Ingeniero de software" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Ingeniero/a de software</div>
-        <div class="text-sm text-gray-500">Sector tecnológico</div>
-      </a>
-
-      <a href="profile.html?prof=Administrador de bases de datos" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Administrador/a de bases de datos</div>
-        <div class="text-sm text-gray-500">Sector tecnológico</div>
-      </a>
-
-      <a href="profile.html?prof=Diseñador UX/UI" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Diseñador/a UX/UI</div>
-        <div class="text-sm text-gray-500">Sector tecnológico</div>
-      </a>
-
-      <a href="profile.html?prof=Especialista en marketing digital" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Especialista en marketing digital</div>
-        <div class="text-sm text-gray-500">Sector tecnológico</div>
-      </a>
-
-      <a href="profile.html?prof=Analista QA" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Analista QA / Tester de software</div>
-        <div class="text-sm text-gray-500">Sector tecnológico</div>
-      </a>
-
-      <!-- 🔹 Sector salud y bienestar -->
-      <a href="profile.html?prof=Nutriólogo" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Nutriólogo/a – Dietista</div>
-        <div class="text-sm text-gray-500">Sector salud</div>
-      </a>
-
-      <a href="profile.html?prof=Terapeuta ocupacional" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Terapeuta ocupacional</div>
-        <div class="text-sm text-gray-500">Sector salud</div>
-      </a>
-
-      <a href="profile.html?prof=Técnico en radioterapia" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Técnico/a en radioterapia</div>
-        <div class="text-sm text-gray-500">Sector salud</div>
-      </a>
-
-      <a href="profile.html?prof=Optometrista" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Optometrista</div>
-        <div class="text-sm text-gray-500">Sector salud</div>
-      </a>
-
-      <a href="profile.html?prof=Tecnólogo en imágenes diagnósticas" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Tecnólogo/a en imágenes diagnósticas</div>
-        <div class="text-sm text-gray-500">Sector salud</div>
-      </a>
-
-      <a href="profile.html?prof=Sonografista" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Sonografista</div>
-        <div class="text-sm text-gray-500">Sector salud</div>
-      </a>
-
-      <a href="profile.html?prof=Auxiliar de enfermería" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Auxiliar de enfermería</div>
-        <div class="text-sm text-gray-500">Sector salud</div>
-      </a>
-
-      <a href="profile.html?prof=Terapeuta respiratorio" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Terapeuta respiratorio</div>
-        <div class="text-sm text-gray-500">Sector salud</div>
-      </a>
-
-      <a href="profile.html?prof=Técnico en laboratorio clínico" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Técnico/a en laboratorio clínico</div>
-        <div class="text-sm text-gray-500">Sector salud</div>
-      </a>
-
-      <!-- 🔹 Ingenierías y oficios especializados -->
-      <a href="profile.html?prof=Ingeniero industrial" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Ingeniero/a industrial</div>
-        <div class="text-sm text-gray-500">Ingeniería especializada</div>
-      </a>
-
-      <a href="profile.html?prof=Ingeniero mecatrónico" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Ingeniero/a mecatrónico/a</div>
-        <div class="text-sm text-gray-500">Ingeniería especializada</div>
-      </a>
-
-      <a href="profile.html?prof=Ingeniero eléctrico" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Ingeniero/a eléctrico/a</div>
-        <div class="text-sm text-gray-500">Ingeniería especializada</div>
-      </a>
-
-      <a href="profile.html?prof=Ingeniero civil" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Ingeniero/a civil</div>
-        <div class="text-sm text-gray-500">Ingeniería especializada</div>
-      </a>
-
-      <a href="profile.html?prof=Técnico en automatización" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Técnico/a en automatización</div>
-        <div class="text-sm text-gray-500">Ingeniería especializada</div>
-      </a>
-
-      <a href="profile.html?prof=Topógrafo" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Topógrafo/a</div>
-        <div class="text-sm text-gray-500">Ingeniería especializada</div>
-      </a>
-
-      <a href="profile.html?prof=Soldador calificado" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Soldador/a calificado/a</div>
-        <div class="text-sm text-gray-500">Ingeniería especializada</div>
-      </a>
-
-      <a href="profile.html?prof=Técnico automotriz" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Técnico/a automotriz</div>
-        <div class="text-sm text-gray-500">Ingeniería especializada</div>
-      </a>
-
-      <!-- 🔹 Ciencias, medio ambiente y campo -->
-      <a href="profile.html?prof=Ingeniero ambiental" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Ingeniero/a ambiental</div>
-        <div class="text-sm text-gray-500">Ciencias y medio ambiente</div>
-      </a>
-
-      <a href="profile.html?prof=Ingeniero forestal" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Ingeniero/a forestal</div>
-        <div class="text-sm text-gray-500">Ciencias y medio ambiente</div>
-      </a>
-
-      <a href="profile.html?prof=Oceanógrafo" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Oceanógrafo/a</div>
-        <div class="text-sm text-gray-500">Ciencias y medio ambiente</div>
-      </a>
-
-      <a href="profile.html?prof=Hidrólogo" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Hidrólogo/a</div>
-        <div class="text-sm text-gray-500">Ciencias y medio ambiente</div>
-      </a>
-
-      <a href="profile.html?prof=Técnico agropecuario" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Técnico/a agropecuario</div>
-        <div class="text-sm text-gray-500">Ciencias y medio ambiente</div>
-      </a>
-
-      <a href="profile.html?prof=Zootecnista" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Zootecnista</div>
-        <div class="text-sm text-gray-500">Ciencias y medio ambiente</div>
-      </a>
-
-      <a href="profile.html?prof=Especialista en energías renovables" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Especialista en energías renovables</div>
-        <div class="text-sm text-gray-500">Ciencias y medio ambiente</div>
-      </a>
-
-      <!-- 🔹 Negocios, finanzas y administración -->
-      <a href="profile.html?prof=Analista financiero" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Analista financiero</div>
-        <div class="text-sm text-gray-500">Negocios y finanzas</div>
-      </a>
-
-      <a href="profile.html?prof=Gestor de proyectos" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Gestor/a de proyectos (Project Manager)</div>
-        <div class="text-sm text-gray-500">Negocios y finanzas</div>
-      </a>
-
-      <a href="profile.html?prof=Especialista en comercio exterior" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Especialista en comercio exterior</div>
-        <div class="text-sm text-gray-500">Negocios y finanzas</div>
-      </a>
-
-      <a href="profile.html?prof=Consultor empresarial" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Consultor/a empresarial</div>
-        <div class="text-sm text-gray-500">Negocios y finanzas</div>
-      </a>
-
-      <a href="profile.html?prof=Administrador público" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Administrador/a público</div>
-        <div class="text-sm text-gray-500">Negocios y finanzas</div>
-      </a>
-
-      <a href="profile.html?prof=Especialista en logística" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Especialista en logística y cadena de suministro</div>
-        <div class="text-sm text-gray-500">Negocios y finanzas</div>
-      </a>
-
-      <a href="profile.html?prof=Mercadólogo" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Mercadólogo/a</div>
-        <div class="text-sm text-gray-500">Negocios y finanzas</div>
-      </a>
-
-      <!-- 🔹 Artes, cultura y humanidades -->
-      <a href="profile.html?prof=Diseñador de interiores" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Diseñador/a de interiores</div>
-        <div class="text-sm text-gray-500">Artes y cultura</div>
-      </a>
-
-      <a href="profile.html?prof=Productor audiovisual" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Productor/a audiovisual</div>
-        <div class="text-sm text-gray-500">Artes y cultura</div>
-      </a>
-
-      <a href="profile.html?prof=Gestor cultural" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Gestor/a cultural</div>
-        <div class="text-sm text-gray-500">Artes y cultura</div>
-      </a>
-
-      <a href="profile.html?prof=Fotógrafo profesional" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Fotógrafo/a profesional</div>
-        <div class="text-sm text-gray-500">Artes y cultura</div>
-      </a>
-
-      <a href="profile.html?prof=Director de arte" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Director/a de arte</div>
-        <div class="text-sm text-gray-500">Artes y cultura</div>
-      </a>
-
-      <a href="profile.html?prof=Editor de contenidos" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Editor/a de contenidos</div>
-        <div class="text-sm text-gray-500">Artes y cultura</div>
-      </a>
-
-      <!-- 🔹 Seguridad, justicia y servicios públicos -->
-      <a href="profile.html?prof=Criminólogo" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Criminólogo/a</div>
-        <div class="text-sm text-gray-500">Seguridad y justicia</div>
-      </a>
-
-      <a href="profile.html?prof=Investigador forense" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Investigador/a forense</div>
-        <div class="text-sm text-gray-500">Seguridad y justicia</div>
-      </a>
-
-      <a href="profile.html?prof=Bombero" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Bombero/a</div>
-        <div class="text-sm text-gray-500">Servicios públicos</div>
-      </a>
-
-      <a href="profile.html?prof=Guardaparque" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Guardaparque</div>
-        <div class="text-sm text-gray-500">Servicios públicos</div>
-      </a>
-
-      <a href="profile.html?prof=Técnico en seguridad industrial" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Técnico/a en seguridad industrial</div>
-        <div class="text-sm text-gray-500">Seguridad y justicia</div>
-      </a>
-
-      <a href="profile.html?prof=Perito judicial" class="p-4 border border-gray-200 rounded-lg hover:bg-yellow-500 hover:text-white cursor-pointer transition-colors shadow-sm">
-        <div class="font-medium">Perito/a judicial</div>
-        <div class="text-sm text-gray-500">Seguridad y justicia</div>
-      </a>
-
-      <!-- Copia-pega esta tarjeta para más profesiones -->
+<body class="min-h-screen hex-pattern">
+  <!-- Header -->
+  <header class="glass-card sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="relative">
+            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+              <i class="fas fa-graduation-cap text-white text-xl"></i>
+              <div class="absolute -top-1 -right-1 w-4 h-4 bg-blue-300 rounded-full"></div>
+            </div>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">COLMENA HUB</h1>
+            <p class="text-xs text-blue-700 font-medium">Profesionales certificados</p>
+          </div>
+        </div>
+        <nav class="hidden md:flex space-x-6">
+          <a href="index.html" class="text-gray-600 hover:text-blue-600 transition-colors">
+            <i class="fas fa-home mr-1"></i>Inicio
+          </a>
+          <a href="oficiadores.html" class="text-gray-600 hover:text-blue-600 transition-colors">
+            <i class="fas fa-tools mr-1"></i>Oficiadores
+          </a>
+          <a href="apply.html" class="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors">
+            <i class="fas fa-user-graduate mr-1"></i>Regístrate
+          </a>
+        </nav>
+      </div>
     </div>
-  </div>
+  </header>
 
-  <!-- Script simple para filtrar (opcional) -->
+  <!-- Contenido principal -->
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Título y buscador -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-gray-900 mb-3">
+        <i class="fas fa-user-tie text-blue-500 mr-3"></i>
+        Profesionistas Certificados
+      </h1>
+      <p class="text-gray-600 max-w-2xl mx-auto">
+        Encuentra profesionales titulados y especializados para proyectos complejos y servicios de alto nivel.
+      </p>
+      
+      <div class="mt-8 max-w-xl mx-auto">
+        <div class="relative">
+          <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          <input type="text" 
+                 id="search" 
+                 placeholder="Buscar profesionistas por especialidad o título..." 
+                 class="w-full pl-12 pr-4 py-4 glass-card rounded-xl border border-gray-200 focus:border-blue-300 focus:ring-2 focus:ring-blue-200 outline-none transition-all">
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid de categorías -->
+    <div id="list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      
+      <!-- Sector tecnológico -->
+      <div class="md:col-span-2 lg:col-span-3 xl:col-span-4 mb-6">
+        <h2 class="text-xl font-bold text-gray-800 flex items-center">
+          <span class="w-4 h-4 bg-blue-500 rounded-full mr-3"></span>
+          🔹 Sector Tecnológico y Digital
+        </h2>
+      </div>
+      
+      <a href="listings.html?category=Ingeniero de software" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-blue-50 cursor-pointer">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-laptop-code text-blue-600 text-xl"></i>
+          </div>
+          <span class="badge badge-tech">Tecnología</span>
+        </div>
+        <h3 class="font-bold text-gray-900 text-lg mb-2">Ingeniero/a de Software</h3>
+        <p class="text-gray-600 text-sm mb-4">Desarrollo de aplicaciones y sistemas empresariales</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-certificate text-blue-500 mr-2"></i>
+          <span>Titulación verificada</span>
+        </div>
+      </a>
+
+      <a href="listings.html?category=Analista de datos" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-blue-50 cursor-pointer">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-chart-line text-indigo-600 text-xl"></i>
+          </div>
+          <span class="badge badge-tech">Datos</span>
+        </div>
+        <h3 class="font-bold text-gray-900 text-lg mb-2">Analista de Datos</h3>
+        <p class="text-gray-600 text-sm mb-4">Análisis estadístico y business intelligence</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-certificate text-blue-500 mr-2"></i>
+          <span>Titulación verificada</span>
+        </div>
+      </a>
+
+      <a href="listings.html?category=Científico de datos" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-blue-50 cursor-pointer">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-brain text-purple-600 text-xl"></i>
+          </div>
+          <span class="badge badge-tech">IA/Datos</span>
+        </div>
+        <h3 class="font-bold text-gray-900 text-lg mb-2">Científico/a de Datos</h3>
+        <p class="text-gray-600 text-sm mb-4">Machine learning y análisis predictivo</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-certificate text-blue-500 mr-2"></i>
+          <span>Titulación verificada</span>
+        </div>
+      </a>
+
+      <a href="listings.html?category=Diseñador UX/UI" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-blue-50 cursor-pointer">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-palette text-pink-600 text-xl"></i>
+          </div>
+          <span class="badge badge-tech">Diseño</span>
+        </div>
+        <h3 class="font-bold text-gray-900 text-lg mb-2">Diseñador/a UX/UI</h3>
+        <p class="text-gray-600 text-sm mb-4">Experiencia de usuario e interfaces digitales</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-certificate text-blue-500 mr-2"></i>
+          <span>Portafolio verificado</span>
+        </div>
+      </a>
+
+      <!-- Sector salud -->
+      <div class="md:col-span-2 lg:col-span-3 xl:col-span-4 mb-6 mt-8">
+        <h2 class="text-xl font-bold text-gray-800 flex items-center">
+          <span class="w-4 h-4 bg-emerald-500 rounded-full mr-3"></span>
+          🏥 Sector Salud y Bienestar
+        </h2>
+      </div>
+
+      <a href="listings.html?category=Nutriólogo" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-emerald-50 cursor-pointer">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-apple-alt text-emerald-600 text-xl"></i>
+          </div>
+          <span class="badge badge-health">Salud</span>
+        </div>
+        <h3 class="font-bold text-gray-900 text-lg mb-2">Nutriólogo/a – Dietista</h3>
+        <p class="text-gray-600 text-sm mb-4">Planes nutricionales personalizados</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-certificate text-emerald-500 mr-2"></i>
+          <span>Cédula profesional</span>
+        </div>
+      </a>
+
+      <a href="listings.html?category=Terapeuta ocupacional" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-emerald-50 cursor-pointer">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-hands-helping text-green-600 text-xl"></i>
+          </div>
+          <span class="badge badge-health">Terapia</span>
+        </div>
+        <h3 class="font-bold text-gray-900 text-lg mb-2">Terapeuta Ocupacional</h3>
+        <p class="text-gray-600 text-sm mb-4">Rehabilitación y terapia física</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-certificate text-emerald-500 mr-2"></i>
+          <span>Licencia verificada</span>
+        </div>
+      </a>
+
+      <!-- Ingenierías -->
+      <div class="md:col-span-2 lg:col-span-3 xl:col-span-4 mb-6 mt-8">
+        <h2 class="text-xl font-bold text-gray-800 flex items-center">
+          <span class="w-4 h-4 bg-amber-500 rounded-full mr-3"></span>
+          ⚙️ Ingenierías Especializadas
+        </h2>
+      </div>
+
+      <a href="listings.html?category=Ingeniero civil" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-building text-amber-600 text-xl"></i>
+          </div>
+          <span class="badge badge-engineering">Civil</span>
+        </div>
+        <h3 class="font-bold text-gray-900 text-lg mb-2">Ingeniero/a Civil</h3>
+        <p class="text-gray-600 text-sm mb-4">Diseño y supervisión de obras civiles</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-certificate text-amber-500 mr-2"></i>
+          <span>Cédula profesional</span>
+        </div>
+      </a>
+
+      <a href="listings.html?category=Ingeniero industrial" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-industry text-orange-600 text-xl"></i>
+          </div>
+          <span class="badge badge-engineering">Industrial</span>
+        </div>
+        <h3 class="font-bold text-gray-900 text-lg mb-2">Ingeniero/a Industrial</h3>
+        <p class="text-gray-600 text-sm mb-4">Optimización de procesos productivos</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-certificate text-amber-500 mr-2"></i>
+          <span>Cédula profesional</span>
+        </div>
+      </a>
+
+      <a href="listings.html?category=Ingeniero ambiental" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-leaf text-emerald-600 text-xl"></i>
+          </div>
+          <span class="badge badge-science">Ambiental</span>
+        </div>
+        <h3 class="font-bold text-gray-900 text-lg mb-2">Ingeniero/a Ambiental</h3>
+        <p class="text-gray-600 text-sm mb-4">Gestión ambiental y sostenibilidad</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-certificate text-amber-500 mr-2"></i>
+          <span>Cédula profesional</span>
+        </div>
+      </a>
+
+      <!-- Negocios y finanzas -->
+      <div class="md:col-span-2 lg:col-span-3 xl:col-span-4 mb-6 mt-8">
+        <h2 class="text-xl font-bold text-gray-800 flex items-center">
+          <span class="w-4 h-4 bg-purple-500 rounded-full mr-3"></span>
+          💼 Negocios, Finanzas y Administración
+        </h2>
+      </div>
+
+      <a href="listings.html?category=Analista financiero" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-purple-50 cursor-pointer">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-chart-bar text-purple-600 text-xl"></i>
+          </div>
+          <span class="badge badge-business">Finanzas</span>
+        </div>
+        <h3 class="font-bold text-gray-900 text-lg mb-2">Analista Financiero</h3>
+        <p class="text-gray-600 text-sm mb-4">Análisis de inversiones y mercado</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-certificate text-purple-500 mr-2"></i>
+          <span>Certificación verificada</span>
+        </div>
+      </a>
+
+      <a href="listings.html?category=Gestor de proyectos" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-purple-50 cursor-pointer">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-tasks text-indigo-600 text-xl"></i>
+          </div>
+          <span class="badge badge-business">Gestión</span>
+        </div>
+        <h3 class="font-bold text-gray-900 text-lg mb-2">Gestor/a de Proyectos</h3>
+        <p class="text-gray-600 text-sm mb-4">Dirección y planificación de proyectos</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-certificate text-purple-500 mr-2"></i>
+          <span>Certificación PMP</span>
+        </div>
+      </a>
+
+      <!-- Artes y cultura -->
+      <div class="md:col-span-2 lg:col-span-3 xl:col-span-4 mb-6 mt-8">
+        <h2 class="text-xl font-bold text-gray-800 flex items-center">
+          <span class="w-4 h-4 bg-pink-500 rounded-full mr-3"></span>
+          🎭 Artes, Cultura y Humanidades
+        </h2>
+      </div>
+
+      <a href="listings.html?category=Diseñador de interiores" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-pink-50 cursor-pointer">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-couch text-pink-600 text-xl"></i>
+          </div>
+          <span class="badge badge-art">Diseño</span>
+        </div>
+        <h3 class="font-bold text-gray-900 text-lg mb-2">Diseñador/a de Interiores</h3>
+        <p class="text-gray-600 text-sm mb-4">Diseño de espacios residenciales y comerciales</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-certificate text-pink-500 mr-2"></i>
+          <span>Titulación verificada</span>
+        </div>
+      </a>
+
+      <a href="listings.html?category=Fotógrafo profesional" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-pink-50 cursor-pointer">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-camera-retro text-rose-600 text-xl"></i>
+          </div>
+          <span class="badge badge-art">Fotografía</span>
+        </div>
+        <h3 class="font-bold text-gray-900 text-lg mb-2">Fotógrafo/a Profesional</h3>
+        <p class="text-gray-600 text-sm mb-4">Fotografía comercial y artística</p>
+        <div class="flex items-center text-xs text-gray-500 mt-auto">
+          <i class="fas fa-certificate text-pink-500 mr-2"></i>
+          <span>Portafolio verificado</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- Llamada a la acción -->
+    <div class="mt-12 text-center">
+      <div class="glass-card rounded-2xl p-8 max-w-2xl mx-auto border-2 border-blue-200">
+        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <i class="fas fa-user-graduate text-3xl text-blue-600"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">¿Eres un profesional titulado?</h3>
+        <p class="text-gray-600 mb-6">Únete a nuestra red de profesionales verificados. Verificamos tu titulación, experiencia y referencias para ofrecerte a clientes de confianza.</p>
+        <a href="apply.html" class="inline-flex items-center bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors shadow-lg">
+          <i class="fas fa-graduation-cap mr-2"></i>
+          Registro para Profesionales Titulados
+        </a>
+        <p class="text-xs text-gray-500 mt-4">* Requiere cédula profesional o título universitario</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-16 border-t border-gray-200 bg-white">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-6 md:mb-0">
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+              <i class="fas fa-graduation-cap text-white text-sm"></i>
+            </div>
+            <span class="text-lg font-bold text-gray-900">COLMENA HUB</span>
+          </div>
+          <p class="text-gray-500 text-sm mt-2">Profesionales verificados para proyectos serios</p>
+        </div>
+        <div class="text-center md:text-right">
+          <p class="text-gray-500 text-sm">© 2024 COLMENA HUB. Profesiones reguladas.</p>
+          <div class="flex space-x-4 mt-3 justify-center md:justify-end">
+            <a href="#" class="text-gray-400 hover:text-blue-500">
+              <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-blue-500">
+              <i class="fab fa-twitter"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-blue-500">
+              <i class="fab fa-instagram"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script de búsqueda -->
   <script>
     const search = document.getElementById('search');
-    const list   = document.getElementById('list');
+    const cards = document.querySelectorAll('.category-card');
+    
     search.addEventListener('input', () => {
-      const term = search.value.toLowerCase();
-      [...list.children].forEach(card => {
-        card.style.display = card.textContent.toLowerCase().includes(term) ? 'block' : 'none';
+      const term = search.value.toLowerCase().trim();
+      
+      cards.forEach(card => {
+        const title = card.querySelector('h3').textContent.toLowerCase();
+        const description = card.querySelector('p').textContent.toLowerCase();
+        const badge = card.querySelector('.badge').textContent.toLowerCase();
+        
+        if (title.includes(term) || description.includes(term) || badge.includes(term)) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      
+      // Mostrar/Ocultar secciones
+      document.querySelectorAll('[class*="col-span-4"]').forEach(section => {
+        if (!section.classList.contains('category-card')) {
+          const nextCards = [...section.parentNode.children].slice(
+            [...section.parentNode.children].indexOf(section) + 1
+          ).filter(card => card.classList.contains('category-card'));
+          
+          const hasVisibleCards = nextCards.some(card => {
+            return card.style.display !== 'none';
+          });
+          
+          section.style.display = hasVisibleCards ? 'block' : 'none';
+        }
       });
     });
   </script>

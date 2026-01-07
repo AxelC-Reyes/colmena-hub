@@ -3,153 +3,817 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perfil - COLMENA HUB</title>
+  <title>Perfil Profesional - COLMENA HUB</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-  <!-- Stripe -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://js.stripe.com/v3/"></script>
   <style>
-    .loading {
-      display: none;
+    :root {
+      --primary-amber: #FBBF24;
+      --amber-light: #FEF3C7;
+      --amber-dark: #92400E;
+      --hex-gray: #6B7280;
     }
-    .spinner {
-      border: 2px solid #f3f3f3;
-      border-top: 2px solid #f59e0b;
+    
+    body {
+      background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 50%, #FDE68A 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    }
+    
+    .hexagon-bg {
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23fbbf24' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    
+    .glass-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(251, 191, 36, 0.08);
+    }
+    
+    .hexagon-avatar {
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      border: 4px solid var(--primary-amber);
+    }
+    
+    .hexagon-badge {
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      background: linear-gradient(135deg, #FBBF24, #F59E0B);
+    }
+    
+    .service-hexagon {
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      transition: all 0.3s ease;
+    }
+    
+    .service-hexagon:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 25px rgba(251, 191, 36, 0.2);
+    }
+    
+    .stripe-btn {
+      background: linear-gradient(135deg, #635bff 0%, #5433ff 100%);
+      transition: all 0.3s ease;
+    }
+    
+    .stripe-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(99, 91, 255, 0.3);
+    }
+    
+    .amber-btn {
+      background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+      transition: all 0.3s ease;
+    }
+    
+    .amber-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3);
+    }
+    
+    .loading-spinner {
+      border: 3px solid #FEF3C7;
+      border-top: 3px solid #FBBF24;
       border-radius: 50%;
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       animation: spin 1s linear infinite;
       display: inline-block;
-      margin-right: 8px;
     }
+    
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    
+    .verified-hex {
+      position: relative;
+      padding-left: 28px;
+    }
+    
+    .verified-hex::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      background: #10B981;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .verified-hex::after {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      text-align: center;
+    }
+    
+    .review-hex {
+      position: relative;
+      padding-left: 24px;
+    }
+    
+    .review-hex::before {
+      content: '★';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      background: #FBBF24;
+      color: white;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .honeycomb-divider {
+      height: 2px;
+      background: linear-gradient(90deg, 
+        transparent, 
+        var(--primary-amber), 
+        transparent);
+      margin: 2rem 0;
+      position: relative;
+    }
+    
+    .honeycomb-divider::before,
+    .honeycomb-divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 12px;
+      height: 12px;
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      background: var(--primary-amber);
+    }
+    
+    .honeycomb-divider::before {
+      left: calc(50% - 30px);
+    }
+    
+    .honeycomb-divider::after {
+      right: calc(50% - 30px);
+    }
+    
+    .bee-floating {
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
   </style>
 </head>
 
-<body class="min-h-screen bg-gray-100 p-6">
-  <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6">
-    <div class="md:flex">
-      <!-- Foto del profesional -->
-      <div class="md:flex-shrink-0">
-        <img id="avatar" class="h-48 w-full md:h-full md:w-48 object-cover rounded-lg" src="" alt="Foto del profesional">
-      </div>
-
-      <!-- Datos del perfil -->
-      <div class="p-8 flex-1">
-        <div class="uppercase tracking-wide text-sm text-yellow-600 font-semibold">Perfil profesional</div>
-        <h1 id="profName" class="block mt-1 text-2xl font-medium text-gray-900">Cargando...</h1>
-        <p id="profDesc" class="mt-2 text-gray-500">Descripción detallada del profesional y sus servicios.</p>
-
-        <!-- Precio y botón de pago -->
-        <div class="mt-6 flex items-center justify-between">
-          <div>
-            <span class="text-3xl font-bold text-gray-900">$200 <span class="text-lg text-gray-500">MXN</span></span>
-            <p class="text-sm text-gray-500 mt-1">Pago único por consulta</p>
+<body class="min-h-screen hexagon-bg p-4 md:p-6">
+  <!-- Header con logo de abeja -->
+  <header class="max-w-6xl mx-auto mb-8">
+    <div class="flex items-center justify-between">
+      <a href="index.html" class="flex items-center text-amber-600 hover:text-amber-700 font-medium">
+        <div class="w-8 h-8 flex items-center justify-center mr-2">
+          <i class="fas fa-chevron-left"></i>
+        </div>
+        Volver al inicio
+      </a>
+      
+      <div class="flex items-center space-x-3">
+        <div class="relative">
+          <div class="w-10 h-10 hexagon-badge flex items-center justify-center">
+            <i class="fas fa-bee text-white"></i>
           </div>
-          <div>
-            <button id="checkoutBtn" class="px-6 py-3 bg-yellow-500 text-white font-medium rounded-lg hover:bg-yellow-600 transition-colors flex items-center">
-              <span class="spinner loading" id="spinner"></span>
-              <span id="buttonText">Pagar con tarjeta</span>
-            </button>
-            <p class="text-xs text-gray-500 mt-2 text-center">Pago seguro con Stripe</p>
+          <div class="absolute -top-1 -right-1 w-4 h-4 bg-amber-300 rounded-full"></div>
+        </div>
+        <div class="text-right">
+          <h1 class="text-xl font-bold text-gray-900">COLMENA HUB</h1>
+          <p class="text-xs text-amber-700 font-medium">Pago seguro con Stripe</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido Principal -->
+  <main class="max-w-6xl mx-auto">
+    <!-- Información del Profesional -->
+    <div id="profInfo" class="glass-card rounded-2xl p-6 mb-8">
+      <div class="flex flex-col md:flex-row items-start gap-6">
+        <!-- Avatar Hexagonal -->
+        <div class="flex-shrink-0 relative">
+          <div class="hexagon-avatar w-32 h-32 overflow-hidden relative">
+            <img id="profAvatar" class="w-full h-full object-cover" 
+                 src="https://ui-avatars.com/api/?name=Profesional&size=256&background=FBBF24&color=92400E">
+            <div class="absolute inset-0 border-2 border-white opacity-50"></div>
+          </div>
+          <!-- Abejita flotante -->
+          <div class="absolute -top-2 -right-2 bee-floating">
+            <div class="w-8 h-8 hexagon-badge flex items-center justify-center">
+              <i class="fas fa-bee text-xs text-white"></i>
+            </div>
           </div>
         </div>
         
-        <!-- Información adicional -->
-        <div class="mt-8 border-t pt-6">
-          <h3 class="text-lg font-medium text-gray-900">¿Cómo funciona?</h3>
-          <ol class="list-decimal list-inside mt-2 text-gray-600 space-y-2">
-            <li>Haz clic en "Pagar con tarjeta"</li>
-            <li>Serás redirigido a Stripe Checkout</li>
-            <li>Ingresa tus datos de pago de forma segura</li>
-            <li>Recibirás confirmación inmediata</li>
-          </ol>
+        <!-- Datos -->
+        <div class="flex-1">
+          <div class="flex flex-wrap items-center gap-3 mb-3">
+            <h2 id="profName" class="text-3xl font-bold text-gray-900">Cargando...</h2>
+            <span class="verified-hex text-xs font-medium text-green-700">
+              Verificado
+            </span>
+          </div>
+          
+          <p id="profProfession" class="text-lg text-gray-600 mb-4">Profesión</p>
+          
+          <!-- Info chips -->
+          <div class="flex flex-wrap gap-3 mb-4">
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-sm">
+              <i class="fas fa-star mr-2"></i>
+              <span id="profRating">4.8</span> (24 reseñas)
+            </span>
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm">
+              <i class="fas fa-briefcase mr-2"></i>
+              <span id="profExperience">5+ años</span> experiencia
+            </span>
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-gray-800 text-sm">
+              <i class="fas fa-map-marker-alt mr-2"></i>
+              <span id="profLocation">CDMX</span>
+            </span>
+          </div>
+          
+          <p id="profDescription" class="text-gray-700 leading-relaxed">
+            Descripción del profesional. Especializado en su área con experiencia comprobada.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Divisor con panal -->
+    <div class="honeycomb-divider my-8"></div>
+
+    <!-- Tarjetas de Servicios y Pago -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Servicios (Panel izquierdo) -->
+      <div class="space-y-6">
+        <div class="glass-card rounded-2xl p-6">
+          <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+            <div class="w-6 h-6 hexagon-badge mr-3 flex items-center justify-center">
+              <i class="fas fa-concierge-bell text-white text-xs"></i>
+            </div>
+            Servicios Ofrecidos
+          </h3>
+          
+          <div id="servicesList" class="space-y-4">
+            <!-- Servicio 1 -->
+            <div class="service-hexagon bg-white border-2 border-amber-200 p-4 rounded-xl">
+              <div class="flex justify-between items-center">
+                <div>
+                  <h4 class="font-bold text-gray-900">Consulta Inicial</h4>
+                  <p class="text-sm text-gray-600 mt-1">30 minutos por videollamada</p>
+                  <ul class="text-xs text-gray-500 mt-2 space-y-1">
+                    <li class="flex items-center">
+                      <i class="fas fa-check text-amber-500 mr-2 text-xs"></i>
+                      Diagnóstico del problema
+                    </li>
+                    <li class="flex items-center">
+                      <i class="fas fa-check text-amber-500 mr-2 text-xs"></i>
+                      Presupuesto detallado
+                    </li>
+                  </ul>
+                </div>
+                <div class="text-right">
+                  <div class="text-2xl font-bold text-gray-900">$200</div>
+                  <div class="text-xs text-gray-500">MXN</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Servicio 2 -->
+            <div class="service-hexagon bg-white border-2 border-amber-200 p-4 rounded-xl">
+              <div class="flex justify-between items-center">
+                <div>
+                  <h4 class="font-bold text-gray-900">Servicio Completo</h4>
+                  <p class="text-sm text-gray-600 mt-1">Trabajo terminado + garantía</p>
+                  <ul class="text-xs text-gray-500 mt-2 space-y-1">
+                    <li class="flex items-center">
+                      <i class="fas fa-check text-amber-500 mr-2 text-xs"></i>
+                      Ejecución completa del trabajo
+                    </li>
+                    <li class="flex items-center">
+                      <i class="fas fa-check text-amber-500 mr-2 text-xs"></i>
+                      Garantía de 30 días
+                    </li>
+                    <li class="flex items-center">
+                      <i class="fas fa-check text-amber-500 mr-2 text-xs"></i>
+                      Materiales incluidos
+                    </li>
+                  </ul>
+                </div>
+                <div class="text-right">
+                  <div class="text-2xl font-bold text-gray-900">$1,500</div>
+                  <div class="text-xs text-gray-500">MXN</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Garantía -->
+        <div class="glass-card rounded-2xl p-6 border border-amber-200">
+          <div class="flex items-start">
+            <div class="w-10 h-10 hexagon-badge flex items-center justify-center mr-4">
+              <i class="fas fa-shield-alt text-white"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-gray-900 mb-2">Garantía Colmena</h4>
+              <p class="text-sm text-gray-600">
+                Tu satisfacción está protegida. Si el servicio no cumple con lo acordado,
+                gestionamos la solución o tu reembolso completo.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pago (Panel derecho) -->
+      <div class="space-y-6">
+        <div class="glass-card rounded-2xl p-6">
+          <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+            <div class="w-6 h-6 hexagon-badge mr-3 flex items-center justify-center">
+              <i class="fas fa-credit-card text-white text-xs"></i>
+            </div>
+            Proceso de Pago
+          </h3>
+          
+          <!-- Paso 1: Seleccionar servicio -->
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-3">
+              <span class="flex items-center">
+                <span class="w-5 h-5 bg-amber-500 text-white text-xs rounded-full flex items-center justify-center mr-2">1</span>
+                Selecciona tu servicio
+              </span>
+            </label>
+            <div class="space-y-3">
+              <div class="flex items-center p-3 border-2 border-amber-200 rounded-lg cursor-pointer hover:border-amber-300 transition-colors service-option" data-service="consulta" data-price="200">
+                <div class="flex-1">
+                  <h4 class="font-medium text-gray-900">Consulta Inicial</h4>
+                  <p class="text-sm text-gray-600">$200 MXN</p>
+                </div>
+                <div class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center">
+                  <div class="w-3 h-3 bg-amber-500 rounded-full hidden"></div>
+                </div>
+              </div>
+              
+              <div class="flex items-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-amber-300 transition-colors service-option" data-service="completo" data-price="1500">
+                <div class="flex-1">
+                  <h4 class="font-medium text-gray-900">Servicio Completo</h4>
+                  <p class="text-sm text-gray-600">$1,500 MXN</p>
+                </div>
+                <div class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center">
+                  <div class="w-3 h-3 bg-amber-500 rounded-full hidden"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Paso 2: Resumen -->
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-3">
+              <span class="flex items-center">
+                <span class="w-5 h-5 bg-amber-500 text-white text-xs rounded-full flex items-center justify-center mr-2">2</span>
+                Resumen del pago
+              </span>
+            </label>
+            <div class="bg-gray-50 rounded-xl p-4">
+              <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Servicio:</span>
+                  <span id="summaryService" class="font-medium text-gray-900">Consulta Inicial</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Precio base:</span>
+                  <span id="summaryPrice" class="font-bold text-gray-900">$200 MXN</span>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                  <span class="text-gray-500">Comisión plataforma (15%):</span>
+                  <span id="summaryCommission" class="text-gray-700">$30 MXN</span>
+                </div>
+                <div class="border-t pt-3 mt-2">
+                  <div class="flex justify-between items-center font-bold text-lg">
+                    <span>Total a pagar:</span>
+                    <span id="summaryTotal" class="text-amber-600">$230 MXN</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Paso 3: Pagar -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">
+              <span class="flex items-center">
+                <span class="w-5 h-5 bg-amber-500 text-white text-xs rounded-full flex items-center justify-center mr-2">3</span>
+                Método de pago seguro
+              </span>
+            </label>
+            
+            <button id="checkoutBtn" 
+                    class="stripe-btn w-full py-4 text-white font-bold rounded-xl flex items-center justify-center relative overflow-hidden">
+              <div class="loading-spinner mr-3 hidden"></div>
+              <span id="buttonText">Pagar con Stripe</span>
+              <div class="absolute right-4 opacity-50">
+                <svg width="40" height="24" viewBox="0 0 40 24">
+                  <path d="M14.4 12c0-1.2 1-2.2 2.2-2.2 1.2 0 2.2 1 2.2 2.2 0 1.2-1 2.2-2.2 2.2-1.2 0-2.2-1-2.2-2.2z" fill="#fff"/>
+                  <path d="M20 12c0-1.2 1-2.2 2.2-2.2 1.2 0 2.2 1 2.2 2.2 0 1.2-1 2.2-2.2 2.2-1.2 0-2.2-1-2.2-2.2z" fill="#fff"/>
+                  <path d="M25.6 12c0-1.2 1-2.2 2.2-2.2 1.2 0 2.2 1 2.2 2.2 0 1.2-1 2.2-2.2 2.2-1.2 0-2.2-1-2.2-2.2z" fill="#fff"/>
+                </svg>
+              </div>
+            </button>
+            
+            <p class="text-xs text-gray-500 mt-4 text-center">
+              <i class="fas fa-lock mr-1"></i>Protegido por Stripe. Tus datos nunca se comparten.
+            </p>
+            
+            <!-- Logos de tarjetas -->
+            <div class="flex justify-center gap-4 mt-6 opacity-70">
+              <i class="fab fa-cc-visa text-2xl text-gray-400"></i>
+              <i class="fab fa-cc-mastercard text-2xl text-gray-400"></i>
+              <i class="fab fa-cc-amex text-2xl text-gray-400"></i>
+              <i class="fab fa-cc-paypal text-2xl text-gray-400"></i>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Contacto alternativo -->
+        <div class="glass-card rounded-2xl p-6 text-center">
+          <div class="w-12 h-12 hexagon-badge flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-comments text-white"></i>
+          </div>
+          <h4 class="font-bold text-gray-900 mb-2">¿Prefieres contactar primero?</h4>
+          <p class="text-sm text-gray-600 mb-4">Habla con el profesional antes de contratar</p>
+          <button id="contactBtn" class="amber-btn text-white px-6 py-3 rounded-lg font-medium w-full">
+            <i class="fas fa-message mr-2"></i>Enviar mensaje
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+<div class="glass-card rounded-2xl p-6 mt-8">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h3 class="text-xl font-bold text-gray-900 flex items-center">
+        <div class="w-6 h-6 hexagon-badge mr-3 flex items-center justify-center">
+          <i class="fas fa-star text-white text-xs"></i>
+        </div>
+        Calificaciones y reseñas
+      </h3>
+      <div class="flex items-center mt-2">
+        <div class="text-3xl font-bold text-amber-600 mr-3" id="overallRating">4.8</div>
+        <div>
+          <div class="flex text-amber-500 mb-1">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+          </div>
+          <div class="text-sm text-gray-600" id="reviewCount">(24 reseñas verificadas)</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Distribución de calificaciones -->
+    <div class="hidden md:block">
+      <div class="text-sm text-gray-700 mb-1">Distribución:</div>
+      <div class="space-y-1">
+        <div class="flex items-center">
+          <span class="w-8 text-xs">10★</span>
+          <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden ml-2">
+            <div class="h-full bg-amber-500 rounded-full" style="width: 45%"></div>
+          </div>
+          <span class="text-xs text-gray-600 ml-2">45%</span>
+        </div>
+        <div class="flex items-center">
+          <span class="w-8 text-xs">8-9★</span>
+          <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden ml-2">
+            <div class="h-full bg-amber-400 rounded-full" style="width: 35%"></div>
+          </div>
+          <span class="text-xs text-gray-600 ml-2">35%</span>
         </div>
       </div>
     </div>
   </div>
+  
+  <!-- Filtros de reseñas -->
+  <div class="flex flex-wrap gap-2 mb-6">
+    <button class="px-3 py-1 bg-amber-500 text-white text-sm rounded-full">Todas</button>
+    <button class="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-gray-200">10 estrellas</button>
+    <button class="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-gray-200">8-9 estrellas</button>
+    <button class="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-gray-200">Con comentarios</button>
+    <button class="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-gray-200">Recientes</button>
+  </div>
+  
+  <!-- Lista de reseñas -->
+  <div id="reviewsList" class="space-y-6">
+    <!-- Las reseñas se cargarán aquí desde Firebase -->
+    <div class="text-center py-8" id="reviewsLoading">
+      <div class="loading-spinner mx-auto mb-4"></div>
+      <p class="text-gray-600">Cargando reseñas...</p>
+    </div>
+  </div>
+  
+  <!-- Botón para ver más -->
+  <button id="loadMoreReviews" class="w-full mt-6 py-3 border-2 border-amber-200 text-amber-600 font-medium rounded-xl hover:bg-amber-50 transition-colors hidden">
+    <i class="fas fa-chevron-down mr-2"></i>Cargar más reseñas
+  </button>
+</div>
 
-  <!-- Mensaje de error -->
-  <div id="errorMessage" class="max-w-4xl mx-auto mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded hidden">
-    <p id="errorText"></p>
+  <!-- Footer -->
+  <footer class="max-w-6xl mx-auto mt-12 pt-8 border-t border-amber-200">
+    <div class="text-center">
+      <div class="flex items-center justify-center space-x-3 mb-4">
+        <div class="w-8 h-8 hexagon-badge flex items-center justify-center">
+          <i class="fas fa-bee text-white"></i>
+        </div>
+        <span class="text-lg font-bold text-gray-900">COLMENA HUB</span>
+      </div>
+      <p class="text-gray-600 text-sm mb-6">Conectando talento con confianza</p>
+      <div class="flex justify-center space-x-6 text-sm">
+        <a href="politica-privacidad.html" class="text-gray-500 hover:text-amber-600">Privacidad</a>
+        <a href="#" class="text-gray-500 hover:text-amber-600">Términos</a>
+        <a href="#" class="text-gray-500 hover:text-amber-600">Soporte</a>
+      </div>
+      <p class="text-gray-400 text-xs mt-6">© 2024 COLMENA-HUB. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- Notificaciones -->
+  <div id="notification" class="fixed bottom-4 left-4 right-4 max-w-md mx-auto glass-card p-4 rounded-xl shadow-lg hidden z-50">
+    <div class="flex items-start">
+      <div id="notificationIcon" class="w-6 h-6 flex items-center justify-center mr-3">
+        <i class="fas fa-info-circle"></i>
+      </div>
+      <div class="flex-1">
+        <p id="notificationText" class="text-sm"></p>
+      </div>
+      <button onclick="hideNotification()" class="ml-3 text-gray-400 hover:text-gray-600">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
   </div>
 
-  <!-- Stripe Checkout -->
+  <!-- Scripts -->
   <script>
-    // ---------- CONFIGURACIÓN SEGURA ----------
-    // Claves de PRUEBA para GitHub (seguras para hacer público)
-    const stripePublicKey = 'pk_test_1ABC123';
-    const stripePriceId = 'price_1ABC123...';
+    // ========== CONFIGURACIÓN ==========
+    // REEMPLAZA CON TUS CLAVES REALES
+    const STRIPE_PUBLIC_KEY = 'pk_test_51QjKRjLpBXq2lYlD6TvXG5Ypz8T5aBcE...';
     
-    const stripe = Stripe(stripePublicKey);
-    const priceId = stripePriceId;
+    // Price IDs de Stripe (obtén en dashboard.stripe.com > Products)
+    const STRIPE_PRICES = {
+      'consulta': 'price_1QjK...TU_PRICE_ID_CONSULTA...',
+      'completo': 'price_1QjK...TU_PRICE_ID_COMPLETO...'
+    };
 
-    // ---------- ELEMENTOS DEL DOM ----------
-    const checkoutBtn = document.getElementById('checkoutBtn');
-    const buttonText = document.getElementById('buttonText');
-    const spinner = document.getElementById('spinner');
-    const errorMessage = document.getElementById('errorMessage');
-    const errorText = document.getElementById('errorText');
+    // ========== ESTADO ==========
+    let stripe = null;
+    let selectedService = 'consulta';
+    let selectedPrice = 200;
 
-    // ---------- LEE EL PROFESIONAL DE LA URL ----------
-    const params = new URLSearchParams(location.search);
-    const prof = params.get('prof') || 'Profesional';
+    // ========== INICIALIZACIÓN ==========
+    document.addEventListener('DOMContentLoaded', async function() {
+      try {
+        // 1. Inicializar Stripe
+        stripe = Stripe(STRIPE_PUBLIC_KEY);
+        
+        // 2. Cargar datos del profesional desde la URL
+        await loadProfessionalData();
+        
+        // 3. Configurar eventos
+        setupEventListeners();
+        
+        // 4. Mostrar notificación de bienvenida
+        showNotification('¡Bienvenido! Selecciona el servicio que necesitas.', 'info');
+        
+      } catch (error) {
+        console.error('Error al iniciar:', error);
+        showNotification('Error al cargar la página. Por favor recarga.', 'error');
+      }
+    });
 
-    // ---------- RELLENA DATOS ----------
-    document.getElementById('profName').textContent = prof;
-    document.getElementById('profDesc').textContent = `Servicio profesional de ${prof}. Experiencia comprobada y calificaciones verificadas.`;
-    document.getElementById('avatar').src = `https://ui-avatars.com/api/?name=${prof}&size=256&background=random`;
-
-    // ---------- MANEJO DE ERRORES ----------
-    function showError(message) {
-      errorText.textContent = message;
-      errorMessage.classList.remove('hidden');
-      setTimeout(() => {
-        errorMessage.classList.add('hidden');
-      }, 5000);
-    }
-
-    function hideError() {
-      errorMessage.classList.add('hidden');
-    }
-
-    // ---------- MANEJO DEL ESTADO DE CARGA ----------
-    function setLoadingState(isLoading) {
-      if (isLoading) {
-        spinner.classList.remove('loading');
-        buttonText.textContent = 'Procesando...';
-        checkoutBtn.disabled = true;
-      } else {
-        spinner.classList.add('loading');
-        buttonText.textContent = 'Pagar con tarjeta';
-        checkoutBtn.disabled = false;
+    // ========== FUNCIONES PRINCIPALES ==========
+    
+    async function loadProfessionalData() {
+      // Obtener parámetros de la URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const professionalId = urlParams.get('id');
+      const profName = urlParams.get('name') || 'Juan Martínez';
+      const profession = urlParams.get('prof') || 'Electricista';
+      const location = urlParams.get('loc') || 'CDMX';
+      
+      // Actualizar UI
+      document.getElementById('profName').textContent = profName;
+      document.getElementById('profProfession').textContent = profession;
+      document.getElementById('profLocation').textContent = location;
+      
+      // Avatar con iniciales (hexagonal)
+      const initials = profName.split(' ').map(n => n[0]).join('');
+      document.getElementById('profAvatar').src = 
+        `https://ui-avatars.com/api/?name=${initials}&size=256&background=FBBF24&color=92400E`;
+      
+      // Descripción personalizada por profesión
+      const descriptions = {
+        'Electricista': 'Electricista certificado con 5+ años de experiencia. Especializado en instalaciones residenciales, mantenimiento eléctrico y soluciones de energía. Trabajo garantizado y cumplimiento de normas.',
+        'Plomero': 'Fontanero profesional con amplia experiencia en reparaciones de tuberías, instalaciones de baños y cocinas. Soluciones rápidas y duraderas.',
+        'Carpintero': 'Maestro carpintero especializado en muebles a medida, trabajos en madera y remodelaciones. Atención al detalle y acabados perfectos.'
+      };
+      
+      document.getElementById('profDescription').textContent = 
+        descriptions[profession] || `${profession} profesional con experiencia verificada. Calidad garantizada.`;
+      
+      // Si tenemos ID, cargar más datos desde Firebase
+      if (professionalId) {
+        try {
+          // Aquí podrías cargar datos adicionales desde Firestore
+          // const db = firebase.firestore();
+          // const doc = await db.collection('professionals').doc(professionalId).get();
+          // if (doc.exists) { ... }
+        } catch (error) {
+          console.log('Sin datos adicionales del profesional');
+        }
       }
     }
 
-    // ---------- REDIRIGE A STRIPE ----------
-    checkoutBtn.addEventListener('click', async () => {
-      hideError();
-      setLoadingState(true);
+    function setupEventListeners() {
+      // Selección de servicios
+      document.querySelectorAll('.service-option').forEach(option => {
+        option.addEventListener('click', function() {
+          // Remover selección anterior
+          document.querySelectorAll('.service-option').forEach(opt => {
+            opt.classList.remove('border-amber-300', 'bg-amber-50');
+            opt.classList.add('border-gray-200');
+            opt.querySelector('.bg-amber-500').classList.add('hidden');
+          });
+          
+          // Seleccionar actual
+          this.classList.remove('border-gray-200');
+          this.classList.add('border-amber-300', 'bg-amber-50');
+          this.querySelector('.bg-amber-500').classList.remove('hidden');
+          
+          // Actualizar estado
+          selectedService = this.dataset.service;
+          selectedPrice = parseInt(this.dataset.price);
+          
+          // Actualizar resumen
+          updatePaymentSummary();
+          
+          // Feedback
+          showNotification(`Servicio seleccionado: ${getServiceName(selectedService)}`, 'success');
+        });
+      });
+      
+      // Botón de pago
+      document.getElementById('checkoutBtn').addEventListener('click', processPayment);
+      
+      // Botón de contacto
+      document.getElementById('contactBtn').addEventListener('click', function() {
+        showNotification('Función de mensajería en desarrollo. Próximamente.', 'info');
+      });
+    }
 
+    function updatePaymentSummary() {
+      const commissionRate = 0.15; // 15% de comisión
+      const commission = Math.round(selectedPrice * commissionRate);
+      const total = selectedPrice + commission;
+      
+      // Actualizar UI
+      document.getElementById('summaryService').textContent = getServiceName(selectedService);
+      document.getElementById('summaryPrice').textContent = `$${selectedPrice} MXN`;
+      document.getElementById('summaryCommission').textContent = `$${commission} MXN`;
+      document.getElementById('summaryTotal').textContent = `$${total} MXN`;
+    }
+
+    function getServiceName(serviceType) {
+      const names = {
+        'consulta': 'Consulta Inicial',
+        'completo': 'Servicio Completo'
+      };
+      return names[serviceType] || 'Servicio';
+    }
+
+    async function processPayment() {
+      // Validar Stripe configurado
+      if (!STRIPE_PRICES[selectedService] || STRIPE_PRICES[selectedService].includes('...')) {
+        showNotification('⚠️ Configura primero Stripe: 1. Ve a dashboard.stripe.com 2. Crea productos 3. Copia los Price IDs 4. Reemplázalos en el código.', 'error');
+        return;
+      }
+      
+      // Mostrar loading
+      setLoading(true);
+      
       try {
+        // Redirigir a Stripe Checkout
         const { error } = await stripe.redirectToCheckout({
-          lineItems: [{ price: priceId, quantity: 1 }],
+          lineItems: [{ 
+            price: STRIPE_PRICES[selectedService], 
+            quantity: 1 
+          }],
           mode: 'payment',
-          successUrl: window.location.origin + '/exito.html?prof=' + encodeURIComponent(prof),
-          cancelUrl: window.location.origin + '/cancelado.html?prof=' + encodeURIComponent(prof)
+          successUrl: `${window.location.origin}/exito.html?service=${selectedService}&professional=${encodeURIComponent(document.getElementById('profName').textContent)}`,
+          cancelUrl: `${window.location.origin}/cancelado.html`,
+          billingAddressCollection: 'required',
+          customerEmail: 'customer@example.com', // En producción, obtén el email del usuario
         });
         
         if (error) {
-          showError('Error al procesar el pago: ' + error.message);
+          throw error;
         }
-      } catch (err) {
-        showError('Error inesperado: ' + err.message);
-      } finally {
-        setLoadingState(false);
+        
+      } catch (error) {
+        console.error('Error en pago:', error);
+        showNotification(`Error al procesar el pago: ${error.message}`, 'error');
+        setLoading(false);
       }
-    });
+    }
+
+    // ========== FUNCIONES UTILITARIAS ==========
+    function setLoading(isLoading) {
+      const button = document.getElementById('checkoutBtn');
+      const spinner = button.querySelector('.loading-spinner');
+      const buttonText = document.getElementById('buttonText');
+      
+      if (isLoading) {
+        spinner.classList.remove('hidden');
+        buttonText.textContent = 'Procesando...';
+        button.disabled = true;
+        button.style.opacity = '0.8';
+      } else {
+        spinner.classList.add('hidden');
+        buttonText.textContent = 'Pagar con Stripe';
+        button.disabled = false;
+        button.style.opacity = '1';
+      }
+    }
+
+    function showNotification(message, type = 'info') {
+      const notification = document.getElementById('notification');
+      const text = document.getElementById('notificationText');
+      const icon = document.getElementById('notificationIcon');
+      
+      // Configurar tipo
+      const icons = {
+        'info': 'fas fa-info-circle text-blue-500',
+        'success': 'fas fa-check-circle text-green-500',
+        'error': 'fas fa-exclamation-circle text-red-500',
+        'warning': 'fas fa-exclamation-triangle text-yellow-500'
+      };
+      
+      icon.className = `w-6 h-6 flex items-center justify-center mr-3 ${icons[type] || icons.info}`;
+      text.textContent = message;
+      
+      // Mostrar
+      notification.classList.remove('hidden');
+      
+      // Auto-ocultar después de 5 segundos
+      setTimeout(() => {
+        hideNotification();
+      }, 5000);
+    }
+
+    function hideNotification() {
+      document.getElementById('notification').classList.add('hidden');
+    }
+
+    // Función para compartir perfil
+    function shareProfile() {
+      if (navigator.share) {
+        navigator.share({
+          title: document.getElementById('profName').textContent,
+          text: `Mira el perfil de ${document.getElementById('profName').textContent} en Colmena Hub`,
+          url: window.location.href,
+        });
+      } else {
+        navigator.clipboard.writeText(window.location.href);
+        showNotification('Enlace copiado al portapapeles', 'success');
+      }
+    }
+
+    // Añadir botón de compartir dinámicamente
+    const shareBtn = document.createElement('button');
+    shareBtn.className = 'fixed bottom-20 right-4 w-12 h-12 hexagon-badge flex items-center justify-center shadow-lg z-40';
+    shareBtn.innerHTML = '<i class="fas fa-share-alt text-white"></i>';
+    shareBtn.onclick = shareProfile;
+    document.body.appendChild(shareBtn);
   </script>
 </body>
 </html>
