@@ -55,7 +55,26 @@
     .badge-science { background: #E0E7FF; color: #3730A3; }
     .badge-business { background: #FCE7F3; color: #9D174D; }
     .badge-art { background: #FEF3C7; color: #92400E; }
-    .badge-security { background: #FEE2E2; color: #991B1B; }
+    .badge-social { background: #EDE9FE; color: #5B21B6; }
+    .badge-humanities { background: #FEF3C7; color: #92400E; }
+    .badge-physics { background: #BFDBFE; color: #1E40AF; }
+    .badge-bio { background: #A7F3D0; color: #065F46; }
+    
+    .section-divider {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--primary-blue), transparent);
+      margin: 2rem 0;
+    }
+    
+    .category-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
   </style>
 </head>
 <body class="min-h-screen hex-pattern">
@@ -116,240 +135,8 @@
     <!-- Grid de categorías -->
     <div id="list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       
-      <!-- Sector tecnológico -->
-      <div class="md:col-span-2 lg:col-span-3 xl:col-span-4 mb-6">
-        <h2 class="text-xl font-bold text-gray-800 flex items-center">
-          <span class="w-4 h-4 bg-blue-500 rounded-full mr-3"></span>
-          🔹 Sector Tecnológico y Digital
-        </h2>
-      </div>
-      
-      <a href="listings.html?category=Ingeniero de software" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-blue-50 cursor-pointer">
-        <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-laptop-code text-blue-600 text-xl"></i>
-          </div>
-          <span class="badge badge-tech">Tecnología</span>
-        </div>
-        <h3 class="font-bold text-gray-900 text-lg mb-2">Ingeniero/a de Software</h3>
-        <p class="text-gray-600 text-sm mb-4">Desarrollo de aplicaciones y sistemas empresariales</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-certificate text-blue-500 mr-2"></i>
-          <span>Titulación verificada</span>
-        </div>
-      </a>
-
-      <a href="listings.html?category=Analista de datos" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-blue-50 cursor-pointer">
-        <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-chart-line text-indigo-600 text-xl"></i>
-          </div>
-          <span class="badge badge-tech">Datos</span>
-        </div>
-        <h3 class="font-bold text-gray-900 text-lg mb-2">Analista de Datos</h3>
-        <p class="text-gray-600 text-sm mb-4">Análisis estadístico y business intelligence</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-certificate text-blue-500 mr-2"></i>
-          <span>Titulación verificada</span>
-        </div>
-      </a>
-
-      <a href="listings.html?category=Científico de datos" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-blue-50 cursor-pointer">
-        <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-brain text-purple-600 text-xl"></i>
-          </div>
-          <span class="badge badge-tech">IA/Datos</span>
-        </div>
-        <h3 class="font-bold text-gray-900 text-lg mb-2">Científico/a de Datos</h3>
-        <p class="text-gray-600 text-sm mb-4">Machine learning y análisis predictivo</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-certificate text-blue-500 mr-2"></i>
-          <span>Titulación verificada</span>
-        </div>
-      </a>
-
-      <a href="listings.html?category=Diseñador UX/UI" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-blue-50 cursor-pointer">
-        <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-palette text-pink-600 text-xl"></i>
-          </div>
-          <span class="badge badge-tech">Diseño</span>
-        </div>
-        <h3 class="font-bold text-gray-900 text-lg mb-2">Diseñador/a UX/UI</h3>
-        <p class="text-gray-600 text-sm mb-4">Experiencia de usuario e interfaces digitales</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-certificate text-blue-500 mr-2"></i>
-          <span>Portafolio verificado</span>
-        </div>
-      </a>
-
-      <!-- Sector salud -->
-      <div class="md:col-span-2 lg:col-span-3 xl:col-span-4 mb-6 mt-8">
-        <h2 class="text-xl font-bold text-gray-800 flex items-center">
-          <span class="w-4 h-4 bg-emerald-500 rounded-full mr-3"></span>
-          🏥 Sector Salud y Bienestar
-        </h2>
-      </div>
-
-      <a href="listings.html?category=Nutriólogo" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-emerald-50 cursor-pointer">
-        <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-apple-alt text-emerald-600 text-xl"></i>
-          </div>
-          <span class="badge badge-health">Salud</span>
-        </div>
-        <h3 class="font-bold text-gray-900 text-lg mb-2">Nutriólogo/a – Dietista</h3>
-        <p class="text-gray-600 text-sm mb-4">Planes nutricionales personalizados</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-certificate text-emerald-500 mr-2"></i>
-          <span>Cédula profesional</span>
-        </div>
-      </a>
-
-      <a href="listings.html?category=Terapeuta ocupacional" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-emerald-50 cursor-pointer">
-        <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-hands-helping text-green-600 text-xl"></i>
-          </div>
-          <span class="badge badge-health">Terapia</span>
-        </div>
-        <h3 class="font-bold text-gray-900 text-lg mb-2">Terapeuta Ocupacional</h3>
-        <p class="text-gray-600 text-sm mb-4">Rehabilitación y terapia física</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-certificate text-emerald-500 mr-2"></i>
-          <span>Licencia verificada</span>
-        </div>
-      </a>
-
-      <!-- Ingenierías -->
-      <div class="md:col-span-2 lg:col-span-3 xl:col-span-4 mb-6 mt-8">
-        <h2 class="text-xl font-bold text-gray-800 flex items-center">
-          <span class="w-4 h-4 bg-amber-500 rounded-full mr-3"></span>
-          ⚙️ Ingenierías Especializadas
-        </h2>
-      </div>
-
-      <a href="listings.html?category=Ingeniero civil" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-building text-amber-600 text-xl"></i>
-          </div>
-          <span class="badge badge-engineering">Civil</span>
-        </div>
-        <h3 class="font-bold text-gray-900 text-lg mb-2">Ingeniero/a Civil</h3>
-        <p class="text-gray-600 text-sm mb-4">Diseño y supervisión de obras civiles</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-certificate text-amber-500 mr-2"></i>
-          <span>Cédula profesional</span>
-        </div>
-      </a>
-
-      <a href="listings.html?category=Ingeniero industrial" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-industry text-orange-600 text-xl"></i>
-          </div>
-          <span class="badge badge-engineering">Industrial</span>
-        </div>
-        <h3 class="font-bold text-gray-900 text-lg mb-2">Ingeniero/a Industrial</h3>
-        <p class="text-gray-600 text-sm mb-4">Optimización de procesos productivos</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-certificate text-amber-500 mr-2"></i>
-          <span>Cédula profesional</span>
-        </div>
-      </a>
-
-      <a href="listings.html?category=Ingeniero ambiental" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-leaf text-emerald-600 text-xl"></i>
-          </div>
-          <span class="badge badge-science">Ambiental</span>
-        </div>
-        <h3 class="font-bold text-gray-900 text-lg mb-2">Ingeniero/a Ambiental</h3>
-        <p class="text-gray-600 text-sm mb-4">Gestión ambiental y sostenibilidad</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-certificate text-amber-500 mr-2"></i>
-          <span>Cédula profesional</span>
-        </div>
-      </a>
-
-      <!-- Negocios y finanzas -->
-      <div class="md:col-span-2 lg:col-span-3 xl:col-span-4 mb-6 mt-8">
-        <h2 class="text-xl font-bold text-gray-800 flex items-center">
-          <span class="w-4 h-4 bg-purple-500 rounded-full mr-3"></span>
-          💼 Negocios, Finanzas y Administración
-        </h2>
-      </div>
-
-      <a href="listings.html?category=Analista financiero" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-purple-50 cursor-pointer">
-        <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-chart-bar text-purple-600 text-xl"></i>
-          </div>
-          <span class="badge badge-business">Finanzas</span>
-        </div>
-        <h3 class="font-bold text-gray-900 text-lg mb-2">Analista Financiero</h3>
-        <p class="text-gray-600 text-sm mb-4">Análisis de inversiones y mercado</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-certificate text-purple-500 mr-2"></i>
-          <span>Certificación verificada</span>
-        </div>
-      </a>
-
-      <a href="listings.html?category=Gestor de proyectos" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-purple-50 cursor-pointer">
-        <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-tasks text-indigo-600 text-xl"></i>
-          </div>
-          <span class="badge badge-business">Gestión</span>
-        </div>
-        <h3 class="font-bold text-gray-900 text-lg mb-2">Gestor/a de Proyectos</h3>
-        <p class="text-gray-600 text-sm mb-4">Dirección y planificación de proyectos</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-certificate text-purple-500 mr-2"></i>
-          <span>Certificación PMP</span>
-        </div>
-      </a>
-
-      <!-- Artes y cultura -->
-      <div class="md:col-span-2 lg:col-span-3 xl:col-span-4 mb-6 mt-8">
-        <h2 class="text-xl font-bold text-gray-800 flex items-center">
-          <span class="w-4 h-4 bg-pink-500 rounded-full mr-3"></span>
-          🎭 Artes, Cultura y Humanidades
-        </h2>
-      </div>
-
-      <a href="listings.html?category=Diseñador de interiores" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-pink-50 cursor-pointer">
-        <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-couch text-pink-600 text-xl"></i>
-          </div>
-          <span class="badge badge-art">Diseño</span>
-        </div>
-        <h3 class="font-bold text-gray-900 text-lg mb-2">Diseñador/a de Interiores</h3>
-        <p class="text-gray-600 text-sm mb-4">Diseño de espacios residenciales y comerciales</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-certificate text-pink-500 mr-2"></i>
-          <span>Titulación verificada</span>
-        </div>
-      </a>
-
-      <a href="listings.html?category=Fotógrafo profesional" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-pink-50 cursor-pointer">
-        <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-camera-retro text-rose-600 text-xl"></i>
-          </div>
-          <span class="badge badge-art">Fotografía</span>
-        </div>
-        <h3 class="font-bold text-gray-900 text-lg mb-2">Fotógrafo/a Profesional</h3>
-        <p class="text-gray-600 text-sm mb-4">Fotografía comercial y artística</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-certificate text-pink-500 mr-2"></i>
-          <span>Portafolio verificado</span>
-        </div>
-      </a>
+      <!-- Container para categorías dinámicas -->
+      <div id="categoriesContainer"></div>
 
     </div>
 
@@ -401,40 +188,490 @@
     </div>
   </footer>
 
-  <!-- Script de búsqueda -->
+  <!-- Script de datos y búsqueda -->
   <script>
-    const search = document.getElementById('search');
-    const cards = document.querySelectorAll('.category-card');
-    
-    search.addEventListener('input', () => {
-      const term = search.value.toLowerCase().trim();
+    // Datos de todas las carreras profesionales organizadas por área
+    const categories = [
+      {
+        name: "🔬 Físico-Matemáticas e Ingenierías",
+        icon: "atom",
+        color: "blue",
+        badge: "badge-physics",
+        items: [
+          "Actuaría",
+          "Arquitectura",
+          "Arquitectura de Paisaje",
+          "Ciencia de Materiales Sustentables",
+          "Ciencias Atmosféricas",
+          "Ciencias de la Computación",
+          "Ciencias de la Tierra",
+          "Computación",
+          "Física",
+          "Física Biomédica",
+          "Geociencias",
+          "Ingeniería Aeroespacial",
+          "Ingeniería Aeronáutica",
+          "Ingeniería Agrícola",
+          "Ingeniería Ambiental",
+          "Ingeniería Biomédica",
+          "Ingeniería Biónica",
+          "Ingeniería Bioquímica",
+          "Ingeniería Biotecnológica",
+          "Ingeniería Civil",
+          "Ingeniería de Minas y Metalurgia",
+          "Ingeniería Eléctrica",
+          "Ingeniería Electrónica",
+          "Ingeniería Eléctrica y Electrónica",
+          "Ingeniería en Alimentos",
+          "Ingeniería en Computación",
+          "Ingeniería en Control y Automatización",
+          "Ingeniería en Energía",
+          "Ingeniería en Energías Renovables",
+          "Ingeniería en Inteligencia Artificial",
+          "Ingeniería en Robótica Industrial",
+          "Ingeniería en Sistemas Automotrices",
+          "Ingeniería en Telecomunicaciones",
+          "Ingeniería en Telecomunicaciones, Sistemas y Electrónica",
+          "Ingeniería Farmacéutica",
+          "Ingeniería Ferroviaria",
+          "Ingeniería Fotónica",
+          "Ingeniería Geofísica",
+          "Ingeniería Geológica",
+          "Ingeniería Geomática",
+          "Ingeniería Hidrológica",
+          "Ingeniería Industrial",
+          "Ingeniería Informática",
+          "Ingeniería Matemática",
+          "Ingeniería Mecánica",
+          "Ingeniería Mecánica Eléctrica",
+          "Ingeniería Mecatrónica",
+          "Ingeniería Metalúrgica",
+          "Ingeniería Petrolera",
+          "Ingeniería Química",
+          "Ingeniería Química Industrial",
+          "Ingeniería Química Metalúrgica",
+          "Ingeniería Química Petrolera",
+          "Ingeniería Sistemas Ambientales",
+          "Ingeniería Sistemas Computacionales",
+          "Ingeniería Sistemas Energéticos y Redes Inteligentes",
+          "Ingeniería Telemática",
+          "Ingeniería Topográfica y Fotogramétrica",
+          "Ingeniería Transporte",
+          "Matemáticas",
+          "Matemáticas Aplicadas",
+          "Matemáticas Aplicadas y Computación",
+          "Matemáticas para el Desarrollo",
+          "Nanotecnología",
+          "Tecnología",
+          "Tecnologías para la Información en Ciencias",
+          "Urbanismo"
+        ]
+      },
+      {
+        name: "🧬 Ciencias Biológicas, Químicas y de la Salud",
+        icon: "dna",
+        color: "emerald",
+        badge: "badge-bio",
+        items: [
+          "Agronomía",
+          "Bioquímica Diagnóstica",
+          "Biología",
+          "Ciencia de la Nutrición Humana",
+          "Ciencia Forense",
+          "Ciencias Agroforestales",
+          "Ciencias Agrogenómicas",
+          "Ciencias Ambientales",
+          "Ciencias Genómicas",
+          "Ecología",
+          "Enfermería",
+          "Enfermería y Obstetricia",
+          "Estomatología",
+          "Farmacia",
+          "Fisioterapia",
+          "Investigación Biomédica Básica",
+          "Manejo Sustentable de Zonas Costeras",
+          "Medicina",
+          "Medicina Veterinaria y Zootecnia",
+          "Médico Cirujano",
+          "Médico Cirujano Homeópata",
+          "Médico Cirujano Partero",
+          "Neurociencias",
+          "Nutrición Humana",
+          "Nutriología",
+          "Odontología",
+          "Optometría",
+          "Órtesis y Prótesis",
+          "Química",
+          "Química de Alimentos",
+          "Química Farmacéutica Biológica",
+          "Químico Bacteriólogo y Parasitólogo",
+          "Químico Farmacéutico Industrial"
+        ]
+      },
+      {
+        name: "🏛️ Ciencias Sociales",
+        icon: "users",
+        color: "purple",
+        badge: "badge-social",
+        items: [
+          "Administración",
+          "Administración Agropecuaria",
+          "Administración de Archivos y Gestión Documental",
+          "Administración Industrial",
+          "Administración y Desarrollo Empresarial",
+          "Antropología",
+          "Bibliotecología y Estudios de la Información",
+          "Ciencias de la Comunicación",
+          "Ciencias Políticas y Administración Pública",
+          "Comunicación",
+          "Comunicación Social",
+          "Comunicación y Periodismo",
+          "Contaduría",
+          "Contaduría y Finanzas Públicas",
+          "Derecho",
+          "Desarrollo Comunitario para el Envejecimiento",
+          "Desarrollo Territorial",
+          "Economía",
+          "Economía Industrial",
+          "Estudios Sociales y Gestión Local",
+          "Geografía",
+          "Geografía Aplicada",
+          "Geohistoria",
+          "Informática",
+          "Mercadotecnia Digital",
+          "Movilidad Urbana",
+          "Negocios Energéticos Sustentables",
+          "Negocios Internacionales",
+          "Planeación Territorial",
+          "Planificación para el Desarrollo Agropecuario",
+          "Política y Gestión Social",
+          "Psicología",
+          "Relaciones Comerciales",
+          "Relaciones Internacionales",
+          "Sociología",
+          "Sociología Aplicada",
+          "Trabajo Social",
+          "Turismo y Desarrollo Sostenible"
+        ]
+      },
+      {
+        name: "🎨 Humanidades y Artes",
+        icon: "palette",
+        color: "pink",
+        badge: "badge-humanities",
+        items: [
+          "Arte y Diseño",
+          "Artes Visuales",
+          "Canto",
+          "Composición",
+          "Desarrollo y Gestión Interculturales",
+          "Diseño de la Comunicación Gráfica",
+          "Diseño Gráfico",
+          "Diseño Industrial",
+          "Diseño y Comunicación Visual",
+          "Educación Musical",
+          "Enseñanza de Inglés",
+          "Enseñanza de Español como Lengua Extranjera",
+          "Enseñanza de Inglés como Lengua Extranjera",
+          "Estudios Latinoamericanos",
+          "Etnomusicología",
+          "Filosofía",
+          "Historia",
+          "Historia del Arte",
+          "Instrumentista",
+          "Lengua y Literaturas Hispánicas",
+          "Lengua y Literaturas Modernas Alemanas",
+          "Lengua y Literaturas Modernas Francesas",
+          "Lengua y Literaturas Modernas Inglesas",
+          "Lengua y Literaturas Modernas Italianas",
+          "Lengua y Literaturas Modernas Portuguesas",
+          "Letras Clásicas",
+          "Lingüística Aplicada",
+          "Literatura Dramática y Teatro",
+          "Literatura Intercultural",
+          "Música y Tecnología Artística",
+          "Pedagogía",
+          "Piano",
+          "Teatro y Actuación",
+          "Traducción"
+        ]
+      }
+    ];
+
+    // Funciones auxiliares
+    function getColorClass(color) {
+      const colors = {
+        blue: { bg: 'bg-blue-100', text: 'text-blue-600' },
+        emerald: { bg: 'bg-emerald-100', text: 'text-emerald-600' },
+        purple: { bg: 'bg-purple-100', text: 'text-purple-600' },
+        pink: { bg: 'bg-pink-100', text: 'text-pink-600' },
+        amber: { bg: 'bg-amber-100', text: 'text-amber-600' },
+        indigo: { bg: 'bg-indigo-100', text: 'text-indigo-600' },
+        orange: { bg: 'bg-orange-100', text: 'text-orange-600' }
+      };
+      return colors[color] || colors.blue;
+    }
+
+    function getIcon(categoryName, itemName) {
+      const lowerItem = itemName.toLowerCase();
       
-      cards.forEach(card => {
-        const title = card.querySelector('h3').textContent.toLowerCase();
-        const description = card.querySelector('p').textContent.toLowerCase();
-        const badge = card.querySelector('.badge').textContent.toLowerCase();
+      // Ingenierías y tecnología
+      if (lowerItem.includes('ing') && lowerItem.includes('software')) return 'fas fa-laptop-code';
+      if (lowerItem.includes('ing') && lowerItem.includes('comput')) return 'fas fa-laptop-code';
+      if (lowerItem.includes('ing') && lowerItem.includes('sistemas')) return 'fas fa-server';
+      if (lowerItem.includes('ing') && lowerItem.includes('civil')) return 'fas fa-building';
+      if (lowerItem.includes('ing') && lowerItem.includes('industrial')) return 'fas fa-industry';
+      if (lowerItem.includes('ing') && lowerItem.includes('mec')) return 'fas fa-cogs';
+      if (lowerItem.includes('ing') && lowerItem.includes('electr')) return 'fas fa-bolt';
+      if (lowerItem.includes('ing') && lowerItem.includes('quím')) return 'fas fa-flask';
+      if (lowerItem.includes('ing') && lowerItem.includes('ambient')) return 'fas fa-leaf';
+      if (lowerItem.includes('arquitect')) return 'fas fa-drafting-compass';
+      if (lowerItem.includes('urban')) return 'fas fa-city';
+      
+      // Ciencias y salud
+      if (lowerItem.includes('medic') || lowerItem.includes('médic')) return 'fas fa-stethoscope';
+      if (lowerItem.includes('enfermer')) return 'fas fa-heartbeat';
+      if (lowerItem.includes('odont') || lowerItem.includes('estomat')) return 'fas fa-tooth';
+      if (lowerItem.includes('farmac')) return 'fas fa-pills';
+      if (lowerItem.includes('nutri')) return 'fas fa-apple-alt';
+      if (lowerItem.includes('biolog')) return 'fas fa-dna';
+      if (lowerItem.includes('quím')) return 'fas fa-vial';
+      if (lowerItem.includes('físic')) return 'fas fa-atom';
+      
+      // Sociales y administración
+      if (lowerItem.includes('derecho') || lowerItem.includes('abogado')) return 'fas fa-balance-scale';
+      if (lowerItem.includes('psicolog')) return 'fas fa-brain';
+      if (lowerItem.includes('administra')) return 'fas fa-briefcase';
+      if (lowerItem.includes('econom')) return 'fas fa-chart-line';
+      if (lowerItem.includes('contad')) return 'fas fa-calculator';
+      if (lowerItem.includes('comunica')) return 'fas fa-bullhorn';
+      
+      // Humanidades y artes
+      if (lowerItem.includes('diseño')) return 'fas fa-paint-brush';
+      if (lowerItem.includes('arte') || lowerItem.includes('artes')) return 'fas fa-palette';
+      if (lowerItem.includes('músic')) return 'fas fa-music';
+      if (lowerItem.includes('teatro') || lowerItem.includes('actuación')) return 'fas fa-theater-masks';
+      if (lowerItem.includes('historia')) return 'fas fa-landmark';
+      if (lowerItem.includes('filosof')) return 'fas fa-brain';
+      if (lowerItem.includes('traduc')) return 'fas fa-language';
+      
+      // Educación
+      if (lowerItem.includes('pedagog') || lowerItem.includes('enseñanza')) return 'fas fa-chalkboard-teacher';
+      
+      return 'fas fa-graduation-cap';
+    }
+
+    function getDescription(itemName) {
+      const lowerItem = itemName.toLowerCase();
+      
+      // Ingenierías
+      if (lowerItem.includes('ing') && lowerItem.includes('civil')) return 'Diseño y construcción de infraestructura';
+      if (lowerItem.includes('ing') && lowerItem.includes('industrial')) return 'Optimización de procesos productivos';
+      if (lowerItem.includes('ing') && lowerItem.includes('sistemas')) return 'Desarrollo de software y TI';
+      if (lowerItem.includes('ing') && lowerItem.includes('mecánic')) return 'Diseño y mantenimiento de maquinaria';
+      if (lowerItem.includes('ing') && lowerItem.includes('electr')) return 'Sistemas eléctricos y electrónicos';
+      if (lowerItem.includes('ing') && lowerItem.includes('ambient')) return 'Gestión ambiental y sostenibilidad';
+      if (lowerItem.includes('ing') && lowerItem.includes('quím')) return 'Procesos químicos industriales';
+      
+      // Arquitectura y diseño
+      if (lowerItem.includes('arquitect')) return 'Diseño de espacios y construcciones';
+      if (lowerItem.includes('diseño')) return 'Creación y desarrollo de productos visuales';
+      
+      // Salud
+      if (lowerItem.includes('medic') || lowerItem.includes('médic')) return 'Diagnóstico y tratamiento médico';
+      if (lowerItem.includes('enfermer')) return 'Cuidado integral de la salud';
+      if (lowerItem.includes('odont')) return 'Salud dental y bucal';
+      if (lowerItem.includes('farmac')) return 'Desarrollo y dispensación de medicamentos';
+      if (lowerItem.includes('nutri')) return 'Nutrición y dietética especializada';
+      
+      // Ciencias
+      if (lowerItem.includes('biolog')) return 'Estudio de seres vivos y ecosistemas';
+      if (lowerItem.includes('quím')) return 'Análisis y síntesis de sustancias';
+      if (lowerItem.includes('físic')) return 'Estudio de la materia y energía';
+      if (lowerItem.includes('matemát')) return 'Análisis matemático y modelado';
+      
+      // Sociales
+      if (lowerItem.includes('derecho')) return 'Ejercicio y consultoría legal';
+      if (lowerItem.includes('psicolog')) return 'Salud mental y desarrollo humano';
+      if (lowerItem.includes('administra')) return 'Gestión empresarial y organizacional';
+      if (lowerItem.includes('econom')) return 'Análisis económico y financiero';
+      if (lowerItem.includes('contad')) return 'Contabilidad y finanzas corporativas';
+      if (lowerItem.includes('comunica')) return 'Comunicación estratégica y medios';
+      
+      // Humanidades
+      if (lowerItem.includes('historia')) return 'Investigación y análisis histórico';
+      if (lowerItem.includes('filosof')) return 'Pensamiento crítico y análisis';
+      if (lowerItem.includes('arte') || lowerItem.includes('artes')) return 'Creación y expresión artística';
+      if (lowerItem.includes('músic')) return 'Interpretación y composición musical';
+      
+      return 'Profesional titulado con especialización';
+    }
+
+    function getBadge(categoryName, itemName) {
+      const lowerItem = itemName.toLowerCase();
+      
+      if (categoryName.includes("Físico-Matemáticas")) return "badge-physics";
+      if (categoryName.includes("Ciencias Biológicas")) return "badge-bio";
+      if (categoryName.includes("Ciencias Sociales")) return "badge-social";
+      if (categoryName.includes("Humanidades y Artes")) return "badge-art";
+      
+      // Detección específica por palabras clave
+      if (lowerItem.includes('ing') && lowerItem.includes('civil')) return "badge-engineering";
+      if (lowerItem.includes('ing') && lowerItem.includes('industrial')) return "badge-engineering";
+      if (lowerItem.includes('ing') && lowerItem.includes('sistemas')) return "badge-tech";
+      if (lowerItem.includes('medic') || lowerItem.includes('médic')) return "badge-health";
+      if (lowerItem.includes('enfermer')) return "badge-health";
+      if (lowerItem.includes('derecho')) return "badge-social";
+      if (lowerItem.includes('psicolog')) return "badge-social";
+      if (lowerItem.includes('administra')) return "badge-business";
+      if (lowerItem.includes('diseño')) return "badge-art";
+      
+      return "badge-tech";
+    }
+
+    function getVerificationText(itemName) {
+      const lowerItem = itemName.toLowerCase();
+      
+      if (lowerItem.includes('medic') || lowerItem.includes('médic') || 
+          lowerItem.includes('enfermer') || lowerItem.includes('odont') ||
+          lowerItem.includes('farmac')) {
+        return 'Cédula profesional de salud';
+      }
+      
+      if (lowerItem.includes('ing') && (lowerItem.includes('civil') || 
+          lowerItem.includes('mecánic') || lowerItem.includes('electr'))) {
+        return 'Cédula profesional de ingeniería';
+      }
+      
+      if (lowerItem.includes('derecho') || lowerItem.includes('abogado')) {
+        return 'Cédula profesional de abogacía';
+      }
+      
+      if (lowerItem.includes('arquitect')) {
+        return 'Cédula profesional de arquitectura';
+      }
+      
+      if (lowerItem.includes('contad') || lowerItem.includes('contador')) {
+        return 'Cédula profesional de contaduría';
+      }
+      
+      return 'Titulación universitaria verificada';
+    }
+
+    // Renderizar todas las categorías
+    function renderCategories() {
+      const container = document.getElementById('categoriesContainer');
+      const listContainer = document.getElementById('list');
+      
+      categories.forEach(category => {
+        // Añadir divisor de categoría
+        const divider = document.createElement('div');
+        divider.className = 'section-divider md:col-span-2 lg:col-span-3 xl:col-span-4 category-divider';
+        divider.innerHTML = `<span class="px-4 bg-white text-gray-700 font-medium text-lg">${category.name}</span>`;
+        listContainer.insertBefore(divider, container);
         
-        if (title.includes(term) || description.includes(term) || badge.includes(term)) {
-          card.style.display = 'flex';
-        } else {
-          card.style.display = 'none';
-        }
+        // Añadir items de la categoría
+        category.items.forEach(item => {
+          const colorClass = getColorClass(category.color);
+          const description = getDescription(item);
+          const icon = getIcon(category.name, item);
+          const badge = getBadge(category.name, item);
+          const verification = getVerificationText(item);
+          
+          const card = document.createElement('a');
+          card.href = `listings.html?category=${encodeURIComponent(item)}`;
+          card.className = 'category-card glass-card rounded-xl p-5 flex flex-col hover:bg-blue-50 cursor-pointer';
+          card.innerHTML = `
+            <div class="flex items-start justify-between mb-4">
+              <div class="category-icon ${colorClass.bg}">
+                <i class="${icon} ${colorClass.text}"></i>
+              </div>
+              <span class="badge ${badge}">${category.name.split(' ')[0]}</span>
+            </div>
+            <h3 class="font-bold text-gray-900 text-lg mb-2">${item}</h3>
+            <p class="text-gray-600 text-sm mb-4">${description}</p>
+            <div class="flex items-center text-xs text-gray-500 mt-auto">
+              <i class="fas fa-certificate ${colorClass.text} mr-2"></i>
+              <span>${verification}</span>
+            </div>
+          `;
+          listContainer.insertBefore(card, container);
+        });
       });
       
-      // Mostrar/Ocultar secciones
-      document.querySelectorAll('[class*="col-span-4"]').forEach(section => {
-        if (!section.classList.contains('category-card')) {
-          const nextCards = [...section.parentNode.children].slice(
-            [...section.parentNode.children].indexOf(section) + 1
-          ).filter(card => card.classList.contains('category-card'));
+      // Remover el container temporal
+      container.remove();
+    }
+
+    // Configurar búsqueda
+    function setupSearch() {
+      const search = document.getElementById('search');
+      
+      search.addEventListener('input', () => {
+        const term = search.value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.category-card');
+        const dividers = document.querySelectorAll('.section-divider');
+        
+        // Ocultar todas las tarjetas primero
+        cards.forEach(card => {
+          card.style.display = 'none';
+        });
+        
+        // Filtrar tarjetas
+        cards.forEach(card => {
+          const title = card.querySelector('h3').textContent.toLowerCase();
+          const description = card.querySelector('p').textContent.toLowerCase();
+          const badge = card.querySelector('.badge').textContent.toLowerCase();
           
-          const hasVisibleCards = nextCards.some(card => {
-            return card.style.display !== 'none';
+          if (title.includes(term) || description.includes(term) || badge.includes(term)) {
+            card.style.display = 'flex';
+          }
+        });
+        
+        // Gestionar divisores
+        dividers.forEach(divider => {
+          const nextElements = [];
+          let nextElement = divider.nextElementSibling;
+          
+          // Recolectar elementos hasta el siguiente divisor
+          while (nextElement && !nextElement.classList.contains('section-divider')) {
+            if (nextElement.classList.contains('category-card')) {
+              nextElements.push(nextElement);
+            }
+            nextElement = nextElement.nextElementSibling;
+          }
+          
+          // Verificar si hay tarjetas visibles
+          const hasVisibleCards = nextElements.some(element => {
+            return element.style.display === 'flex';
           });
           
-          section.style.display = hasVisibleCards ? 'block' : 'none';
-        }
+          divider.style.display = hasVisibleCards ? 'block' : 'none';
+        });
       });
+    }
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCategories();
+      setupSearch();
+      
+      // Animar aparición de tarjetas
+      setTimeout(() => {
+        const cards = document.querySelectorAll('.category-card');
+        cards.forEach((card, index) => {
+          setTimeout(() => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(10px)';
+            card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            
+            setTimeout(() => {
+              card.style.opacity = '1';
+              card.style.transform = 'translateY(0)';
+            }, 10);
+          }, index * 20);
+        });
+      }, 100);
     });
   </script>
 </body>

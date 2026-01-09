@@ -47,6 +47,16 @@
       background: linear-gradient(90deg, transparent, var(--primary-yellow), transparent);
       margin: 2rem 0;
     }
+    
+    .category-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
   </style>
 </head>
 <body class="min-h-screen bee-pattern">
@@ -107,290 +117,31 @@
     <!-- Grid de categorías -->
     <div id="list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       
-      <!-- Oficios técnicos y mecánicos -->
+      <!-- 🧹 Limpieza, Mantenimiento y Servicios Generales -->
       <div class="section-divider md:col-span-2 lg:col-span-3 xl:col-span-4">
-        <span class="px-4 bg-white text-gray-700 font-medium">🔧 Oficios técnicos y mecánicos</span>
+        <span class="px-4 bg-white text-gray-700 font-medium">🧹 Limpieza, Mantenimiento y Servicios Generales</span>
       </div>
       
-      <a href="listings.html?category=Electricista" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-bolt text-amber-600"></i>
+      <!-- Oficios de limpieza -->
+      <template id="categoryTemplate">
+        <a href="listings.html" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
+          <div class="flex items-center justify-between mb-3">
+            <div class="category-icon bg-gray-100">
+              <i class="fas fa-broom text-gray-600"></i>
+            </div>
+            <i class="fas fa-chevron-right text-gray-300"></i>
           </div>
-          <i class="fas fa-chevron-right text-gray-300"></i>
-        </div>
-        <h3 class="font-semibold text-gray-900 text-lg mb-2">Electricista</h3>
-        <p class="text-gray-600 text-sm mb-4">Instalación y mantenimiento eléctrico residencial e industrial</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-shield-alt mr-2"></i>
-          <span>Profesionales verificados</span>
-        </div>
-      </a>
-
-      <a href="listings.html?category=Plomero" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-faucet text-blue-600"></i>
+          <h3 class="font-semibold text-gray-900 text-lg mb-2">Nombre del Oficio</h3>
+          <p class="text-gray-600 text-sm mb-4">Descripción del servicio</p>
+          <div class="flex items-center text-xs text-gray-500 mt-auto">
+            <i class="fas fa-shield-alt mr-2"></i>
+            <span>Profesionales verificados</span>
           </div>
-          <i class="fas fa-chevron-right text-gray-300"></i>
-        </div>
-        <h3 class="font-semibold text-gray-900 text-lg mb-2">Plomero / Fontanero</h3>
-        <p class="text-gray-600 text-sm mb-4">Reparación e instalación de sistemas de agua y drenaje</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-shield-alt mr-2"></i>
-          <span>Profesionales verificados</span>
-        </div>
-      </a>
+        </a>
+      </template>
 
-      <a href="listings.html?category=Carpintero" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-hammer text-amber-700"></i>
-          </div>
-          <i class="fas fa-chevron-right text-gray-300"></i>
-        </div>
-        <h3 class="font-semibold text-gray-900 text-lg mb-2">Carpintero</h3>
-        <p class="text-gray-600 text-sm mb-4">Muebles, estructuras y trabajos en madera personalizados</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-shield-alt mr-2"></i>
-          <span>Profesionales verificados</span>
-        </div>
-      </a>
-
-      <a href="listings.html?category=Soldador" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-fire text-red-600"></i>
-          </div>
-          <i class="fas fa-chevron-right text-gray-300"></i>
-        </div>
-        <h3 class="font-semibold text-gray-900 text-lg mb-2">Soldador</h3>
-        <p class="text-gray-600 text-sm mb-4">Uniones metálicas para construcción y reparación</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-shield-alt mr-2"></i>
-          <span>Profesionales verificados</span>
-        </div>
-      </a>
-
-      <a href="listings.html?category=Mecánico automotriz" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-car text-gray-700"></i>
-          </div>
-          <i class="fas fa-chevron-right text-gray-300"></i>
-        </div>
-        <h3 class="font-semibold text-gray-900 text-lg mb-2">Mecánico Automotriz</h3>
-        <p class="text-gray-600 text-sm mb-4">Reparación y mantenimiento de vehículos</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-shield-alt mr-2"></i>
-          <span>Profesionales verificados</span>
-        </div>
-      </a>
-
-      <a href="listings.html?category=Albañil" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-hard-hat text-yellow-700"></i>
-          </div>
-          <i class="fas fa-chevron-right text-gray-300"></i>
-        </div>
-        <h3 class="font-semibold text-gray-900 text-lg mb-2">Albañil</h3>
-        <p class="text-gray-600 text-sm mb-4">Construcción y reparación de estructuras</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-shield-alt mr-2"></i>
-          <span>Profesionales verificados</span>
-        </div>
-      </a>
-
-      <!-- Oficios de transporte -->
-      <div class="section-divider md:col-span-2 lg:col-span-3 xl:col-span-4">
-        <span class="px-4 bg-white text-gray-700 font-medium">🚗 Oficios de transporte y movilidad</span>
-      </div>
-
-      <a href="listings.html?category=Conductor de taxi" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-taxi text-green-600"></i>
-          </div>
-          <i class="fas fa-chevron-right text-gray-300"></i>
-        </div>
-        <h3 class="font-semibold text-gray-900 text-lg mb-2">Conductor de Taxi</h3>
-        <p class="text-gray-600 text-sm mb-4">Transporte seguro y confiable</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-shield-alt mr-2"></i>
-          <span>Verificación de antecedentes</span>
-        </div>
-      </a>
-
-      <a href="listings.html?category=Mensajero" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-shipping-fast text-orange-600"></i>
-          </div>
-          <i class="fas fa-chevron-right text-gray-300"></i>
-        </div>
-        <h3 class="font-semibold text-gray-900 text-lg mb-2">Mensajero / Delivery</h3>
-        <p class="text-gray-600 text-sm mb-4">Entrega rápida de paquetes y alimentos</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-shield-alt mr-2"></i>
-          <span>Verificación de identidad</span>
-        </div>
-      </a>
-
-      <!-- Oficios de reparación -->
-      <div class="section-divider md:col-span-2 lg:col-span-3 xl:col-span-4">
-        <span class="px-4 bg-white text-gray-700 font-medium">🔨 Oficios de reparación y mantenimiento</span>
-      </div>
-
-      <a href="listings.html?category=Reparador de electrodomésticos" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-plug text-purple-600"></i>
-          </div>
-          <i class="fas fa-chevron-right text-gray-300"></i>
-        </div>
-        <h3 class="font-semibold text-gray-900 text-lg mb-2">Reparador de Electrodomésticos</h3>
-        <p class="text-gray-600 text-sm mb-4">Reparación de refrigeradores, lavadoras, etc.</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-shield-alt mr-2"></i>
-          <span>Especialistas certificados</span>
-        </div>
-      </a>
-
-      <a href="listings.html?category=Jardinero" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-leaf text-emerald-600"></i>
-          </div>
-          <i class="fas fa-chevron-right text-gray-300"></i>
-        </div>
-        <h3 class="font-semibold text-gray-900 text-lg mb-2">Jardinero</h3>
-        <p class="text-gray-600 text-sm mb-4">Diseño y mantenimiento de jardines</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-shield-alt mr-2"></i>
-          <span>Profesionales verificados</span>
-        </div>
-      </a>
-
-      <a href="listings.html?category=Limpieza profesional de casas" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-broom text-cyan-600"></i>
-          </div>
-          <i class="fas fa-chevron-right text-gray-300"></i>
-        </div>
-        <h3 class="font-semibold text-gray-900 text-lg mb-2">Limpieza Profesional</h3>
-        <p class="text-gray-600 text-sm mb-4">Limpieza de casas y oficinas</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-shield-alt mr-2"></i>
-          <span>Personal confiable</span>
-        </div>
-      </a>
-
-      <!-- Oficios artesanales -->
-      <div class="section-divider md:col-span-2 lg:col-span-3 xl:col-span-4">
-        <span class="px-4 bg-white text-gray-700 font-medium">🎨 Oficios artesanales</span>
-      </div>
-
-      <a href="listings.html?category=Panadero" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-bread-slice text-yellow-700"></i>
-          </div>
-          <i class="fas fa-chevron-right text-gray-300"></i>
-        </div>
-        <h3 class="font-semibold text-gray-900 text-lg mb-2">Panadero</h3>
-        <p class="text-gray-600 text-sm mb-4">Panadería artesanal tradicional</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-shield-alt mr-2"></i>
-          <span>Higiénico y certificado</span>
-        </div>
-      </a>
-
-      <a href="listings.html?category=Sastre" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-tshirt text-pink-600"></i>
-          </div>
-          <i class="fas fa-chevron-right text-gray-300"></i>
-        </div>
-        <h3 class="font-semibold text-gray-900 text-lg mb-2">Sastre / Modista</h3>
-        <p class="text-gray-600 text-sm mb-4">Confección y arreglo de prendas</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-shield-alt mr-2"></i>
-          <span>Artesanos certificados</span>
-        </div>
-      </a>
-
-      <!-- Oficios comerciales -->
-      <div class="section-divider md:col-span-2 lg:col-span-3 xl:col-span-4">
-        <span class="px-4 bg-white text-gray-700 font-medium">💈 Oficios comerciales y de servicios</span>
-      </div>
-
-      <a href="listings.html?category=Barbería" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-cut text-blue-600"></i>
-          </div>
-          <i class="fas fa-chevron-right text-gray-300"></i>
-        </div>
-        <h3 class="font-semibold text-gray-900 text-lg mb-2">Barbería</h3>
-        <p class="text-gray-600 text-sm mb-4">Corte de cabello y cuidado personal</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-shield-alt mr-2"></i>
-          <span>Certificación sanitaria</span>
-        </div>
-      </a>
-
-      <a href="listings.html?category=Fotógrafo" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-camera text-indigo-600"></i>
-          </div>
-          <i class="fas fa-chevron-right text-gray-300"></i>
-        </div>
-        <h3 class="font-semibold text-gray-900 text-lg mb-2">Fotógrafo</h3>
-        <p class="text-gray-600 text-sm mb-4">Fotografía profesional para eventos</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-shield-alt mr-2"></i>
-          <span>Portafolio verificado</span>
-        </div>
-      </a>
-
-      <!-- Oficios emergentes -->
-      <div class="section-divider md:col-span-2 lg:col-span-3 xl:col-span-4">
-        <span class="px-4 bg-white text-gray-700 font-medium">🚀 Oficios emergentes / modernos</span>
-      </div>
-
-      <a href="listings.html?category=Operador de drones" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-drone text-gray-700"></i>
-          </div>
-          <i class="fas fa-chevron-right text-gray-300"></i>
-        </div>
-        <h3 class="font-semibold text-gray-900 text-lg mb-2">Operador de Drones</h3>
-        <p class="text-gray-600 text-sm mb-4">Fotografía aérea y levantamientos</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-shield-alt mr-2"></i>
-          <span>Licencia certificada</span>
-        </div>
-      </a>
-
-      <a href="listings.html?category=Programación básica" class="category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-code text-gray-700"></i>
-          </div>
-          <i class="fas fa-chevron-right text-gray-300"></i>
-        </div>
-        <h3 class="font-semibold text-gray-900 text-lg mb-2">Programación Freelance</h3>
-        <p class="text-gray-600 text-sm mb-4">Desarrollo web y aplicaciones básicas</p>
-        <div class="flex items-center text-xs text-gray-500 mt-auto">
-          <i class="fas fa-shield-alt mr-2"></i>
-          <span>Portafolio verificado</span>
-        </div>
-      </a>
+      <!-- Aquí se insertarán dinámicamente las categorías -->
+      <div id="categoriesContainer"></div>
 
     </div>
 
@@ -441,38 +192,487 @@
     </div>
   </footer>
 
-  <!-- Script de búsqueda -->
+  <!-- Script de categorías y búsqueda -->
   <script>
-    const search = document.getElementById('search');
-    const cards = document.querySelectorAll('.category-card');
-    
-    search.addEventListener('input', () => {
-      const term = search.value.toLowerCase().trim();
+    // Definición de todas las categorías y oficios
+    const categories = [
+      {
+        name: "🧹 Limpieza, Mantenimiento y Servicios Generales",
+        icon: "broom",
+        color: "gray",
+        items: [
+          "Afinador de pianos",
+          "Afilador de cuchillos",
+          "Ama de llaves",
+          "Boleador",
+          "Cargador",
+          "Fumigador",
+          "Limpia piscinas",
+          "Limpia vidrios",
+          "Mucama",
+          "Personal de limpieza",
+          "Portero",
+          "Recolección de basura",
+          "Retiro de escombros"
+        ]
+      },
+      {
+        name: "🏗️ Construcción, Oficios Técnicos y Reparación",
+        icon: "hard-hat",
+        color: "yellow",
+        items: [
+          "Albañil",
+          "Blindador",
+          "Carpintero",
+          "Cerrajero",
+          "Chalan",
+          "Electricista (técnico)",
+          "Herrero",
+          "Mecánico",
+          "Pintor",
+          "Plomero",
+          "Técnico en climatización",
+          "Técnico en refrigeración",
+          "Técnicos en reparación",
+          "Técnico industrial",
+          "Tornero",
+          "Vidriero",
+          "Zapatero"
+        ]
+      },
+      {
+        name: "🚚 Transporte, Logística y Mensajería",
+        icon: "truck",
+        color: "blue",
+        items: [
+          "Chofer",
+          "Grúas (operador de grúa)",
+          "Mensajero",
+          "Mudanzas",
+          "Personal de almacén",
+          "Valet parking"
+        ]
+      },
+      {
+        name: "🍽️ Alimentos, Bebidas y Servicios de Restaurante",
+        icon: "utensils",
+        color: "red",
+        items: [
+          "Ayudante de cocina",
+          "Barista",
+          "Bartender",
+          "Carnicero",
+          "Cocinero",
+          "Comida para eventos (servicio de catering)",
+          "Hostess",
+          "Lavaplatos",
+          "Mesero",
+          "Panadero",
+          "Parrillero",
+          "Repostero",
+          "Sommelier",
+          "Tortillero"
+        ]
+      },
+      {
+        name: "💄 Belleza, Estética y Bienestar",
+        icon: "spa",
+        color: "pink",
+        items: [
+          "Barbero",
+          "Estilista",
+          "Groomer (estilista canino)",
+          "Manicurista",
+          "Maquillista",
+          "Masajista",
+          "Tatuador"
+        ]
+      },
+      {
+        name: "🎨 Artes, Diseño y Oficios Artísticos",
+        icon: "palette",
+        color: "purple",
+        items: [
+          "Actor",
+          "Actor de doblaje",
+          "Alfarero",
+          "Animador de fiestas",
+          "Artesano de fibras vegetales",
+          "Bailarín / Bailarina",
+          "Bordador",
+          "Cantante",
+          "Ceramista",
+          "Creador de contenido",
+          "Decorador de interiores",
+          "Diseño de modas",
+          "Escritor",
+          "Fotógrafo",
+          "Joyero",
+          "Músico / Bandas",
+          "Modelos",
+          "Orfebre",
+          "Serigrafista",
+          "Tallador de piedra",
+          "Tejedor"
+        ]
+      },
+      {
+        name: "🐶 Cuidado de Personas y Animales",
+        icon: "paw",
+        color: "green",
+        items: [
+          "Entrenador canino",
+          "Gericultor (cuidado de adultos mayores)",
+          "Niñera",
+          "Paseador de perros"
+        ]
+      },
+      {
+        name: "🏋️ Deportes, Entrenamiento e Instrucción",
+        icon: "dumbbell",
+        color: "orange",
+        items: [
+          "Árbitro de ajedrez",
+          "Árbitro de fútbol",
+          "Árbitro de fútbol americano",
+          "Árbitro de hockey",
+          "Árbitro de voleibol",
+          "Entrenador de armwrestling",
+          "Entrenador de boxeo",
+          "Entrenador de calistenia",
+          "Entrenador de fútbol",
+          "Entrenador de gimnasia",
+          "Entrenador personal",
+          "Instructor de buceo",
+          "Instructor de paracaidismo",
+          "Maestro de yoga",
+          "Maestro de zumba"
+        ]
+      },
+      {
+        name: "🏥 Salud y Laboratorio",
+        icon: "stethoscope",
+        color: "red",
+        items: [
+          "Criminalista",
+          "Experto en higiene forense",
+          "Laboratorista dental",
+          "Optometrista",
+          "Radiólogo",
+          "Técnico dental",
+          "Técnicos en laboratorio"
+        ]
+      },
+      {
+        name: "🧾 Administración, Finanzas y Oficina",
+        icon: "file-invoice",
+        color: "indigo",
+        items: [
+          "Archivista",
+          "Asistente administrativa",
+          "Asistente personal",
+          "Cajero",
+          "Corrector de texto",
+          "Líder sindical",
+          "Representante de atención al cliente",
+          "Técnico de RRHH",
+          "Técnico en contabilidad",
+          "Técnico en finanzas",
+          "Técnico en informática",
+          "Valuador",
+          "Vendedor"
+        ]
+      },
+      {
+        name: "🛡️ Seguridad, Emergencias e Investigación",
+        icon: "shield-alt",
+        color: "blue",
+        items: [
+          "Bombero",
+          "Guardaespaldas",
+          "Inspector privado",
+          "Personal de seguridad",
+          "Vigilante"
+        ]
+      },
+      {
+        name: "🌾 Campo y Producción",
+        icon: "tractor",
+        color: "emerald",
+        items: [
+          "Agricultor",
+          "Apicultor",
+          "Granjero"
+        ]
+      },
+      {
+        name: "🎉 Eventos, Turismo y Servicios Especiales",
+        icon: "glass-cheers",
+        color: "amber",
+        items: [
+          "Agente aduanal",
+          "Agente de viajes",
+          "Botarguero",
+          "Cambiador de publicidad",
+          "Enterrador",
+          "Guía de turistas",
+          "Mayordomo",
+          "Organizador de eventos",
+          "Sustituto de filas",
+          "Ufólogo"
+        ]
+      }
+    ];
+
+    // Funciones auxiliares
+    function getColorClass(color) {
+      const colors = {
+        gray: { bg: 'bg-gray-100', text: 'text-gray-600' },
+        yellow: { bg: 'bg-yellow-100', text: 'text-yellow-600' },
+        blue: { bg: 'bg-blue-100', text: 'text-blue-600' },
+        red: { bg: 'bg-red-100', text: 'text-red-600' },
+        pink: { bg: 'bg-pink-100', text: 'text-pink-600' },
+        purple: { bg: 'bg-purple-100', text: 'text-purple-600' },
+        green: { bg: 'bg-green-100', text: 'text-green-600' },
+        orange: { bg: 'bg-orange-100', text: 'text-orange-600' },
+        indigo: { bg: 'bg-indigo-100', text: 'text-indigo-600' },
+        emerald: { bg: 'bg-emerald-100', text: 'text-emerald-600' },
+        amber: { bg: 'bg-amber-100', text: 'text-amber-600' }
+      };
+      return colors[color] || colors.gray;
+    }
+
+    function getDescription(categoryName, itemName) {
+      const descriptions = {
+        "Electricista": "Instalación y mantenimiento eléctrico",
+        "Plomero": "Reparación e instalación de sistemas de agua",
+        "Carpintero": "Muebles y estructuras en madera",
+        "Mecánico": "Reparación y mantenimiento vehicular",
+        "Albañil": "Construcción y reparación de estructuras",
+        "Pintor": "Pintura residencial e industrial",
+        "Panadero": "Panadería artesanal tradicional",
+        "Fotógrafo": "Fotografía profesional para eventos",
+        "Barbero": "Corte de cabello y cuidado personal",
+        "Programación Freelance": "Desarrollo web y aplicaciones",
+        "Jardinería": "Diseño y mantenimiento de jardines",
+        "Limpieza": "Limpieza de casas y oficinas",
+        "Reparador": "Reparación de electrodomésticos",
+        "Transporte": "Servicio de transporte seguro"
+      };
       
-      cards.forEach(card => {
-        const title = card.querySelector('h3').textContent.toLowerCase();
-        const description = card.querySelector('p').textContent.toLowerCase();
+      // Buscar descripción por palabras clave
+      const lowerItem = itemName.toLowerCase();
+      if (lowerItem.includes('electric')) return "Instalación y mantenimiento eléctrico";
+      if (lowerItem.includes('plom') || lowerItem.includes('fontan')) return "Reparación de sistemas de agua";
+      if (lowerItem.includes('carpinter')) return "Trabajos en madera personalizados";
+      if (lowerItem.includes('mecánic')) return "Reparación y mantenimiento";
+      if (lowerItem.includes('albañil') || lowerItem.includes('construc')) return "Construcción y reparación";
+      if (lowerItem.includes('pintor')) return "Pintura residencial e industrial";
+      if (lowerItem.includes('panader') || lowerItem.includes('reposter')) return "Elaboración artesanal";
+      if (lowerItem.includes('fotógraf')) return "Fotografía profesional";
+      if (lowerItem.includes('barber') || lowerItem.includes('estilista')) return "Corte y cuidado personal";
+      if (lowerItem.includes('program') || lowerItem.includes('informát')) return "Desarrollo y soporte técnico";
+      if (lowerItem.includes('jardin')) return "Diseño y mantenimiento de áreas verdes";
+      if (lowerItem.includes('limpieza') || lowerItem.includes('limpia')) return "Servicios de limpieza profesional";
+      if (lowerItem.includes('reparador') || lowerItem.includes('técnico')) return "Reparación y mantenimiento";
+      if (lowerItem.includes('chofer') || lowerItem.includes('conductor') || lowerItem.includes('transporte')) return "Servicio de transporte seguro";
+      
+      // Descripción genérica basada en categoría
+      if (categoryName.includes('Limpieza')) return "Servicios de limpieza profesional";
+      if (categoryName.includes('Construcción')) return "Servicios de construcción y reparación";
+      if (categoryName.includes('Transporte')) return "Servicios de transporte y logística";
+      if (categoryName.includes('Alimentos')) return "Servicios gastronómicos y alimenticios";
+      if (categoryName.includes('Belleza')) return "Servicios de estética y cuidado personal";
+      if (categoryName.includes('Artes')) return "Servicios artísticos y creativos";
+      if (categoryName.includes('Cuidado')) return "Servicios de cuidado y asistencia";
+      if (categoryName.includes('Deportes')) return "Entrenamiento e instrucción deportiva";
+      if (categoryName.includes('Salud')) return "Servicios de salud y laboratorio";
+      if (categoryName.includes('Administración')) return "Servicios administrativos y de oficina";
+      if (categoryName.includes('Seguridad')) return "Servicios de seguridad y vigilancia";
+      if (categoryName.includes('Campo')) return "Servicios agrícolas y de producción";
+      if (categoryName.includes('Eventos')) return "Servicios para eventos y turismo";
+      
+      return "Servicio profesional especializado";
+    }
+
+    function getIcon(categoryName, itemName) {
+      const lowerItem = itemName.toLowerCase();
+      if (lowerItem.includes('electric') || lowerItem.includes('técnico')) return 'fas fa-bolt';
+      if (lowerItem.includes('plom') || lowerItem.includes('fontan')) return 'fas fa-faucet';
+      if (lowerItem.includes('carpinter')) return 'fas fa-hammer';
+      if (lowerItem.includes('mecánic') || lowerItem.includes('automotriz')) return 'fas fa-car';
+      if (lowerItem.includes('albañil') || lowerItem.includes('construc')) return 'fas fa-hard-hat';
+      if (lowerItem.includes('pintor')) return 'fas fa-paint-roller';
+      if (lowerItem.includes('panader') || lowerItem.includes('reposter')) return 'fas fa-bread-slice';
+      if (lowerItem.includes('fotógraf')) return 'fas fa-camera';
+      if (lowerItem.includes('barber')) return 'fas fa-cut';
+      if (lowerItem.includes('program') || lowerItem.includes('informát')) return 'fas fa-code';
+      if (lowerItem.includes('jardin')) return 'fas fa-leaf';
+      if (lowerItem.includes('limpieza') || lowerItem.includes('limpia') || lowerItem.includes('mucama')) return 'fas fa-broom';
+      if (lowerItem.includes('reparador') || lowerItem.includes('técnico')) return 'fas fa-tools';
+      if (lowerItem.includes('chofer') || lowerItem.includes('conductor') || lowerItem.includes('taxi')) return 'fas fa-taxi';
+      if (lowerItem.includes('mensajer')) return 'fas fa-shipping-fast';
+      if (lowerItem.includes('músic') || lowerItem.includes('cantante')) return 'fas fa-music';
+      if (lowerItem.includes('actor') || lowerItem.includes('bailarín')) return 'fas fa-theater-masks';
+      if (lowerItem.includes('artesan')) return 'fas fa-palette';
+      if (lowerItem.includes('cuidado') || lowerItem.includes('niñera')) return 'fas fa-baby';
+      if (lowerItem.includes('entrenador') || lowerItem.includes('instructor')) return 'fas fa-dumbbell';
+      if (lowerItem.includes('salud') || lowerItem.includes('médic')) return 'fas fa-stethoscope';
+      if (lowerItem.includes('admin') || lowerItem.includes('oficina')) return 'fas fa-file-invoice';
+      if (lowerItem.includes('seguridad') || lowerItem.includes('vigilante')) return 'fas fa-shield-alt';
+      if (lowerItem.includes('campo') || lowerItem.includes('agricult')) return 'fas fa-tractor';
+      if (lowerItem.includes('eventos') || lowerItem.includes('turism')) return 'fas fa-glass-cheers';
+      if (lowerItem.includes('alimento') || lowerItem.includes('cocin')) return 'fas fa-utensils';
+      if (lowerItem.includes('belleza') || lowerItem.includes('estética')) return 'fas fa-spa';
+      
+      // Iconos por categoría
+      if (categoryName.includes('Limpieza')) return 'fas fa-broom';
+      if (categoryName.includes('Construcción')) return 'fas fa-hard-hat';
+      if (categoryName.includes('Transporte')) return 'fas fa-truck';
+      if (categoryName.includes('Alimentos')) return 'fas fa-utensils';
+      if (categoryName.includes('Belleza')) return 'fas fa-spa';
+      if (categoryName.includes('Artes')) return 'fas fa-palette';
+      if (categoryName.includes('Cuidado')) return 'fas fa-heart';
+      if (categoryName.includes('Deportes')) return 'fas fa-dumbbell';
+      if (categoryName.includes('Salud')) return 'fas fa-stethoscope';
+      if (categoryName.includes('Administración')) return 'fas fa-briefcase';
+      if (categoryName.includes('Seguridad')) return 'fas fa-shield-alt';
+      if (categoryName.includes('Campo')) return 'fas fa-seedling';
+      if (categoryName.includes('Eventos')) return 'fas fa-glass-cheers';
+      
+      return 'fas fa-briefcase';
+    }
+
+    function getVerificationText(categoryName, itemName) {
+      const lowerItem = itemName.toLowerCase();
+      if (lowerItem.includes('electric') || lowerItem.includes('plom') || lowerItem.includes('mecánic')) {
+        return 'Certificación técnica verificada';
+      }
+      if (lowerItem.includes('alimento') || lowerItem.includes('cocin') || lowerItem.includes('panader')) {
+        return 'Certificación sanitaria verificada';
+      }
+      if (lowerItem.includes('salud') || lowerItem.includes('médic') || lowerItem.includes('técnico')) {
+        return 'Certificación profesional verificada';
+      }
+      if (lowerItem.includes('transporte') || lowerItem.includes('chofer') || lowerItem.includes('conductor')) {
+        return 'Licencia verificada';
+      }
+      if (lowerItem.includes('seguridad') || lowerItem.includes('vigilante') || lowerItem.includes('bombero')) {
+        return 'Certificación de seguridad verificada';
+      }
+      if (lowerItem.includes('niñera') || lowerItem.includes('cuidado') || lowerItem.includes('gericultor')) {
+        return 'Verificación de antecedentes';
+      }
+      return 'Profesionales verificados';
+    }
+
+    // Función para renderizar todas las categorías
+    function renderCategories() {
+      const container = document.getElementById('categoriesContainer');
+      const listContainer = document.getElementById('list');
+      
+      categories.forEach(category => {
+        // Añadir divisor de categoría
+        const divider = document.createElement('div');
+        divider.className = 'section-divider md:col-span-2 lg:col-span-3 xl:col-span-4 category-divider';
+        divider.innerHTML = `<span class="px-4 bg-white text-gray-700 font-medium">${category.name}</span>`;
+        listContainer.insertBefore(divider, container);
         
-        if (title.includes(term) || description.includes(term)) {
-          card.style.display = 'flex';
-        } else {
-          card.style.display = 'none';
-        }
+        // Añadir items de la categoría
+        category.items.forEach(item => {
+          const colorClass = getColorClass(category.color);
+          const description = getDescription(category.name, item);
+          const icon = getIcon(category.name, item);
+          const verification = getVerificationText(category.name, item);
+          
+          const card = document.createElement('a');
+          card.href = `listings.html?category=${encodeURIComponent(item)}`;
+          card.className = 'category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer';
+          card.innerHTML = `
+            <div class="flex items-center justify-between mb-3">
+              <div class="category-icon ${colorClass.bg}">
+                <i class="${icon} ${colorClass.text}"></i>
+              </div>
+              <i class="fas fa-chevron-right text-gray-300"></i>
+            </div>
+            <h3 class="font-semibold text-gray-900 text-lg mb-2">${item}</h3>
+            <p class="text-gray-600 text-sm mb-4">${description}</p>
+            <div class="flex items-center text-xs text-gray-500 mt-auto">
+              <i class="fas fa-shield-alt mr-2"></i>
+              <span>${verification}</span>
+            </div>
+          `;
+          listContainer.insertBefore(card, container);
+        });
       });
       
-      // Mostrar/Ocultar divisores
-      document.querySelectorAll('.section-divider').forEach(divider => {
-        const nextCards = [...divider.parentNode.children].slice(
-          [...divider.parentNode.children].indexOf(divider) + 1
-        );
+      // Remover el container temporal
+      container.remove();
+    }
+
+    // Función de búsqueda
+    function setupSearch() {
+      const search = document.getElementById('search');
+      const dividers = document.querySelectorAll('.section-divider');
+      
+      search.addEventListener('input', () => {
+        const term = search.value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.category-card');
         
-        const hasVisibleCards = nextCards.some((card, index) => {
-          if (card.classList.contains('section-divider')) return false;
-          return card.style.display !== 'none';
+        cards.forEach(card => {
+          const title = card.querySelector('h3').textContent.toLowerCase();
+          const description = card.querySelector('p').textContent.toLowerCase();
+          
+          if (title.includes(term) || description.includes(term)) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
         });
         
-        divider.style.display = hasVisibleCards ? 'block' : 'none';
+        // Mostrar/Ocultar divisores basado en si hay tarjetas visibles en su categoría
+        dividers.forEach(divider => {
+          const nextElements = [];
+          let nextElement = divider.nextElementSibling;
+          
+          // Recolectar elementos hasta el siguiente divisor
+          while (nextElement && !nextElement.classList.contains('section-divider')) {
+            nextElements.push(nextElement);
+            nextElement = nextElement.nextElementSibling;
+          }
+          
+          // Verificar si hay tarjetas visibles
+          const hasVisibleCards = nextElements.some(element => {
+            return element.classList.contains('category-card') && 
+                   element.style.display !== 'none';
+          });
+          
+          divider.style.display = hasVisibleCards ? 'block' : 'none';
+        });
       });
+    }
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCategories();
+      setupSearch();
+      
+      // Animar aparición de tarjetas
+      setTimeout(() => {
+        const cards = document.querySelectorAll('.category-card');
+        cards.forEach((card, index) => {
+          setTimeout(() => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(10px)';
+            card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            
+            setTimeout(() => {
+              card.style.opacity = '1';
+              card.style.transform = 'translateY(0)';
+            }, 10);
+          }, index * 30);
+        });
+      }, 100);
     });
   </script>
 </body>
