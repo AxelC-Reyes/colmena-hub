@@ -85,8 +85,18 @@
         }
         
         #veriff-container {
-            min-height: 600px;
+            min-height: 300px;
             width: 100%;
+        }
+        
+        /* Animación para notificaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .notification {
+            animation: fadeIn 0.3s ease;
         }
     </style>
 </head>
@@ -247,8 +257,135 @@
                     </div>
                 </section>
 
-                <!-- Pasos 3-5 (mantener igual que antes) -->
-                <!-- ... (los otros pasos se mantienen igual) ... -->
+                <!-- Paso 3: CV y Trayectoria -->
+                <section id="step-3" class="step hidden">
+                    <h3 class="section-title text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-file-alt mr-3 text-purple-500"></i>CV y Trayectoria Profesional
+                    </h3>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-pencil-alt mr-2"></i>Breve Resumen de tu Trayectoria *
+                        </label>
+                        <p class="text-sm text-gray-500 mb-3">Describe tu experiencia, habilidades principales y logros profesionales.</p>
+                        <textarea id="career-summary" required rows="6"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"
+                                  placeholder="Ejemplo: Más de 10 años de experiencia en construcción residencial, especializado en acabados finos. Certificado en seguridad industrial y manejo de maquinaria pesada. He liderado equipos de hasta 15 personas en proyectos de mediana escala..."></textarea>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-graduation-cap mr-2"></i>Años de Experiencia *
+                            </label>
+                            <select id="experience-years" required 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
+                                <option value="">Selecciona...</option>
+                                <option value="0-2">0-2 años</option>
+                                <option value="3-5">3-5 años</option>
+                                <option value="6-10">6-10 años</option>
+                                <option value="10+">Más de 10 años</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-star mr-2"></i>Especialidades Principales
+                            </label>
+                            <input type="text" id="specialties" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"
+                                   placeholder="Ej: Electricidad, Plomería, Carpintería">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Paso 4: Documentos Profesionales -->
+                <section id="step-4" class="step hidden">
+                    <h3 class="section-title text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-file-certificate mr-3 text-red-500"></i>Documentos Profesionales
+                    </h3>
+                    
+                    <div class="mb-8">
+                        <div class="flex items-center mb-4">
+                            <input type="checkbox" id="is-professional" class="w-5 h-5 text-yellow-600 rounded">
+                            <label for="is-professional" class="ml-2 text-gray-700 font-medium">
+                                Soy profesional titulado (médico, ingeniero, abogado, etc.)
+                            </label>
+                        </div>
+                        
+                        <div id="professional-docs" class="hidden space-y-6 pl-6 border-l-2 border-yellow-300">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-scroll mr-2"></i>Título Profesional (opcional)
+                                </label>
+                                <input type="text" placeholder="Ej: Ingeniero Civil, Universidad Nacional" 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-id-card mr-2"></i>Cédula Profesional (opcional)
+                                </label>
+                                <input type="text" placeholder="Número de cédula" 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-4">
+                            <i class="fas fa-award mr-2"></i>Certificaciones Adicionales (opcional)
+                        </label>
+                        <textarea rows="4" placeholder="Ej: Certificado en seguridad industrial, Diploma en instalaciones eléctricas..." 
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg"></textarea>
+                    </div>
+                </section>
+
+                <!-- Paso 5: Revisión y Envío -->
+                <section id="step-5" class="step hidden">
+                    <h3 class="section-title text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-clipboard-check mr-3 text-green-500"></i>Revisión Final
+                    </h3>
+                    
+                    <div class="bg-gray-50 rounded-xl p-6 mb-6">
+                        <h4 class="font-bold text-lg text-gray-800 mb-4">Resumen de tu solicitud</h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Nombre:</span>
+                                <span id="review-name" class="font-medium">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Verificación de Identidad:</span>
+                                <span id="review-veriff" class="text-red-500 font-medium">Pendiente</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Experiencia:</span>
+                                <span id="review-exp" class="font-medium">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Documentos Profesionales:</span>
+                                <span id="review-docs" class="font-medium">No aplica</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-triangle text-yellow-500 text-xl mr-3 mt-1"></i>
+                            <div>
+                                <h4 class="font-bold text-yellow-800 mb-2">Confirmación final</h4>
+                                <p class="text-yellow-700 mb-4">Al enviar esta solicitud, confirmas que toda la información proporcionada es verídica.</p>
+                                
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="terms-accept" required class="w-5 h-5 text-yellow-600 rounded">
+                                    <label for="terms-accept" class="ml-2 text-gray-700">
+                                        Acepto los <a href="#" class="text-yellow-600 hover:underline">términos y condiciones</a>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 <!-- Navegación -->
                 <div class="flex justify-between pt-8 border-t border-gray-200">
@@ -275,11 +412,7 @@
                         <i class="fas fa-check text-4xl text-green-500"></i>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-800 mb-4">¡Solicitud Enviada!</h3>
-                    <p class="text-gray-600 mb-6">Tu solicitud de verificación ha sido recibida. Te contactaremos en un plazo de 3-5 días hábiles con el resultado.</p>
-                    <div class="bg-gray-50 rounded-lg p-4 mb-6">
-                        <p class="text-sm text-gray-500">ID de seguimiento:</p>
-                        <p id="tracking-id" class="font-mono font-bold text-gray-800">COL-##########</p>
-                    </div>
+                    <p class="text-gray-600 mb-6">Tu solicitud de verificación ha sido recibida. Te contactaremos pronto.</p>
                     <button id="close-modal" class="btn-primary px-8 py-3 rounded-lg font-bold">
                         <i class="fas fa-home mr-2"></i>Volver al Inicio
                     </button>
@@ -302,335 +435,247 @@
                 <div class="text-center md:text-right">
                     <p class="text-gray-400">© 2024 COLMENA HUB. Todos los derechos reservados.</p>
                     <p class="text-gray-400 text-sm mt-1">
-                        <i class="fas fa-lock mr-1"></i>Tus datos están protegidos con encriptación SSL
+                        <i class="fas fa-lock mr-1"></i>Tus datos están protegidos
                     </p>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Scripts -->
+    <!-- ================================================ -->
+    <!-- AQUÍ VA TODO EL JAVASCRIPT EN UN SOLO <script> -->
+    <!-- ================================================ -->
     <script>
-        // CONFIGURACIÓN DE VERIFF
+        // ========================
+        // CONFIGURACIÓN Y VARIABLES
+        // ========================
         const VERIFF_CONFIG = {
-            // ⚠️ REEMPLAZA CON TU API KEY REAL ⚠️
-            API_KEY: 'TU_API_KEY_PUBLICA_DE_VERIFF',
-            BASE_URL: 'https://api.veriff.com/v1',
-            LANG: 'es'
+            API_KEY: 'dev_simulation_mode',
+            IS_DEVELOPMENT: true
         };
 
-        // Estado de la aplicación
-        let currentStep = 1;
-        let totalSteps = 5;
-        let veriffSession = null;
+        let veriffInstance = null;
+        let currentSessionId = null;
         let verificationCompleted = false;
+        let currentStep = 1;
+        const totalSteps = 5;
+        const formData = {
+            personalInfo: {},
+            veriffData: null,
+            careerInfo: {}
+        };
 
-        // Inicialización
-        document.addEventListener('DOMContentLoaded', function() {
-            setupEventListeners();
-            updateProgress();
-        });
+        // ========================
+        // FUNCIONES PRINCIPALES
+        // ========================
 
-        function setupEventListeners() {
-            // Navegación entre pasos
-            document.getElementById('next-btn').addEventListener('click', nextStep);
-            document.getElementById('prev-btn').addEventListener('click', prevStep);
-            document.getElementById('submit-btn').addEventListener('click', submitForm);
-            
-            // Veriff
-            document.getElementById('start-veriff-btn').addEventListener('click', startVeriffVerification);
-            
-            // Modal
-            document.getElementById('close-modal').addEventListener('click', function() {
-                document.getElementById('success-modal').classList.add('hidden');
-                location.reload();
-            });
-        }
-
-        // Navegación entre pasos
-        function nextStep() {
-            if (!validateCurrentStep()) return;
-            
-            if (currentStep < totalSteps) {
-                document.querySelector(`#step-${currentStep}`).classList.add('hidden');
-                currentStep++;
-                document.querySelector(`#step-${currentStep}`).classList.remove('hidden');
-                
-                updateNavigation();
-                updateProgress();
-                
-                // Si estamos en el paso 2, asegurar que Veriff se cargue correctamente
-                if (currentStep === 2 && !verificationCompleted) {
-                    resetVeriffUI();
-                }
-            }
-        }
-
-        function prevStep() {
-            if (currentStep > 1) {
-                document.querySelector(`#step-${currentStep}`).classList.add('hidden');
-                currentStep--;
-                document.querySelector(`#step-${currentStep}`).classList.remove('hidden');
-                updateNavigation();
-                updateProgress();
-            }
-        }
-
-        function validateCurrentStep() {
-            switch(currentStep) {
-                case 1:
-                    const requiredFields = ['fullName', 'email', 'phone', 'profession'];
-                    for (const fieldId of requiredFields) {
-                        const field = document.getElementById(fieldId);
-                        if (!field.value.trim()) {
-                            alert(`Por favor completa el campo: ${field.previousElementSibling.textContent}`);
-                            field.focus();
-                            return false;
-                        }
-                    }
-                    return true;
-                    
-                case 2:
-                    if (!verificationCompleted) {
-                        alert('Por favor completa la verificación de identidad con Veriff primero.');
-                        return false;
-                    }
-                    return true;
-                    
-                default:
-                    return true;
-            }
-        }
-
-        function updateNavigation() {
-            const prevBtn = document.getElementById('prev-btn');
-            const nextBtn = document.getElementById('next-btn');
-            const submitBtn = document.getElementById('submit-btn');
-            
-            prevBtn.classList.toggle('hidden', currentStep === 1);
-            nextBtn.classList.toggle('hidden', currentStep === totalSteps);
-            submitBtn.classList.toggle('hidden', currentStep !== totalSteps);
-        }
-
-        function updateProgress() {
-            const percentage = (currentStep / totalSteps) * 100;
-            document.getElementById('progress-bar').style.width = `${percentage}%`;
-            document.getElementById('progress-text').textContent = `${currentStep}/${totalSteps}`;
-        }
-
-        // FUNCIONES PRINCIPALES DE VERIFF
+        // Función para iniciar Veriff
         async function startVeriffVerification() {
             try {
-                // Ocultar botón de inicio
-                document.getElementById('veriff-init-container').classList.add('hidden');
-                
-                // Mostrar spinner
-                document.getElementById('veriff-loading-icon').classList.remove('hidden');
-                document.getElementById('veriff-status').textContent = 'Preparando verificación...';
+                console.log('🔵 Iniciando verificación Veriff...');
                 
                 // Obtener datos del usuario
                 const fullName = document.getElementById('fullName').value;
                 const email = document.getElementById('email').value;
                 const phone = document.getElementById('phone').value;
                 
-                // Crear sesión de Veriff
-                const sessionData = await createVeriffSession(fullName, email, phone);
-                
-                if (sessionData && sessionData.verification) {
-                    // Mostrar contenedor de Veriff
-                    document.getElementById('veriff-container').classList.remove('hidden');
-                    
-                    // Inicializar SDK de Veriff
-                    initializeVeriffSDK(sessionData.verification.url);
-                    
-                    // Guardar IDs de sesión
-                    document.getElementById('veriff-session-id').value = sessionData.verification.id;
-                    
-                    // Actualizar estado
-                    document.getElementById('veriff-loading-icon').classList.add('hidden');
-                    document.getElementById('veriff-status').textContent = 'Verificación en progreso...';
-                    
-                    // Iniciar monitoreo de estado
-                    monitorVerificationStatus(sessionData.verification.id);
+                if (!fullName || !email || !phone) {
+                    alert('Por favor completa tu información personal primero (Paso 1)');
+                    return;
                 }
+                
+                // Actualizar UI - Mostrar loading
+                document.getElementById('veriff-init-container').classList.add('hidden');
+                document.getElementById('veriff-loading-icon').classList.remove('hidden');
+                document.getElementById('veriff-status').textContent = 'Preparando verificación...';
+                document.getElementById('veriff-status').className = 'text-blue-600';
+                
+                // En MODO DESARROLLO: Mostrar interfaz de prueba
+                if (VERIFF_CONFIG.IS_DEVELOPMENT) {
+                    await showDevelopmentVeriffInterface(fullName, email, phone);
+                    return;
+                }
+                
+                // MODO PRODUCCIÓN: Veriff real
+                await startRealVeriffVerification(fullName, email, phone);
+                
             } catch (error) {
-                console.error('Error con Veriff:', error);
-                showVeriffError('Error al iniciar la verificación. Por favor intenta de nuevo.');
+                console.error('❌ Error en Veriff:', error);
+                showVeriffError('Error al iniciar la verificación: ' + error.message);
             }
         }
 
-        async function createVeriffSession(fullName, email, phone) {
-            // NOTA: En producción, esto debe hacerse en tu servidor backend
-            // para proteger tu API key privada
+        // Mostrar interfaz de desarrollo
+        async function showDevelopmentVeriffInterface(fullName, email, phone) {
+            console.log('🛠️ MODO DESARROLLO: Mostrando interfaz de prueba');
             
-            try {
-                // Separar nombre y apellido
-                const nameParts = fullName.split(' ');
-                const firstName = nameParts[0] || '';
-                const lastName = nameParts.slice(1).join(' ') || '';
-                
-                // Datos para la sesión
-                const sessionData = {
-                    verification: {
-                        callback: window.location.origin + '/veriff-callback.html', // Página de callback
-                        person: {
-                            givenName: firstName,
-                            lastName: lastName,
-                            idNumber: '' // Opcional, para algunos países
-                        },
-                        document: {
-                            type: 'ID_CARD', // INE/IFE
-                            country: 'MX'
-                        },
-                        vendorData: JSON.stringify({
-                            userId: generateUserId(),
-                            email: email,
-                            phone: phone
-                        }),
-                        lang: 'es'
-                    }
-                };
-                
-                // En producción, haz una llamada a TU backend:
-                /*
-                const response = await fetch('/api/create-veriff-session', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer TU_API_KEY_PRIVADA' // Esto en backend
-                    },
-                    body: JSON.stringify(sessionData)
-                });
-                return await response.json();
-                */
-                
-                // Para pruebas locales, simula la respuesta
-                return simulateVeriffResponse(fullName, email);
-                
-            } catch (error) {
-                console.error('Error creando sesión Veriff:', error);
-                throw error;
-            }
+            // Crear contenedor para la simulación
+            const container = document.getElementById('veriff-container');
+            container.innerHTML = '';
+            container.classList.remove('hidden');
+            
+            // Crear interfaz de prueba
+            const simulationHTML = `
+                <div class="bg-white rounded-xl shadow-lg p-6 max-w-md mx-auto">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-id-card text-blue-500 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">MODO PRUEBA - Verificación de Identidad</h3>
+                        <p class="text-gray-600">Esta es una simulación para desarrollo</p>
+                    </div>
+                    
+                    <div class="space-y-4 mb-6">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-500 mb-1">Nombre:</p>
+                            <p class="font-medium">${fullName}</p>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-500 mb-1">Email:</p>
+                            <p class="font-medium">${email}</p>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-500 mb-1">Teléfono:</p>
+                            <p class="font-medium">${phone}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-600 mb-4">¿Cómo quieres simular la verificación?</p>
+                        
+                        <button onclick="simulateVeriffSuccess()" 
+                                class="w-full py-3 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition flex items-center justify-center gap-2">
+                            <i class="fas fa-check-circle"></i>
+                            Simular ÉXITO (aprobado)
+                        </button>
+                        
+                        <button onclick="simulateVeriffDeclined()" 
+                                class="w-full py-3 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition flex items-center justify-center gap-2">
+                            <i class="fas fa-times-circle"></i>
+                            Simular RECHAZO
+                        </button>
+                        
+                        <button onclick="simulateVeriffPending()" 
+                                class="w-full py-3 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600 transition flex items-center justify-center gap-2">
+                            <i class="fas fa-clock"></i>
+                            Simular PENDIENTE
+                        </button>
+                        
+                        <button onclick="resetVeriffUI()" 
+                                class="w-full py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition mt-4">
+                            <i class="fas fa-redo mr-2"></i>Reiniciar
+                        </button>
+                    </div>
+                    
+                    <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p class="text-sm text-blue-700">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            En producción, aquí aparecería la interfaz real de Veriff para subir tu INE/IFE y tomar selfie.
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = simulationHTML;
+            
+            // Ocultar loading
+            document.getElementById('veriff-loading-icon').classList.add('hidden');
+            document.getElementById('veriff-status').textContent = 'Modo prueba - Selecciona una opción';
         }
 
-        function initializeVeriffSDK(veriffUrl) {
-            try {
-                // Limpiar contenedor previo
-                const container = document.getElementById('veriff-container');
-                container.innerHTML = '';
-                
-                // Crear iframe
-                const iframe = document.createElement('iframe');
-                iframe.id = 'veriff-iframe';
-                iframe.src = veriffUrl;
-                iframe.className = 'w-full h-96';
-                iframe.frameBorder = '0';
-                iframe.allow = 'camera; microphone';
-                
-                // Eventos del iframe
-                iframe.onload = () => {
-                    console.log('Veriff iframe cargado');
-                    document.getElementById('veriff-status').textContent = 'Verificación lista';
-                };
-                
-                iframe.onerror = () => {
-                    showVeriffError('Error al cargar la verificación');
-                };
-                
-                container.appendChild(iframe);
-                
-            } catch (error) {
-                console.error('Error inicializando SDK Veriff:', error);
-                showVeriffError('Error técnico. Por favor recarga la página.');
-            }
-        }
+        // ========================
+        // FUNCIONES DE SIMULACIÓN
+        // ========================
 
-        function monitorVerificationStatus(sessionId) {
-            // En producción, usarías Webhooks o polling al backend
-            // Esto es un ejemplo simplificado
+        // Simular verificación exitosa
+        function simulateVeriffSuccess() {
+            console.log('✅ Simulando verificación exitosa');
             
-            // Simular chequeo cada 5 segundos
-            const checkInterval = setInterval(async () => {
-                try {
-                    // En producción:
-                    /*
-                    const response = await fetch(`/api/veriff-status/${sessionId}`);
-                    const data = await response.json();
-                    
-                    if (data.status === 'approved') {
-                        clearInterval(checkInterval);
-                        handleVeriffSuccess(data);
-                    } else if (data.status === 'declined') {
-                        clearInterval(checkInterval);
-                        handleVeriffDeclined(data);
-                    }
-                    */
-                    
-                    // Para demo, simular aprobación después de 10 segundos
-                    if (Math.random() > 0.7) { // 30% de chance de completar
-                        clearInterval(checkInterval);
-                        simulateVeriffSuccess(sessionId);
-                    }
-                    
-                } catch (error) {
-                    console.error('Error monitoreando estado:', error);
-                }
-            }, 5000);
-            
-            // Limpiar después de 5 minutos
-            setTimeout(() => {
-                clearInterval(checkInterval);
-                if (!verificationCompleted) {
-                    showVeriffError('Tiempo de verificación agotado. Por favor intenta de nuevo.');
-                }
-            }, 300000);
-        }
-
-        function handleVeriffSuccess(data) {
-            verificationCompleted = true;
+            // Crear datos de verificación exitosa
+            const verificationData = {
+                verificationId: 'veriff_success_' + Date.now(),
+                sessionId: currentSessionId || 'dev_session_' + Date.now(),
+                status: 'approved',
+                timestamp: new Date().toISOString()
+            };
             
             // Actualizar UI
             document.getElementById('veriff-success-icon').classList.remove('hidden');
             document.getElementById('veriff-status').textContent = '✅ Verificación completada exitosamente';
-            document.getElementById('veriff-status').classList.add('text-green-600');
-            document.getElementById('veriff-verification-id').value = data.verificationId;
+            document.getElementById('veriff-status').className = 'text-green-600 font-medium';
+            document.getElementById('veriff-verification-id').value = verificationData.verificationId;
+            document.getElementById('veriff-session-id').value = verificationData.sessionId;
             
-            // Ocultar iframe
+            // Ocultar contenedor de simulación
             document.getElementById('veriff-container').classList.add('hidden');
             
+            // Guardar en estado global
+            formData.veriffData = verificationData;
+            verificationCompleted = true;
+            
             // Mostrar mensaje de éxito
-            showSuccessMessage('Tu identidad ha sido verificada exitosamente.');
+            showNotification('¡Identidad verificada exitosamente!', 'success');
+            
+            // Habilitar botón siguiente
+            document.getElementById('next-btn').disabled = false;
         }
 
-        function handleVeriffDeclined(data) {
+        // Simular verificación rechazada
+        function simulateVeriffDeclined() {
+            console.log('❌ Simulando verificación rechazada');
+            
             // Actualizar UI
             document.getElementById('veriff-error-icon').classList.remove('hidden');
-            document.getElementById('veriff-status').textContent = '❌ Verificación rechazada: ' + (data.reason || 'No se pudo verificar');
-            document.getElementById('veriff-status').classList.add('text-red-600');
+            document.getElementById('veriff-status').textContent = '❌ Verificación rechazada - Documentos no válidos';
+            document.getElementById('veriff-status').className = 'text-red-600 font-medium';
             
             // Mostrar botón para reintentar
+            const container = document.getElementById('veriff-container');
             const retryBtn = document.createElement('button');
-            retryBtn.className = 'btn-primary mt-2 px-4 py-2 text-sm';
-            retryBtn.innerHTML = '<i class="fas fa-redo mr-2"></i>Reintentar';
+            retryBtn.className = 'mt-4 px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition';
+            retryBtn.innerHTML = '<i class="fas fa-redo mr-2"></i>Intentar de nuevo';
             retryBtn.onclick = () => {
                 resetVeriffUI();
                 startVeriffVerification();
             };
             
-            document.getElementById('veriff-container').parentNode.appendChild(retryBtn);
-        }
-
-        function showVeriffError(message) {
-            document.getElementById('veriff-error-icon').classList.remove('hidden');
-            document.getElementById('veriff-status').textContent = '❌ ' + message;
-            document.getElementById('veriff-status').classList.add('text-red-600');
+            container.querySelector('.space-y-3').appendChild(retryBtn);
             
-            // Mostrar botón para reintentar
-            document.getElementById('veriff-init-container').classList.remove('hidden');
+            // Mostrar mensaje
+            showNotification('Verificación rechazada. Por favor intenta de nuevo.', 'error');
         }
 
+        // Simular verificación pendiente
+        function simulateVeriffPending() {
+            console.log('⏳ Simulando verificación pendiente');
+            
+            // Actualizar UI
+            document.getElementById('veriff-loading-icon').classList.remove('hidden');
+            document.getElementById('veriff-status').textContent = '⏳ Verificación en revisión';
+            document.getElementById('veriff-status').className = 'text-yellow-600';
+            
+            // Simular que está pendiente
+            formData.veriffData = {
+                status: 'pending',
+                timestamp: new Date().toISOString()
+            };
+            verificationCompleted = false;
+            
+            // Mostrar mensaje
+            showNotification('Verificación en proceso.', 'warning');
+        }
+
+        // ========================
+        // FUNCIONES AUXILIARES VERIFF
+        // ========================
+
+        // Reiniciar UI de Veriff
         function resetVeriffUI() {
-            // Restablecer UI de Veriff
+            console.log('🔄 Reiniciando UI de Veriff');
+            
+            // Restablecer UI
             document.getElementById('veriff-init-container').classList.remove('hidden');
             document.getElementById('veriff-container').classList.add('hidden');
             document.getElementById('veriff-container').innerHTML = '';
@@ -642,41 +687,240 @@
             document.getElementById('veriff-status').textContent = 'Verificación pendiente';
             document.getElementById('veriff-status').className = 'text-gray-700';
             
+            // Resetear estado
             verificationCompleted = false;
+            formData.veriffData = null;
+            currentSessionId = null;
+            
+            // Si hay instancia de Veriff, destruirla
+            if (veriffInstance && typeof veriffInstance.destroy === 'function') {
+                veriffInstance.destroy();
+            }
         }
 
-        function showSuccessMessage(message) {
-            alert(message); // O usar un toast más elegante
+        // Mostrar error de Veriff
+        function showVeriffError(message) {
+            console.error('❌ Error Veriff:', message);
+            
+            // Actualizar UI
+            document.getElementById('veriff-error-icon').classList.remove('hidden');
+            document.getElementById('veriff-status').textContent = '❌ ' + message;
+            document.getElementById('veriff-status').className = 'text-red-600';
+            
+            // Mostrar botón para reintentar
+            document.getElementById('veriff-init-container').classList.remove('hidden');
+            
+            // Mostrar notificación
+            showNotification(message, 'error');
         }
 
-        // Funciones auxiliares
-        function generateUserId() {
-            return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        }
+        // ========================
+        // NAVEGACIÓN DEL FORMULARIO
+        // ========================
 
-        function simulateVeriffResponse(fullName, email) {
-            // Simulación para desarrollo
-            return {
-                verification: {
-                    id: 'session_' + Date.now(),
-                    url: 'https://magic.veriff.me/v/WHATEVER_SESSION_ID',
-                    status: 'created'
+        // Ir al siguiente paso
+        function nextStep() {
+            if (!validateCurrentStep()) return;
+            
+            if (currentStep < totalSteps) {
+                // Ocultar paso actual
+                document.querySelector(`#step-${currentStep}`).classList.add('hidden');
+                currentStep++;
+                
+                // Mostrar siguiente paso
+                document.querySelector(`#step-${currentStep}`).classList.remove('hidden');
+                
+                // Actualizar navegación
+                updateNavigation();
+                
+                // Actualizar barra de progreso
+                updateProgress();
+                
+                // Si estamos en el paso final, actualizar resumen
+                if (currentStep === totalSteps) {
+                    updateReviewSection();
                 }
-            };
+                
+                // Si vamos al paso 2, reiniciar Veriff si no está completado
+                if (currentStep === 2 && !verificationCompleted) {
+                    resetVeriffUI();
+                }
+            }
         }
 
-        function simulateVeriffSuccess(sessionId) {
-            // Simulación para desarrollo
+        // Regresar al paso anterior
+        function prevStep() {
+            if (currentStep > 1) {
+                document.querySelector(`#step-${currentStep}`).classList.add('hidden');
+                currentStep--;
+                document.querySelector(`#step-${currentStep}`).classList.remove('hidden');
+                updateNavigation();
+                updateProgress();
+            }
+        }
+
+        // Validar paso actual
+        function validateCurrentStep() {
+            switch(currentStep) {
+                case 1:
+                    // Validar información personal
+                    const requiredFields = ['fullName', 'email', 'phone', 'profession'];
+                    for (const fieldId of requiredFields) {
+                        const field = document.getElementById(fieldId);
+                        if (!field.value.trim()) {
+                            alert(`Por favor completa el campo: ${field.previousElementSibling.textContent}`);
+                            field.focus();
+                            return false;
+                        }
+                    }
+                    
+                    // Guardar datos personales
+                    formData.personalInfo = {
+                        fullName: document.getElementById('fullName').value,
+                        email: document.getElementById('email').value,
+                        phone: document.getElementById('phone').value,
+                        profession: document.getElementById('profession').value,
+                        address: document.getElementById('address').value
+                    };
+                    return true;
+                    
+                case 2:
+                    // Verificar que la verificación esté completada
+                    if (!verificationCompleted) {
+                        const statusElement = document.getElementById('veriff-status');
+                        const statusText = statusElement.textContent;
+                        
+                        if (statusText.includes('pendiente') || statusText.includes('No iniciada')) {
+                            showNotification('Por favor inicia la verificación de identidad primero.', 'warning');
+                        } else if (statusText.includes('rechazada') || statusText.includes('error')) {
+                            showNotification('La verificación fue rechazada o tiene errores. Por favor inténtalo de nuevo.', 'error');
+                        } else {
+                            showNotification('Completa la verificación de identidad para continuar.', 'info');
+                        }
+                        
+                        // Resaltar el área de verificación
+                        document.getElementById('veriff-init-container').scrollIntoView({ 
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                        
+                        return false;
+                    }
+                    return true;
+                    
+                case 3:
+                    // Validar información profesional
+                    if (!document.getElementById('career-summary').value.trim()) {
+                        alert('Por favor proporciona un resumen de tu trayectoria profesional.');
+                        return false;
+                    }
+                    if (!document.getElementById('experience-years').value) {
+                        alert('Por favor selecciona tus años de experiencia.');
+                        return false;
+                    }
+                    
+                    // Guardar información profesional
+                    formData.careerInfo = {
+                        summary: document.getElementById('career-summary').value,
+                        experience: document.getElementById('experience-years').value,
+                        specialties: document.getElementById('specialties').value
+                    };
+                    return true;
+                    
+                case 5:
+                    // Validar términos y condiciones
+                    if (!document.getElementById('terms-accept').checked) {
+                        alert('Debes aceptar los términos y condiciones para continuar.');
+                        return false;
+                    }
+                    return true;
+                    
+                default:
+                    return true;
+            }
+        }
+
+        // Actualizar navegación
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const submitBtn = document.getElementById('submit-btn');
+            
+            // Mostrar/ocultar botones según el paso
+            prevBtn.classList.toggle('hidden', currentStep === 1);
+            nextBtn.classList.toggle('hidden', currentStep === totalSteps);
+            submitBtn.classList.toggle('hidden', currentStep !== totalSteps);
+        }
+
+        // Actualizar barra de progreso
+        function updateProgress() {
+            const percentage = (currentStep / totalSteps) * 100;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+            document.getElementById('progress-text').textContent = `${currentStep}/${totalSteps}`;
+        }
+
+        // Actualizar sección de revisión
+        function updateReviewSection() {
+            // Información personal
+            if (formData.personalInfo.fullName) {
+                document.getElementById('review-name').textContent = formData.personalInfo.fullName;
+            }
+            
+            // Veriff
+            document.getElementById('review-veriff').textContent = 
+                verificationCompleted ? '✅ Completada' : '❌ Pendiente';
+            document.getElementById('review-veriff').className = 
+                verificationCompleted ? 'text-green-500 font-medium' : 'text-red-500 font-medium';
+            
+            // Experiencia
+            if (formData.careerInfo.experience) {
+                document.getElementById('review-exp').textContent = formData.careerInfo.experience;
+            }
+            
+            // Documentos profesionales
+            const isProfessional = document.getElementById('is-professional').checked;
+            document.getElementById('review-docs').textContent = 
+                isProfessional ? '✅ Sí' : 'No aplica';
+        }
+
+        // ========================
+        // FUNCIONES AUXILIARES
+        // ========================
+
+        // Mostrar notificación
+        function showNotification(message, type = 'info') {
+            // Crear notificación
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 notification
+                                   ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' :
+                                     type === 'error' ? 'bg-red-100 text-red-800 border border-red-200' :
+                                     type === 'warning' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+                                     'bg-blue-100 text-blue-800 border border-blue-200'}`;
+            notification.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' :
+                                  type === 'error' ? 'fa-exclamation-circle' :
+                                  type === 'warning' ? 'fa-exclamation-triangle' :
+                                  'fa-info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remover después de 4 segundos
             setTimeout(() => {
-                handleVeriffSuccess({
-                    verificationId: 'veriff_' + Date.now(),
-                    sessionId: sessionId,
-                    status: 'approved',
-                    timestamp: new Date().toISOString()
-                });
-            }, 2000);
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.5s';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 500);
+            }, 4000);
         }
 
+        // Enviar formulario
         async function submitForm() {
             try {
                 if (!verificationCompleted) {
@@ -685,9 +929,6 @@
                 }
                 
                 // Mostrar modal de éxito
-                document.getElementById('tracking-id').textContent = 
-                    'COL-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
-                
                 document.getElementById('success-modal').classList.remove('hidden');
                 
                 setTimeout(() => {
@@ -698,6 +939,103 @@
             } catch (error) {
                 console.error('Error al enviar:', error);
                 alert('Error al enviar la solicitud. Por favor intenta de nuevo.');
+            }
+        }
+
+        // ========================
+        // INICIALIZACIÓN
+        // ========================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar event listeners
+            document.getElementById('start-veriff-btn').addEventListener('click', startVeriffVerification);
+            document.getElementById('next-btn').addEventListener('click', nextStep);
+            document.getElementById('prev-btn').addEventListener('click', prevStep);
+            document.getElementById('submit-btn').addEventListener('click', submitForm);
+            
+            // Checkbox de documentos profesionales
+            document.getElementById('is-professional').addEventListener('change', function() {
+                document.getElementById('professional-docs').classList.toggle('hidden', !this.checked);
+            });
+            
+            // Cerrar modal
+            document.getElementById('close-modal').addEventListener('click', function() {
+                document.getElementById('success-modal').classList.add('hidden');
+                // Recargar página para empezar de nuevo
+                setTimeout(() => {
+                    location.reload();
+                }, 500);
+            });
+            
+            // Inicializar progreso
+            updateProgress();
+            updateNavigation();
+        });
+
+        // ========================
+        // FUNCIONES DE PRODUCCIÓN (opcionales)
+        // ========================
+
+        // Veriff en modo producción (para cuando tengas API Key)
+        async function startRealVeriffVerification(fullName, email, phone) {
+            try {
+                console.log('🚀 Iniciando Veriff real...');
+                
+                // Separar nombre
+                const nameParts = fullName.split(' ');
+                const firstName = nameParts[0] || '';
+                const lastName = nameParts.slice(1).join(' ') || firstName;
+                
+                // Crear instancia de Veriff
+                veriffInstance = Veriff({
+                    apiKey: VERIFF_CONFIG.API_KEY,
+                    parentId: 'veriff-container',
+                    onSession: function(err, response) {
+                        if (err) {
+                            console.error('❌ Error sesión Veriff:', err);
+                            showVeriffError('Error al crear sesión: ' + err.message);
+                            return;
+                        }
+                        
+                        console.log('✅ Sesión Veriff creada:', response.veriffId);
+                        currentSessionId = response.veriffId;
+                        
+                        // Actualizar UI
+                        document.getElementById('veriff-loading-icon').classList.add('hidden');
+                        document.getElementById('veriff-status').textContent = '✅ Sesión creada - Sigue las instrucciones';
+                        document.getElementById('veriff-session-id').value = response.veriffId;
+                    },
+                    onError: function(err) {
+                        console.error('❌ Error SDK Veriff:', err);
+                        showVeriffError('Error técnico: ' + err.message);
+                    }
+                });
+                
+                // Configurar parámetros
+                veriffInstance.setParams({
+                    person: {
+                        givenName: firstName,
+                        lastName: lastName,
+                        idNumber: ''
+                    },
+                    document: {
+                        type: 'ID_CARD',
+                        country: 'MX'
+                    },
+                    vendorData: JSON.stringify({
+                        fullName: fullName,
+                        email: email,
+                        phone: phone,
+                        timestamp: new Date().toISOString()
+                    }),
+                    lang: 'es'
+                });
+                
+                // Montar Veriff
+                veriffInstance.mount();
+                
+            } catch (error) {
+                console.error('❌ Error en Veriff real:', error);
+                showVeriffError('Error iniciando verificación: ' + error.message);
             }
         }
     </script>
