@@ -34,7 +34,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
   <!-- Veriff SDK -->
-  <script src="https://cdn.veriff.me/js/v1/veriff.js"></script>
+  <script src="https://cdn.veriff.me/v2/veriff.js"></script>
 
   <script>
     // ---------- CONFIG FIREBASE (copia TUS 6 valores reales) ----------
@@ -102,10 +102,18 @@
 
     <!-- Botón flotante Verificar Identidad (solo logueado) -->
     <div id="veriffWrapper" class="fixed bottom-4 right-4 hidden">
-      <button id="veriffBtn" onclick="lanzarVeriff()"
+      <button id="veriffBtn"
               class="px-4 py-2 bg-green-600 text-white rounded-lg shadow">
         Verificar mi identidad
       </button>
+    </div>
+
+    <!-- Badge de verificación -->
+    <div id="verifiedBadge" class="fixed top-4 right-4 hidden z-50">
+      <div class="px-4 py-2 bg-green-100 text-green-800 rounded-full flex items-center gap-2">
+        <i class="fas fa-check-circle"></i>
+        <span class="font-medium">Verificado</span>
+      </div>
     </div>
 
     <!-- Mini Juego -->
@@ -290,6 +298,17 @@
   <script src="juego-logica.js"></script>
 
   <script>
+    // ---------- CONFIGURACIÓN VERIFF ----------
+    const VERIFF_CONFIG = {
+      // ⚠️ PARA DESARROLLO: usa esto
+      API_KEY: 'dev_' + Math.random().toString(36).substr(2, 9),
+      IS_DEVELOPMENT: true
+      
+      // ⚠️ PARA PRODUCCIÓN: cambia esto por tu API Key real
+      // API_KEY: 'TU_API_KEY_REAL_DE_VERIFF',
+      // IS_DEVELOPMENT: false
+    };
+
     /* ---------- LOGIN GOOGLE (POPUP sin redirigir) ---------- */
     document.getElementById('btnGoogle').addEventListener('click', async () => {
       const provider = new firebase.auth.GoogleAuthProvider();
@@ -309,30 +328,169 @@
       }
     });
 
-    /* ---------- FUNCIÓN VERIFF ---------- */
-    function lanzarVeriff() {
+    /* ---------- FUNCIÓN VERIFF MEJORADA ---------- */
+    document.getElementById('veriffBtn').addEventListener('click', async function() {
       const user = auth.currentUser;
-      if (!user) { alert('Inicia sesión primero'); return; }
+      if (!user) { 
+        alert('Inicia sesión primero'); 
+        return; 
+      }
+      
+      try {
+        // Mostrar loading
+        const btn = document.getElementById('veriffBtn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Preparando...';
+        btn.disabled = true;
+        
+        if (VERIFF_CONFIG.IS_DEVELOPMENT) {
+          // MODO DESARROLLO: Simular Veriff
+          await simulateVeriffVerification(user);
+        } else {
+          // MODO PRODUCCIÓN: Veriff real
+          await startRealVeriffVerification(user);
+        }
+        
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        
+      } catch (error) {
+        console.error('Error en Veriff:', error);
+        alert('Error: ' + error.message);
+        
+        const btn = document.getElementById('veriffBtn');
+        btn.innerHTML = 'Verificar mi identidad';
+        btn.disabled = false;
+      }
+    });
+
+    // Función para simular Veriff (modo desarrollo)
+    async function simulateVeriffVerification(user) {
+      // Mostrar mensaje
+      alert('🔧 MODO DESARROLLO\n\nEn producción esto abriría Veriff real.\n\nAhora simularemos la verificación...');
+      
+      // Simular delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Simular datos de verificación exitosa
+      const verificationData = {
+        id: 'veriff_simulado_' + Date.now(),
+        status: 'approved',
+        timestamp: new Date().toISOString()
+      };
+      
+      // Guardar en Firestore
+      await db.doc('users/' + user.uid).set({
+        verified: true,
+        veriffId: verificationData.id,
+        veriffStatus: 'approved',
+        verificationDate: verificationData.timestamp
+      }, { merge: true });
+      
+      // Mostrar badge de verificado
+      document.getElementById('verifiedBadge').classList.remove('hidden');
+      document.getElementById('veriffBtn').classList.add('hidden');
+      
+      // Mostrar mensaje de éxito
+      alert('✅ ¡Identidad verificada exitosamente!\n\nTu cuenta ahora está verificada en COLMENA HUB.');
+    }
+
+    // Función para Veriff real (modo producción)
+    async function startRealVeriffVerification(user) {
       const veriff = Veriff({
-        apiKey: 'PON_AQUÍ_TU_VERIFF_PUBLIC_KEY',
+        apiKey: VERIFF_CONFIG.API_KEY, // Tu API Key real
         parentId: 'veriffBtn',
         onSession: function(err, response) {
-          if (err) return console.error(err);
+          if (err) {
+            console.error('Error Veriff:', err);
+            alert('Error en verificación: ' + err.message);
+            return;
+          }
+          
+          // Guardar ID de sesión en Firestore
           db.doc('users/' + user.uid).set({
             veriffId: response.veriffId,
-            verified: false
+            veriffStatus: 'pending',
+            lastVeriffAttempt: firebase.firestore.FieldValue.serverTimestamp()
           }, { merge: true });
-          alert('Verificación enviada. En 30 s llega el resultado.');
+          
+          alert('✅ Verificación iniciada\n\nSigue las instrucciones en pantalla para completar el proceso.');
+        },
+        onError: function(err) {
+          console.error('Error SDK Veriff:', err);
+          alert('Error técnico: ' + err.message);
         }
       });
-      veriff.setParams({ person: { firstName: '', lastName: '' } });
+      
+      // Configurar parámetros del usuario
+      const nameParts = user.displayName ? user.displayName.split(' ') : ['Usuario', ''];
+      veriff.setParams({
+        person: {
+          givenName: nameParts[0],
+          lastName: nameParts.slice(1).join(' ') || nameParts[0],
+          idNumber: '' // Opcional para algunos países
+        },
+        document: {
+          type: 'ID_CARD', // INE/IFE para México
+          country: 'MX'
+        },
+        vendorData: JSON.stringify({
+          userId: user.uid,
+          email: user.email,
+          timestamp: new Date().toISOString()
+        }),
+        lang: 'es' // Español
+      });
+      
+      // Iniciar Veriff
       veriff.mount();
+    }
+
+    // Función para verificar si el usuario ya está verificado
+    async function checkVerificationStatus(user) {
+      if (!user) return;
+      
+      try {
+        const userDoc = await db.doc('users/' + user.uid).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          if (userData.verified) {
+            // Mostrar badge de verificado
+            document.getElementById('verifiedBadge').classList.remove('hidden');
+            document.getElementById('veriffBtn').classList.add('hidden');
+          }
+        }
+      } catch (error) {
+        console.error('Error verificando estado:', error);
+      }
     }
 
     /* ---------- MOSTRAR / OCULTAR BOTONES ---------- */
     auth.onAuthStateChanged(user => {
-      document.getElementById('btnGoogle').style.display = user ? 'none' : 'inline-block';
-      document.getElementById('veriffWrapper').style.display = user ? 'block' : 'none';
+      const btnGoogle = document.getElementById('btnGoogle');
+      const veriffWrapper = document.getElementById('veriffWrapper');
+      
+      if (user) {
+        // Usuario logueado
+        btnGoogle.style.display = 'none';
+        veriffWrapper.style.display = 'block';
+        
+        // Verificar si ya está verificado
+        checkVerificationStatus(user);
+      } else {
+        // Usuario no logueado
+        btnGoogle.style.display = 'inline-block';
+        veriffWrapper.style.display = 'none';
+        document.getElementById('verifiedBadge').classList.add('hidden');
+      }
+    });
+
+    // Inicializar: verificar estado al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+      const user = auth.currentUser;
+      if (user) {
+        checkVerificationStatus(user);
+      }
     });
   </script>
 </body>
