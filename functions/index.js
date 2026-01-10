@@ -1,449 +1,528 @@
 /**
- * Cloud Functions para COLMENA-HUB
- * 1. Evita duplicados por INE + teléfono
- * 2. Obliga verificación a clientes después del pago
- * 3. Detecta si ya está registrado sin que usuario lo note
- * 4. Índice para búsquedas rápidas (rubro + ciudad)
- * 5. Veriff: crea sesiones, verifica estado y webhook
+ * Cloud Functions para COLMENA-HUB - VERSIÓN COMPLETA
+ * Despliegue: firebase deploy --only functions
  */
 
 const { onRequest } = require("firebase-functions/v2/https");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { onCall } = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin");
 const axios = require("axios");
-const cors = require("cors")({ origin: true });
+const crypto = require("crypto");
 
-// Inicializa Firebase Admin SDK
+// 1. INICIALIZAR FIREBASE
 if (!admin.apps.length) {
   admin.initializeApp();
 }
 const db = admin.firestore();
 
-// Configuración de Veriff
+// 2. CONFIGURACIÓN VERIFF (¡REEMPLAZA CON TUS DATOS REALES!)
 const VERIFF_CONFIG = {
-  API_KEY: process.env.VERIFF_API_KEY || 95d2dbf2-2592-4089-860c-10243c087fa0,
-  BASE_URL: https://stationapi.veriff.com,
+  API_KEY: "95d2dbf2-2592-4089-860c-10243c087fa0",  // ← Tu API Key pública de Veriff
+  API_SECRET: "d714ef07-1674-4c0e-9363-aa0d522cd779",  // ← Tu API Secret
+  WEBHOOK_SECRET: "whsec_xxxxxxxx",  // ← Webhook Signing Secret
+  BASE_URL: "https://stationapi.veriff.com",  // URL de PRODUCCIÓN
+  IS_DEVELOPMENT: false  // ← Cambia a false para producción
 };
 
-// --------------------------------------------------------------
-// 1. VERIFF: Crear sesión de verificación
-// --------------------------------------------------------------
-exports.createVeriffSession = onRequest({ maxInstances: 10 }, async (req, res) => {
-  cors(req, res, async () => {
-    try {
-      const { fullName, email, phone, userId } = req.body;
-
-      if (!fullName || !email || !phone) {
-        return res.status(400).json({ error: "Datos incompletos" });
-      }
-
-      // Separar nombre y apellido
-      const nameParts = fullName.split(" ");
-      const firstName = nameParts[0] || "";
-      const lastName = nameParts.slice(1).join(" ") || firstName;
-
-      // Crear sesión en Veriff
-      const response = await axios.post(
-        `${VERIFF_CONFIG.BASE_URL}/sessions`,
-        {
-          verification: {
-            callback: `${req.headers.origin || "https://tu-dominio.com"}/veriff-callback.html`,
-            person: {
-              givenName: firstName,
-              lastName: lastName,
-              idNumber: "", // Opcional
-            },
-            document: {
-              type: "ID_CARD", // INE/IFE para México
-              country: "MX",
-            },
-            vendorData: JSON.stringify({
-              userId: userId,
-              email: email,
-              phone: phone,
-              timestamp: new Date().toISOString(),
-            }),
-            lang: "es",
-          },
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${VERIFF_CONFIG.API_KEY}`,
-          },
-        }
-      );
-
-      // Guardar referencia en Firestore
-      if (userId) {
-        await db.collection("veriff_sessions").doc(response.data.verification.id).set({
-          userId: userId,
-          email: email,
-          phone: phone,
-          fullName: fullName,
-          sessionId: response.data.verification.id,
-          status: "created",
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          sessionUrl: response.data.verification.url,
-        });
-      }
-
-      logger.log(`Sesión Veriff creada para ${email}: ${response.data.verification.id}`);
-      res.json({
-        success: true,
-        verification: response.data.verification,
-      });
-
-    } catch (error) {
-      logger.error("Error creando sesión Veriff:", error.response?.data || error.message);
-      res.status(500).json({
-        error: "Error creando sesión de verificación",
-        details: error.response?.data || error.message,
-      });
-    }
-  });
-});
-
-// --------------------------------------------------------------
-// 2. VERIFF: Verificar estado de una sesión
-// --------------------------------------------------------------
-exports.getVeriffStatus = onRequest({ maxInstances: 10 }, async (req, res) => {
-  cors(req, res, async () => {
-    try {
-      const { sessionId } = req.query;
-
-      if (!sessionId) {
-        return res.status(400).json({ error: "Session ID requerido" });
-      }
-
-      const response = await axios.get(
-        `${VERIFF_CONFIG.BASE_URL}/sessions/${sessionId}/decision`,
-        {
-          headers: {
-            "Authorization": `Bearer ${VERIFF_CONFIG.API_KEY}`,
-          },
-        }
-      );
-
-      // Si la verificación fue exitosa, actualizar usuario
-      if (response.data.verification?.status === "approved") {
-        const sessionDoc = await db.collection("veriff_sessions").doc(sessionId).get();
-        if (sessionDoc.exists) {
-          const sessionData = sessionDoc.data();
-          
-          // Actualizar usuario como verificado
-          await db.collection("users").doc(sessionData.userId).update({
-            verified: true,
-            veriffId: sessionId,
-            verificationDate: admin.firestore.FieldValue.serverTimestamp(),
-            verificationStatus: "approved",
-          });
-
-          logger.log(`Usuario ${sessionData.userId} verificado exitosamente`);
-        }
-      }
-
-      res.json(response.data);
-
-    } catch (error) {
-      logger.error("Error obteniendo estado Veriff:", error.response?.data || error.message);
-      res.status(500).json({
-        error: "Error obteniendo estado de verificación",
-        details: error.response?.data || error.message,
-      });
-    }
-  });
-});
-
-// --------------------------------------------------------------
-// 3. VERIFF: Webhook para recibir resultados
-// --------------------------------------------------------------
-exports.veriffWebhook = onRequest({ maxInstances: 10 }, async (req, res) => {
+// =============================================================
+// FUNCIÓN 1: Crear sesión de verificación con Veriff
+// =============================================================
+exports.createVeriffSession = onCall({ maxInstances: 10 }, async (request) => {
   try {
-    const signature = req.headers["x-veriff-signature"];
-    const payload = req.body;
-
-    // IMPORTANTE: Verificar la firma en producción
-    // const isValid = verifySignature(signature, JSON.stringify(payload));
-    // if (!isValid) return res.status(401).send("Firma inválida");
-
-    const { verification, status } = payload;
-
-    logger.log(`📨 Webhook Veriff: ${verification.id} - ${status}`);
-
-    // Buscar sesión por vendorData
-    let userId = null;
-    if (payload.verification?.vendorData) {
-      try {
-        const vendorData = JSON.parse(payload.verification.vendorData);
-        userId = vendorData.userId;
-      } catch (e) {
-        logger.error("Error parseando vendorData:", e);
-      }
+    // Verificar autenticación
+    if (!request.auth) {
+      throw new Error("No autenticado");
     }
 
-    // Si no encontramos userId en vendorData, buscar en nuestra BD
-    if (!userId) {
-      const sessionDoc = await db.collection("veriff_sessions").doc(verification.id).get();
-      if (sessionDoc.exists) {
-        const sessionData = sessionDoc.data();
-        userId = sessionData.userId;
-      }
+    const userId = request.auth.uid;
+    const userData = request.data;
+
+    // Validar datos requeridos
+    if (!userData.firstName || !userData.lastName || !userData.email) {
+      throw new Error("Nombre, apellido y email son requeridos");
     }
 
-    // Actualizar sesión
-    await db.collection("veriff_sessions").doc(verification.id).update({
-      status: status,
-      decision: payload.decision || {},
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    // Crear sesión en Veriff
+    const response = await axios.post(
+      `${VERIFF_CONFIG.BASE_URL}/v1/sessions`,
+      {
+        verification: {
+          callback: "https://colmena-hub.com/veriff-callback",  // ← Tu dominio real
+          vendorData: userId,  // IMPORTANTE: Vincular con usuario
+          person: {
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            idNumber: userData.idNumber || "",
+            email: userData.email,
+            phone: userData.phone || ""
+          },
+          document: {
+            type: userData.documentType || "ID_CARD",
+            country: userData.country || "MX"
+          },
+          lang: "es"
+        }
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-AUTH-CLIENT": VERIFF_CONFIG.API_KEY
+        },
+        auth: {
+          username: VERIFF_CONFIG.API_KEY,
+          password: VERIFF_CONFIG.API_SECRET
+        }
+      }
+    );
+
+    const verification = response.data.verification;
+
+    // Guardar en Firestore
+    await db.collection("veriff_sessions").doc(verification.id).set({
+      userId: userId,
+      email: userData.email,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      phone: userData.phone || "",
+      sessionId: verification.id,
+      status: "created",
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      sessionUrl: verification.url,
+      vendorData: userId
     });
 
-    // Si está aprobado, actualizar usuario
-    if (status === "approved" && userId) {
-      await db.collection("users").doc(userId).update({
-        verified: true,
-        veriffId: verification.id,
-        verificationDate: admin.firestore.FieldValue.serverTimestamp(),
-        verificationStatus: "approved",
-        identityVerified: true,
-      });
+    logger.info(`Sesión Veriff creada para ${userData.email}: ${verification.id}`);
 
-      logger.log(`✅ Usuario ${userId} verificado via webhook`);
-    } else if (userId) {
-      // Si fue rechazado o hubo error
-      await db.collection("users").doc(userId).update({
-        verificationStatus: status,
-        lastVerificationAttempt: admin.firestore.FieldValue.serverTimestamp(),
-      });
-    }
-
-    res.status(200).json({ received: true });
+    return {
+      success: true,
+      sessionId: verification.id,
+      sessionUrl: verification.url,
+      status: verification.status
+    };
 
   } catch (error) {
-    logger.error("Error en webhook Veriff:", error);
-    res.status(500).json({ error: "Error procesando webhook" });
+    logger.error("Error creando sesión Veriff:", error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || "Error al crear sesión de verificación");
   }
 });
 
-// --------------------------------------------------------------
-// 4. EVITA DUPLICADOS por INE + teléfono
-// --------------------------------------------------------------
-exports.checkDuplicates = onRequest({ maxInstances: 10 }, async (req, res) => {
-  cors(req, res, async () => {
-    try {
-      const { ineNumber, phone, uid } = req.body;
+// =============================================================
+// FUNCIÓN 2: Webhook para recibir resultados de Veriff (CRÍTICA)
+// =============================================================
+exports.veriffWebhook = onRequest({ maxInstances: 10 }, async (req, res) => {
+  try {
+    console.log("🔔 Webhook recibido de Veriff");
 
-      if (!ineNumber || !phone) {
-        return res.status(400).send("INE y teléfono requeridos");
+    // 1. Verificar firma del webhook
+    const signature = req.headers["x-veriff-signature"];
+    const payload = JSON.stringify(req.body);
+
+    if (!signature) {
+      console.error("❌ No signature in webhook");
+      return res.status(400).send("No signature");
+    }
+
+    // Verificar firma (solo en producción)
+    if (!VERIFF_CONFIG.IS_DEVELOPMENT) {
+      const expectedSignature = crypto
+        .createHmac("sha256", VERIFF_CONFIG.WEBHOOK_SECRET)
+        .update(payload)
+        .digest("hex");
+
+      if (signature !== expectedSignature) {
+        console.error("❌ Firma inválida");
+        return res.status(401).send("Invalid signature");
       }
+    }
 
-      // Buscar por INE
-      const ineQuery = await db.collection("users")
-        .where("ineNumber", "==", ineNumber)
-        .limit(1)
-        .get();
+    // 2. Procesar evento
+    const event = req.body;
+    console.log("📦 Evento:", {
+      id: event.verification?.id,
+      status: event.verification?.status,
+      timestamp: event.timestamp
+    });
 
-      // Buscar por teléfono
-      const phoneQuery = await db.collection("users")
-        .where("phone", "==", phone)
-        .limit(1)
-        .get();
+    const verificationId = event.verification?.id;
+    const status = event.verification?.status; // 'approved', 'declined', 'expired'
+    const vendorData = event.verification?.vendorData; // userId
 
-      const duplicates = [];
+    if (!verificationId || !status) {
+      return res.status(400).send("Datos incompletos");
+    }
 
-      if (!ineQuery.empty) {
-        duplicates.push("INE ya registrada");
-      }
+    // 3. Actualizar sesión en Firestore
+    await db.collection("veriff_sessions").doc(verificationId).update({
+      status: status,
+      decision: event.decision || {},
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      webhookReceived: true,
+      lastEvent: event
+    });
 
-      if (!phoneQuery.empty) {
-        duplicates.push("Teléfono ya registrado");
-      }
-
-      if (duplicates.length > 0) {
-        logger.warn(`Duplicado detectado para ${uid}: ${duplicates.join(", ")}`);
-        return res.status(409).json({
-          error: "Usuario ya registrado",
-          duplicates: duplicates,
-          message: "Este INE o teléfono ya están registrados en el sistema",
-        });
-      }
-
-      logger.log(`Sin duplicados: ${uid}`);
-      return res.status(200).json({
-        success: true,
-        message: "Sin duplicados detectados",
+    // 4. Si está aprobado, actualizar usuario
+    if (status === "approved" && vendorData) {
+      await db.collection("users").doc(vendorData).update({
+        verified: true,
+        veriffId: verificationId,
+        verificationDate: admin.firestore.FieldValue.serverTimestamp(),
+        verificationStatus: "approved",
+        identityVerified: true,
+        lastUpdated: admin.firestore.FieldValue.serverTimestamp()
       });
 
-    } catch (error) {
-      logger.error("Error en checkDuplicates", error);
-      return res.status(500).json({
-        error: "Error interno del servidor",
-        details: error.message,
+      console.log(`✅ Usuario ${vendorData} verificado exitosamente`);
+
+      // Opcional: Enviar notificación por email
+      const userDoc = await db.collection("users").doc(vendorData).get();
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        await sendVerificationEmail(userData.email, userData.displayName || userData.firstName);
+      }
+    }
+
+    // 5. Responder a Veriff
+    res.status(200).json({ 
+      success: true, 
+      message: "Webhook procesado correctamente" 
+    });
+
+  } catch (error) {
+    console.error("🔥 Error en webhook:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+// =============================================================
+// FUNCIÓN 3: Verificar estado de sesión
+// =============================================================
+exports.getVeriffStatus = onCall({ maxInstances: 10 }, async (request) => {
+  try {
+    const sessionId = request.data.sessionId;
+    
+    if (!sessionId) {
+      throw new Error("Session ID requerido");
+    }
+
+    // Primero buscar en Firestore
+    const sessionDoc = await db.collection("veriff_sessions").doc(sessionId).get();
+    
+    if (sessionDoc.exists) {
+      const sessionData = sessionDoc.data();
+      
+      // Si ya tenemos estado final, devolverlo
+      if (sessionData.status && ["approved", "declined", "expired"].includes(sessionData.status)) {
+        return {
+          status: sessionData.status,
+          sessionId: sessionId,
+          fromCache: true,
+          timestamp: sessionData.updatedAt?.toDate() || new Date()
+        };
+      }
+    }
+
+    // Consultar a Veriff
+    const response = await axios.get(
+      `${VERIFF_CONFIG.BASE_URL}/v1/sessions/${sessionId}`,
+      {
+        auth: {
+          username: VERIFF_CONFIG.API_KEY,
+          password: VERIFF_CONFIG.API_SECRET
+        }
+      }
+    );
+
+    const verification = response.data.verification;
+
+    // Actualizar Firestore
+    await db.collection("veriff_sessions").doc(sessionId).update({
+      status: verification.status,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Si está aprobado, actualizar usuario
+    if (verification.status === "approved" && verification.vendorData) {
+      await db.collection("users").doc(verification.vendorData).update({
+        verified: true,
+        veriffId: sessionId,
+        verificationDate: admin.firestore.FieldValue.serverTimestamp(),
+        verificationStatus: "approved"
       });
+    }
+
+    return {
+      status: verification.status,
+      sessionId: sessionId,
+      fromCache: false,
+      timestamp: new Date()
+    };
+
+  } catch (error) {
+    logger.error("Error obteniendo estado:", error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || "Error obteniendo estado");
+  }
+});
+
+// =============================================================
+// FUNCIÓN 4: Detectar duplicados
+// =============================================================
+exports.checkDuplicates = onCall({ maxInstances: 10 }, async (request) => {
+  const { ineNumber, phone, email } = request.data;
+  
+  if (!ineNumber && !phone && !email) {
+    throw new Error("Al menos un campo es requerido");
+  }
+
+  const duplicates = [];
+
+  // Buscar por INE
+  if (ineNumber) {
+    const ineQuery = await db.collection("users")
+      .where("ineNumber", "==", ineNumber)
+      .limit(1)
+      .get();
+    
+    if (!ineQuery.empty) {
+      duplicates.push({ type: "INE", userId: ineQuery.docs[0].id });
+    }
+  }
+
+  // Buscar por teléfono
+  if (phone) {
+    const phoneQuery = await db.collection("users")
+      .where("phone", "==", phone)
+      .limit(1)
+      .get();
+    
+    if (!phoneQuery.empty) {
+      duplicates.push({ type: "teléfono", userId: phoneQuery.docs[0].id });
+    }
+  }
+
+  // Buscar por email
+  if (email) {
+    const emailQuery = await db.collection("users")
+      .where("email", "==", email)
+      .limit(1)
+      .get();
+    
+    if (!emailQuery.empty) {
+      duplicates.push({ type: "email", userId: emailQuery.docs[0].id });
+    }
+  }
+
+  return {
+    hasDuplicates: duplicates.length > 0,
+    duplicates: duplicates,
+    message: duplicates.length > 0 ? 
+      "Usuario ya registrado" : 
+      "No se encontraron duplicados"
+  };
+});
+
+// =============================================================
+// FUNCIÓN 5: Buscar trabajadores
+// =============================================================
+exports.searchWorkers = onCall({ maxInstances: 10 }, async (request) => {
+  const { category, city, limit = 20, page = 1 } = request.data;
+  
+  if (!category || !city) {
+    throw new Error("Categoría y ciudad son requeridos");
+  }
+
+  const pageNum = parseInt(page);
+  const limitNum = parseInt(limit);
+  const offset = (pageNum - 1) * limitNum;
+
+  // Buscar en colección 'professionals' o 'workers'
+  let query = db.collection("professionals")
+    .where("category", "==", category)
+    .where("city", "==", city)
+    .where("status", "==", "active");
+
+  // Obtener total
+  const countSnapshot = await query.get();
+  const total = countSnapshot.size;
+
+  // Aplicar paginación
+  const snapshot = await query
+    .orderBy("rating", "desc")
+    .orderBy("createdAt", "desc")
+    .offset(offset)
+    .limit(limitNum)
+    .get();
+
+  const results = [];
+  snapshot.forEach(doc => {
+    results.push({
+      id: doc.id,
+      ...doc.data()
+    });
+  });
+
+  return {
+    success: true,
+    total: total,
+    page: pageNum,
+    limit: limitNum,
+    totalPages: Math.ceil(total / limitNum),
+    results: results,
+    search: {
+      category: category,
+      city: city
+    }
+  };
+});
+
+// =============================================================
+// FUNCIÓN 6: Forzar verificación después de pago
+// =============================================================
+exports.forceVerification = onCall({ maxInstances: 10 }, async (request) => {
+  const { userId, orderId } = request.data;
+  
+  if (!userId || !orderId) {
+    throw new Error("User ID y Order ID requeridos");
+  }
+
+  // Verificar si usuario ya está verificado
+  const userDoc = await db.collection("users").doc(userId).get();
+  const userData = userDoc.data();
+
+  if (userData?.verified) {
+    return {
+      requiresVerification: false,
+      message: "Usuario ya verificado",
+      alreadyVerified: true
+    };
+  }
+
+  // Crear record de verificación pendiente
+  const deadline = new Date();
+  deadline.setHours(deadline.getHours() + 24); // 24 horas
+
+  await db.collection("pending_verifications").doc(orderId).set({
+    userId: userId,
+    orderId: orderId,
+    deadline: admin.firestore.Timestamp.fromDate(deadline),
+    status: "pending",
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    verificationUrl: `https://colmena-hub.com/apply?order=${orderId}`
+  });
+
+  // Actualizar orden
+  await db.collection("orders").doc(orderId).update({
+    requiresVerification: true,
+    verificationDeadline: admin.firestore.Timestamp.fromDate(deadline),
+    verificationStatus: "pending"
+  });
+
+  return {
+    requiresVerification: true,
+    deadline: deadline.toISOString(),
+    verificationUrl: `https://colmena-hub.com/apply?order=${orderId}`,
+    message: "Verificación requerida para completar la orden"
+  };
+});
+
+// =============================================================
+// FUNCIÓN 7: Detectar si ya está registrado
+// =============================================================
+exports.detectRegistered = onCall({ maxInstances: 10 }, async (request) => {
+  const { email, phone } = request.data;
+  
+  if (!email && !phone) {
+    throw new Error("Email o teléfono requerido");
+  }
+
+  let userFound = null;
+
+  if (email) {
+    const emailQuery = await db.collection("users")
+      .where("email", "==", email)
+      .limit(1)
+      .get();
+    
+    if (!emailQuery.empty) {
+      userFound = {
+        id: emailQuery.docs[0].id,
+        ...emailQuery.docs[0].data(),
+        foundBy: "email"
+      };
+    }
+  }
+
+  if (!userFound && phone) {
+    const phoneQuery = await db.collection("users")
+      .where("phone", "==", phone)
+      .limit(1)
+      .get();
+    
+    if (!phoneQuery.empty) {
+      userFound = {
+        id: phoneQuery.docs[0].id,
+        ...phoneQuery.docs[0].data(),
+        foundBy: "phone"
+      };
+    }
+  }
+
+  return {
+    registered: !!userFound,
+    user: userFound,
+    message: userFound ? 
+      `Usuario encontrado por ${userFound.foundBy}` : 
+      "Usuario no registrado"
+  };
+});
+
+// =============================================================
+// FUNCIÓN 8: Test API - Salud del sistema
+// =============================================================
+exports.testAPI = onRequest({ maxInstances: 5 }, async (req, res) => {
+  res.json({
+    status: "operational",
+    service: "COLMENA HUB API",
+    version: "2.0.0",
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      createVeriffSession: "Crea sesión de verificación",
+      veriffWebhook: "Recibe resultados de Veriff",
+      getVeriffStatus: "Consulta estado de verificación",
+      checkDuplicates: "Detecta duplicados",
+      searchWorkers: "Busca profesionales",
+      forceVerification: "Forza verificación post-pago",
+      detectRegistered: "Detecta usuario registrado"
+    },
+    veriff: {
+      configured: !!VERIFF_CONFIG.API_KEY && VERIFF_CONFIG.API_KEY !== "95d-xxxxxxxxxxxx",
+      mode: VERIFF_CONFIG.IS_DEVELOPMENT ? "development" : "production"
     }
   });
 });
 
-// --------------------------------------------------------------
-// 5. OBLIGA VERIFICACIÓN a CLIENTES después del pago
-// --------------------------------------------------------------
-exports.forceVerification = onRequest({ maxInstances: 10 }, async (req, res) => {
-  cors(req, res, async () => {
-    try {
-      const { orderId, userId } = req.body;
+// =============================================================
+// FUNCIÓN AUXILIAR: Enviar email de verificación
+// =============================================================
+async function sendVerificationEmail(email, name) {
+  try {
+    // En producción, implementar con nodemailer o SendGrid
+    console.log(`📧 [Email Simulado] Verificación exitosa para ${name} (${email})`);
+    return true;
+  } catch (error) {
+    console.error("Error enviando email:", error);
+    return false;
+  }
+}
 
-      if (!orderId || !userId) {
-        return res.status(400).send("Order ID y User ID requeridos");
-      }
-
-      const orderRef = db.doc(`orders/${orderId}`);
-      const orderSnap = await orderRef.get();
-
-      if (!orderSnap.exists) {
-        return res.status(404).send("Orden no encontrada");
-      }
-
-      const order = orderSnap.data();
-
-      // Solo si el pago fue exitoso y aún no verificado
-      if (order.status === "paid" && !order.verified) {
-        // Verificar si el usuario YA está verificado
-        const userSnap = await db.doc(`users/${userId}`).get();
-        const userData = userSnap.exists ? userSnap.data() : null;
-
-        if (userData?.verified) {
-          // Ya verificado → actualizar orden
-          await orderRef.update({
-            verified: true,
-            verificationStatus: "already_verified",
-          });
-          return res.status(200).json({
-            message: "Usuario ya verificado",
-            verified: true,
-          });
-        }
-
-        // Obligar verificación
-        const deadline = new Date();
-        deadline.setHours(deadline.getHours() + 24); // 24 horas
-
-        await orderRef.update({
-          status: "pending_verification",
-          requiresVerification: true,
-          verificationDeadline: admin.firestore.Timestamp.fromDate(deadline),
-          verificationRequestedAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
-
-        // Notificar al usuario (opcional)
-        if (userData?.phone) {
-          await sendWhatsAppNotification(
-            userData.phone,
-            `Hola ${userData.displayName || ""}, para completar tu orden #${orderId}, necesitas verificar tu identidad. Visita: https://colmena-hub.com/verify/${orderId}`
-          );
-        }
-
-        logger.log(`Verificación obligada para orden ${orderId}, usuario ${userId}`);
-        return res.status(200).json({
-          message: "Verificación obligada",
-          requiresVerification: true,
-          deadline: deadline.toISOString(),
-          verificationUrl: `https://colmena-hub.com/verify/${orderId}`,
-        });
-      }
-
-      return res.status(200).json({
-        message: "No se requiere verificación",
-        requiresVerification: false,
-      });
-
-    } catch (error) {
-      logger.error("Error en forceVerification", error);
-      return res.status(500).json({
-        error: "Error interno del servidor",
-        details: error.message,
-      });
-    }
-  });
-});
-
-// --------------------------------------------------------------
-// 6. DETECTA SI YA ESTÁ REGISTRADO sin que usuario lo note
-// --------------------------------------------------------------
-exports.detectRegistered = onRequest({ maxInstances: 10 }, async (req, res) => {
-  cors(req, res, async () => {
-    try {
-      const { email, phone, ineNumber } = req.query;
-
-      if (!email && !phone && !ineNumber) {
-        return res.status(400).json({ error: "Al menos un parámetro requerido (email, phone o ineNumber)" });
-      }
-
-      const conditions = [];
-
-      if (email) {
-        conditions.push(db.collection("users").where("email", "==", email).limit(1));
-      }
-
-      if (phone) {
-        conditions.push(db.collection("users").where("phone", "==", phone).limit(1));
-      }
-
-      if (ineNumber) {
-        conditions.push(db.collection("users").where("ineNumber", "==", ineNumber).limit(1));
-      }
-
-      const results = await Promise.all(conditions.map(query => query.get()));
-
-      let userFound = null;
-      let foundBy = null;
-
-      for (let i = 0; i < results.length; i++) {
-        if (!results[i].empty) {
-          const doc = results[i].docs[0];
-          userFound = { id: doc.id, ...doc.data() };
-          
-          if (i === 0 && email) foundBy = "email";
-          if (i === 1 && phone) foundBy = "teléfono";
-          if (i === 2 && ineNumber) foundBy = "INE";
-          break;
-        }
-      }
-
-      if (userFound) {
-        return res.json({
-          registered: true,
-          foundBy: foundBy,
-          userId: userFound.id,
-          verified: userFound.verified || false,
-          requiresVerification: !userFound.verified,
-          userData: {
-            displayName: userFound.displayName,
-            email: userFound.email,
-            phone: userFound.phone,
-          },
-        });
-      }
-
-      return res.json({
-        registered: false,
-        message: "Usuario no registrado",
-      });
-
-    } catch (error) {
-      logger.error("Error en detectRegistered", error);
-      return res.status(500).json({
-        error: "Error interno del servidor",
-        details: error.message,
-      });
-    }
-  });
-});
-
-// --------------------------------------------------------------
-// 7. ÍNDICE PARA BÚSQUEDAS RÁPIDAS (rubro + ciudad)
-// --------------------------------------------------------------
-exports.createWorkerIndex = onDocumentCreated("workers/{uid}", async (event) => {
+// =============================================================
+// FUNCIÓN 9: Crear índice para trabajador (trigger)
+// =============================================================
+exports.createWorkerIndex = onDocumentCreated("professionals/{userId}", async (event) => {
   try {
     const snapshot = event.data;
     if (!snapshot.exists) {
@@ -452,204 +531,20 @@ exports.createWorkerIndex = onDocumentCreated("workers/{uid}", async (event) => 
 
     const data = snapshot.data();
     
-    // Solo crear índice si tiene perfil público
-    if (!data.publicProfile || !data.publicProfile.rubro || !data.publicProfile.city) {
-      return;
-    }
-
-    const { rubro, city } = data.publicProfile;
-
-    await db.collection("search_index").doc(event.params.uid).set({
-      rubro: rubro.toLowerCase().trim(),
-      city: city.toLowerCase().trim(),
+    // Crear documento en índice de búsqueda
+    await db.collection("search_index").doc(event.params.userId).set({
+      category: data.category,
+      city: data.city,
+      skills: data.skills || [],
+      rating: data.rating || 0,
+      verified: data.verified || false,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      active: true,
-      // Campos adicionales para búsqueda
-      rubroKeywords: generateKeywords(rubro),
-      cityKeywords: generateKeywords(city),
+      searchable: true
     });
 
-    logger.log(`Índice creado para trabajador ${event.params.uid}: ${rubro} en ${city}`);
+    console.log(`Índice creado para profesional: ${event.params.userId}`);
 
   } catch (error) {
-    logger.error("Error creando índice:", error);
+    console.error("Error creando índice:", error);
   }
-});
-
-// --------------------------------------------------------------
-// 8. BUSCAR TRABAJADORES por rubro y ciudad
-// --------------------------------------------------------------
-exports.searchWorkers = onRequest({ maxInstances: 10 }, async (req, res) => {
-  cors(req, res, async () => {
-    try {
-      const { rubro, city, limit = 20, page = 1 } = req.query;
-
-      if (!rubro || !city) {
-        return res.status(400).json({ error: "Rubro y ciudad requeridos" });
-      }
-
-      const searchRubro = rubro.toLowerCase().trim();
-      const searchCity = city.toLowerCase().trim();
-
-      // Buscar en el índice
-      let query = db.collection("search_index")
-        .where("rubro", "==", searchRubro)
-        .where("city", "==", searchCity)
-        .where("active", "==", true);
-
-      // Paginación
-      const offset = (page - 1) * limit;
-      query = query.limit(parseInt(limit)).offset(offset);
-
-      const snapshot = await query.get();
-
-      const results = [];
-      const workerIds = [];
-
-      snapshot.forEach(doc => {
-        workerIds.push(doc.id);
-        results.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
-
-      // Obtener datos completos de los trabajadores
-      const workersData = [];
-      if (workerIds.length > 0) {
-        const workersSnapshot = await db.collection("workers")
-          .where(admin.firestore.FieldPath.documentId(), "in", workerIds.slice(0, 30)) // Firestore límite: 30 in clauses
-          .get();
-
-        workersSnapshot.forEach(doc => {
-          workersData.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-      }
-
-      // Contar total para paginación
-      const countQuery = await db.collection("search_index")
-        .where("rubro", "==", searchRubro)
-        .where("city", "==", searchCity)
-        .where("active", "==", true)
-        .count()
-        .get();
-
-      const total = countQuery.data().count;
-
-      res.json({
-        success: true,
-        total: total,
-        page: parseInt(page),
-        limit: parseInt(limit),
-        totalPages: Math.ceil(total / limit),
-        results: workersData,
-        search: {
-          rubro: searchRubro,
-          city: searchCity,
-        },
-      });
-
-    } catch (error) {
-      logger.error("Error buscando trabajadores:", error);
-      res.status(500).json({
-        error: "Error en la búsqueda",
-        details: error.message,
-      });
-    }
-  });
-});
-
-// --------------------------------------------------------------
-// FUNCIONES AUXILIARES
-// --------------------------------------------------------------
-
-// Generar keywords para búsqueda
-function generateKeywords(text) {
-  const words = text.toLowerCase().split(/\s+/);
-  const keywords = new Set();
-  
-  words.forEach(word => {
-    if (word.length > 2) {
-      // Agregar variaciones
-      keywords.add(word);
-      if (word.endsWith('s')) {
-        keywords.add(word.slice(0, -1)); // singular
-      }
-      if (word.endsWith('es')) {
-        keywords.add(word.slice(0, -2)); // singular
-      }
-    }
-  });
-  
-  return Array.from(keywords);
-}
-
-// Enviar notificación por WhatsApp (Twilio)
-async function sendWhatsAppNotification(phone, message) {
-  try {
-    // Configuración de Twilio (opcional)
-    const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
-    const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
-    const TWILIO_WHATSAPP_NUMBER = process.env.TWILIO_WHATSAPP_NUMBER;
-
-    if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN) {
-      logger.log(`[WhatsApp Simulado] Para: ${phone} - Mensaje: ${message}`);
-      return;
-    }
-
-    const twilio = require("twilio")(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
-
-    await twilio.messages.create({
-      body: message,
-      from: `whatsapp:${TWILIO_WHATSAPP_NUMBER}`,
-      to: `whatsapp:${phone}`,
-    });
-
-    logger.log(`WhatsApp enviado a ${phone}`);
-
-  } catch (error) {
-    logger.error("Error enviando WhatsApp:", error);
-    // No fallar la función principal por error en WhatsApp
-  }
-}
-
-// Verificar firma de webhook (para producción)
-function verifySignature(signature, payload) {
-  // Implementar verificación de firma HMAC
-  // Consulta documentación de Veriff: https://developers.veriff.com/#verifying-signatures
-  return true; // Temporal para desarrollo
-}
-
-// --------------------------------------------------------------
-// 9. ENDPOINT DE PRUEBA
-// --------------------------------------------------------------
-exports.testAPI = onRequest({ maxInstances: 10 }, (req, res) => {
-  cors(req, res, () => {
-    res.json({
-      message: "✅ COLMENA HUB API funcionando",
-      timestamp: new Date().toISOString(),
-      version: "1.0.0",
-      endpoints: {
-        veriff: {
-          createSession: "/createVeriffSession (POST)",
-          checkStatus: "/getVeriffStatus?sessionId=XXX (GET)",
-          webhook: "/veriffWebhook (POST)",
-        },
-        users: {
-          checkDuplicates: "/checkDuplicates (POST)",
-          detectRegistered: "/detectRegistered (GET)",
-        },
-        orders: {
-          forceVerification: "/forceVerification (POST)",
-        },
-        workers: {
-          search: "/searchWorkers (GET)",
-        },
-      },
-    });
-  });
 });
