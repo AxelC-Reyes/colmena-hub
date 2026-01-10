@@ -5,7 +5,7 @@
 
 const { onRequest } = require("firebase-functions/v2/https");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
-const { onCall } = require("firebase-functions/v2/https");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin");
 const axios = require("axios");
@@ -22,8 +22,8 @@ const VERIFF_CONFIG = {
   API_KEY: "95d2dbf2-2592-4089-860c-10243c087fa0",  // ← Tu API Key pública de Veriff
   API_SECRET: "d714ef07-1674-4c0e-9363-aa0d522cd779",  // ← Tu API Secret
   WEBHOOK_SECRET: "whsec_xxxxxxxx",  // ← Webhook Signing Secret
-  BASE_URL: "https://stationapi.veriff.com",  // URL de PRODUCCIÓN
-  IS_DEVELOPMENT: false  // ← Cambia a false para producción
+  BASE_URL: "https://stationapi.veriff.com",  // URL de SANDBOX
+  IS_DEVELOPMENT: true  // ← Cambia a false para producción
 };
 
 // =============================================================
@@ -33,7 +33,7 @@ exports.createVeriffSession = onCall({ maxInstances: 10 }, async (request) => {
   try {
     // Verificar autenticación
     if (!request.auth) {
-      throw new Error("No autenticado");
+      throw new HttpsError("unauthenticated", "Usuario no autenticado");
     }
 
     const userId = request.auth.uid;
@@ -41,16 +41,21 @@ exports.createVeriffSession = onCall({ maxInstances: 10 }, async (request) => {
 
     // Validar datos requeridos
     if (!userData.firstName || !userData.lastName || !userData.email) {
-      throw new Error("Nombre, apellido y email son requeridos");
+      throw new HttpsError("invalid-argument", "Nombre, apellido y email son requeridos");
     }
+
+    // URL de callback - ¡IMPORTANTE! Cambia esto por tu URL real
+    const callbackUrl = VERIFF_CONFIG.IS_DEVELOPMENT 
+      ? "http://localhost:5000/veriff-callback.html"  // Para desarrollo local
+      : "https://tu-dominio.com/veriff-callback.html"; // Para producción
 
     // Crear sesión en Veriff
     const response = await axios.post(
       `${VERIFF_CONFIG.BASE_URL}/v1/sessions`,
       {
         verification: {
-          callback: "https://colmena-hub.com/veriff-callback",  // ← Tu dominio real
-          vendorData: userId,  // IMPORTANTE: Vincular con usuario
+          callback: callbackUrl,
+          vendorData: userId,
           person: {
             firstName: userData.firstName,
             lastName: userData.lastName,
@@ -90,7 +95,8 @@ exports.createVeriffSession = onCall({ maxInstances: 10 }, async (request) => {
       status: "created",
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       sessionUrl: verification.url,
-      vendorData: userId
+      vendorData: userId,
+      callbackUrl: callbackUrl
     });
 
     logger.info(`Sesión Veriff creada para ${userData.email}: ${verification.id}`);
@@ -99,17 +105,29 @@ exports.createVeriffSession = onCall({ maxInstances: 10 }, async (request) => {
       success: true,
       sessionId: verification.id,
       sessionUrl: verification.url,
-      status: verification.status
+      status: verification.status,
+      callbackUrl: callbackUrl
     };
 
   } catch (error) {
+    console.error("Error detallado Veriff:", {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status
+    });
+    
     logger.error("Error creando sesión Veriff:", error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || "Error al crear sesión de verificación");
+    
+    throw new HttpsError(
+      "internal", 
+      "Error al crear sesión de verificación", 
+      error.response?.data || error.message
+    );
   }
 });
 
 // =============================================================
-// FUNCIÓN 2: Webhook para recibir resultados de Veriff (CRÍTICA)
+// FUNCIÓN 2: Webhook para recibir resultados de Veriff
 // =============================================================
 exports.veriffWebhook = onRequest({ maxInstances: 10 }, async (req, res) => {
   try {
@@ -121,7 +139,7 @@ exports.veriffWebhook = onRequest({ maxInstances: 10 }, async (req, res) => {
 
     if (!signature) {
       console.error("❌ No signature in webhook");
-      return res.status(400).send("No signature");
+      return res.status(400).json({ error: "No signature" });
     }
 
     // Verificar firma (solo en producción)
@@ -133,13 +151,13 @@ exports.veriffWebhook = onRequest({ maxInstances: 10 }, async (req, res) => {
 
       if (signature !== expectedSignature) {
         console.error("❌ Firma inválida");
-        return res.status(401).send("Invalid signature");
+        return res.status(401).json({ error: "Invalid signature" });
       }
     }
 
     // 2. Procesar evento
     const event = req.body;
-    console.log("📦 Evento:", {
+    console.log("📦 Evento recibido:", {
       id: event.verification?.id,
       status: event.verification?.status,
       timestamp: event.timestamp
@@ -150,7 +168,7 @@ exports.veriffWebhook = onRequest({ maxInstances: 10 }, async (req, res) => {
     const vendorData = event.verification?.vendorData; // userId
 
     if (!verificationId || !status) {
-      return res.status(400).send("Datos incompletos");
+      return res.status(400).json({ error: "Datos incompletos" });
     }
 
     // 3. Actualizar sesión en Firestore
@@ -181,6 +199,12 @@ exports.veriffWebhook = onRequest({ maxInstances: 10 }, async (req, res) => {
         const userData = userDoc.data();
         await sendVerificationEmail(userData.email, userData.displayName || userData.firstName);
       }
+    } else if (vendorData) {
+      // Si fue rechazado o expiró
+      await db.collection("users").doc(vendorData).update({
+        verificationStatus: status,
+        lastVerificationAttempt: admin.firestore.FieldValue.serverTimestamp()
+      });
     }
 
     // 5. Responder a Veriff
@@ -206,7 +230,7 @@ exports.getVeriffStatus = onCall({ maxInstances: 10 }, async (request) => {
     const sessionId = request.data.sessionId;
     
     if (!sessionId) {
-      throw new Error("Session ID requerido");
+      throw new HttpsError("invalid-argument", "Session ID requerido");
     }
 
     // Primero buscar en Firestore
@@ -216,12 +240,13 @@ exports.getVeriffStatus = onCall({ maxInstances: 10 }, async (request) => {
       const sessionData = sessionDoc.data();
       
       // Si ya tenemos estado final, devolverlo
-      if (sessionData.status && ["approved", "declined", "expired"].includes(sessionData.status)) {
+      if (sessionData.status && ["approved", "declined", "expired", "abandoned"].includes(sessionData.status)) {
         return {
           status: sessionData.status,
           sessionId: sessionId,
           fromCache: true,
-          timestamp: sessionData.updatedAt?.toDate() || new Date()
+          timestamp: sessionData.updatedAt?.toDate() || new Date(),
+          userVerified: sessionData.status === "approved"
         };
       }
     }
@@ -259,12 +284,27 @@ exports.getVeriffStatus = onCall({ maxInstances: 10 }, async (request) => {
       status: verification.status,
       sessionId: sessionId,
       fromCache: false,
-      timestamp: new Date()
+      timestamp: new Date(),
+      userVerified: verification.status === "approved"
     };
 
   } catch (error) {
-    logger.error("Error obteniendo estado:", error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || "Error obteniendo estado");
+    console.error("Error obteniendo estado:", error.response?.data || error.message);
+    
+    // Si Veriff devuelve 404, la sesión puede no existir aún
+    if (error.response?.status === 404) {
+      return {
+        status: "not_found",
+        sessionId: request.data.sessionId,
+        message: "Sesión no encontrada o aún no procesada"
+      };
+    }
+    
+    throw new HttpsError(
+      "internal",
+      "Error obteniendo estado de verificación",
+      error.response?.data || error.message
+    );
   }
 });
 
@@ -272,252 +312,374 @@ exports.getVeriffStatus = onCall({ maxInstances: 10 }, async (request) => {
 // FUNCIÓN 4: Detectar duplicados
 // =============================================================
 exports.checkDuplicates = onCall({ maxInstances: 10 }, async (request) => {
-  const { ineNumber, phone, email } = request.data;
-  
-  if (!ineNumber && !phone && !email) {
-    throw new Error("Al menos un campo es requerido");
-  }
-
-  const duplicates = [];
-
-  // Buscar por INE
-  if (ineNumber) {
-    const ineQuery = await db.collection("users")
-      .where("ineNumber", "==", ineNumber)
-      .limit(1)
-      .get();
+  try {
+    const { ineNumber, phone, email } = request.data;
     
-    if (!ineQuery.empty) {
-      duplicates.push({ type: "INE", userId: ineQuery.docs[0].id });
+    if (!ineNumber && !phone && !email) {
+      throw new HttpsError("invalid-argument", "Al menos un campo es requerido (INE, teléfono o email)");
     }
-  }
 
-  // Buscar por teléfono
-  if (phone) {
-    const phoneQuery = await db.collection("users")
-      .where("phone", "==", phone)
-      .limit(1)
-      .get();
-    
-    if (!phoneQuery.empty) {
-      duplicates.push({ type: "teléfono", userId: phoneQuery.docs[0].id });
+    const duplicates = [];
+
+    // Buscar por INE
+    if (ineNumber) {
+      const ineQuery = await db.collection("users")
+        .where("ineNumber", "==", ineNumber)
+        .limit(1)
+        .get();
+      
+      if (!ineQuery.empty) {
+        const doc = ineQuery.docs[0];
+        duplicates.push({ 
+          type: "INE", 
+          userId: doc.id,
+          userData: doc.data()
+        });
+      }
     }
-  }
 
-  // Buscar por email
-  if (email) {
-    const emailQuery = await db.collection("users")
-      .where("email", "==", email)
-      .limit(1)
-      .get();
-    
-    if (!emailQuery.empty) {
-      duplicates.push({ type: "email", userId: emailQuery.docs[0].id });
+    // Buscar por teléfono
+    if (phone) {
+      const phoneQuery = await db.collection("users")
+        .where("phone", "==", phone)
+        .limit(1)
+        .get();
+      
+      if (!phoneQuery.empty) {
+        const doc = phoneQuery.docs[0];
+        duplicates.push({ 
+          type: "teléfono", 
+          userId: doc.id,
+          userData: doc.data()
+        });
+      }
     }
-  }
 
-  return {
-    hasDuplicates: duplicates.length > 0,
-    duplicates: duplicates,
-    message: duplicates.length > 0 ? 
-      "Usuario ya registrado" : 
-      "No se encontraron duplicados"
-  };
+    // Buscar por email
+    if (email) {
+      const emailQuery = await db.collection("users")
+        .where("email", "==", email)
+        .limit(1)
+        .get();
+      
+      if (!emailQuery.empty) {
+        const doc = emailQuery.docs[0];
+        duplicates.push({ 
+          type: "email", 
+          userId: doc.id,
+          userData: doc.data()
+        });
+      }
+    }
+
+    return {
+      hasDuplicates: duplicates.length > 0,
+      duplicates: duplicates,
+      message: duplicates.length > 0 ? 
+        "Usuario ya registrado" : 
+        "No se encontraron duplicados",
+      count: duplicates.length
+    };
+
+  } catch (error) {
+    console.error("Error en checkDuplicates:", error);
+    throw new HttpsError("internal", "Error verificando duplicados", error.message);
+  }
 });
 
 // =============================================================
-// FUNCIÓN 5: Buscar trabajadores
+// FUNCIÓN 5: Buscar trabajadores/profesionales
 // =============================================================
 exports.searchWorkers = onCall({ maxInstances: 10 }, async (request) => {
-  const { category, city, limit = 20, page = 1 } = request.data;
-  
-  if (!category || !city) {
-    throw new Error("Categoría y ciudad son requeridos");
-  }
-
-  const pageNum = parseInt(page);
-  const limitNum = parseInt(limit);
-  const offset = (pageNum - 1) * limitNum;
-
-  // Buscar en colección 'professionals' o 'workers'
-  let query = db.collection("professionals")
-    .where("category", "==", category)
-    .where("city", "==", city)
-    .where("status", "==", "active");
-
-  // Obtener total
-  const countSnapshot = await query.get();
-  const total = countSnapshot.size;
-
-  // Aplicar paginación
-  const snapshot = await query
-    .orderBy("rating", "desc")
-    .orderBy("createdAt", "desc")
-    .offset(offset)
-    .limit(limitNum)
-    .get();
-
-  const results = [];
-  snapshot.forEach(doc => {
-    results.push({
-      id: doc.id,
-      ...doc.data()
-    });
-  });
-
-  return {
-    success: true,
-    total: total,
-    page: pageNum,
-    limit: limitNum,
-    totalPages: Math.ceil(total / limitNum),
-    results: results,
-    search: {
-      category: category,
-      city: city
+  try {
+    const { category, city, limit = 20, page = 1, minRating = 0, verifiedOnly = false } = request.data;
+    
+    if (!category || !city) {
+      throw new HttpsError("invalid-argument", "Categoría y ciudad son requeridos");
     }
-  };
+
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const offset = (pageNum - 1) * limitNum;
+
+    // Buscar en colección 'professionals' o 'workers'
+    let query = db.collection("professionals")
+      .where("category", "==", category)
+      .where("city", "==", city)
+      .where("status", "==", "active");
+
+    // Filtrar por rating mínimo
+    if (minRating > 0) {
+      query = query.where("rating", ">=", parseFloat(minRating));
+    }
+
+    // Filtrar solo verificados
+    if (verifiedOnly) {
+      query = query.where("verified", "==", true);
+    }
+
+    // Obtener total para paginación
+    const countSnapshot = await query.get();
+    const total = countSnapshot.size;
+
+    // Aplicar paginación
+    const snapshot = await query
+      .orderBy("rating", "desc")
+      .orderBy("createdAt", "desc")
+      .offset(offset)
+      .limit(limitNum)
+      .get();
+
+    const results = [];
+    snapshot.forEach(doc => {
+      results.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+
+    return {
+      success: true,
+      total: total,
+      page: pageNum,
+      limit: limitNum,
+      totalPages: Math.ceil(total / limitNum),
+      hasMore: (pageNum * limitNum) < total,
+      results: results,
+      search: {
+        category: category,
+        city: city,
+        filters: {
+          minRating: minRating,
+          verifiedOnly: verifiedOnly
+        }
+      }
+    };
+
+  } catch (error) {
+    console.error("Error buscando trabajadores:", error);
+    throw new HttpsError("internal", "Error en la búsqueda", error.message);
+  }
 });
 
 // =============================================================
 // FUNCIÓN 6: Forzar verificación después de pago
 // =============================================================
 exports.forceVerification = onCall({ maxInstances: 10 }, async (request) => {
-  const { userId, orderId } = request.data;
-  
-  if (!userId || !orderId) {
-    throw new Error("User ID y Order ID requeridos");
-  }
+  try {
+    const { userId, orderId } = request.data;
+    
+    if (!userId || !orderId) {
+      throw new HttpsError("invalid-argument", "User ID y Order ID requeridos");
+    }
 
-  // Verificar si usuario ya está verificado
-  const userDoc = await db.collection("users").doc(userId).get();
-  const userData = userDoc.data();
+    // Verificar si usuario ya está verificado
+    const userDoc = await db.collection("users").doc(userId).get();
+    
+    if (!userDoc.exists) {
+      throw new HttpsError("not-found", "Usuario no encontrado");
+    }
 
-  if (userData?.verified) {
+    const userData = userDoc.data();
+
+    if (userData?.verified) {
+      return {
+        requiresVerification: false,
+        message: "Usuario ya verificado",
+        alreadyVerified: true,
+        verificationDate: userData.verificationDate
+      };
+    }
+
+    // Verificar si ya existe una verificación pendiente
+    const existingVerification = await db.collection("pending_verifications")
+      .where("userId", "==", userId)
+      .where("orderId", "==", orderId)
+      .where("status", "==", "pending")
+      .limit(1)
+      .get();
+
+    if (!existingVerification.empty) {
+      const pending = existingVerification.docs[0].data();
+      return {
+        requiresVerification: true,
+        message: "Ya existe una verificación pendiente",
+        deadline: pending.deadline?.toDate().toISOString(),
+        verificationUrl: pending.verificationUrl
+      };
+    }
+
+    // Crear nuevo registro de verificación pendiente
+    const deadline = new Date();
+    deadline.setHours(deadline.getHours() + 24); // 24 horas
+
+    const verificationUrl = VERIFF_CONFIG.IS_DEVELOPMENT
+      ? `http://localhost:5000/apply.html?order=${orderId}`
+      : `https://colmena-hub.com/apply.html?order=${orderId}`;
+
+    await db.collection("pending_verifications").doc(orderId).set({
+      userId: userId,
+      orderId: orderId,
+      deadline: admin.firestore.Timestamp.fromDate(deadline),
+      status: "pending",
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      verificationUrl: verificationUrl
+    });
+
+    // Actualizar orden
+    await db.collection("orders").doc(orderId).update({
+      requiresVerification: true,
+      verificationDeadline: admin.firestore.Timestamp.fromDate(deadline),
+      verificationStatus: "pending"
+    });
+
     return {
-      requiresVerification: false,
-      message: "Usuario ya verificado",
-      alreadyVerified: true
+      requiresVerification: true,
+      deadline: deadline.toISOString(),
+      verificationUrl: verificationUrl,
+      message: "Verificación requerida para completar la orden"
     };
+
+  } catch (error) {
+    console.error("Error en forceVerification:", error);
+    throw new HttpsError("internal", "Error forzando verificación", error.message);
   }
-
-  // Crear record de verificación pendiente
-  const deadline = new Date();
-  deadline.setHours(deadline.getHours() + 24); // 24 horas
-
-  await db.collection("pending_verifications").doc(orderId).set({
-    userId: userId,
-    orderId: orderId,
-    deadline: admin.firestore.Timestamp.fromDate(deadline),
-    status: "pending",
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    verificationUrl: `https://colmena-hub.com/apply?order=${orderId}`
-  });
-
-  // Actualizar orden
-  await db.collection("orders").doc(orderId).update({
-    requiresVerification: true,
-    verificationDeadline: admin.firestore.Timestamp.fromDate(deadline),
-    verificationStatus: "pending"
-  });
-
-  return {
-    requiresVerification: true,
-    deadline: deadline.toISOString(),
-    verificationUrl: `https://colmena-hub.com/apply?order=${orderId}`,
-    message: "Verificación requerida para completar la orden"
-  };
 });
 
 // =============================================================
 // FUNCIÓN 7: Detectar si ya está registrado
 // =============================================================
 exports.detectRegistered = onCall({ maxInstances: 10 }, async (request) => {
-  const { email, phone } = request.data;
-  
-  if (!email && !phone) {
-    throw new Error("Email o teléfono requerido");
-  }
-
-  let userFound = null;
-
-  if (email) {
-    const emailQuery = await db.collection("users")
-      .where("email", "==", email)
-      .limit(1)
-      .get();
+  try {
+    const { email, phone } = request.data;
     
-    if (!emailQuery.empty) {
-      userFound = {
-        id: emailQuery.docs[0].id,
-        ...emailQuery.docs[0].data(),
-        foundBy: "email"
+    if (!email && !phone) {
+      throw new HttpsError("invalid-argument", "Email o teléfono requerido");
+    }
+
+    let userFound = null;
+    let foundBy = null;
+
+    if (email) {
+      const emailQuery = await db.collection("users")
+        .where("email", "==", email)
+        .limit(1)
+        .get();
+      
+      if (!emailQuery.empty) {
+        const doc = emailQuery.docs[0];
+        userFound = {
+          id: doc.id,
+          ...doc.data()
+        };
+        foundBy = "email";
+      }
+    }
+
+    if (!userFound && phone) {
+      const phoneQuery = await db.collection("users")
+        .where("phone", "==", phone)
+        .limit(1)
+        .get();
+      
+      if (!phoneQuery.empty) {
+        const doc = phoneQuery.docs[0];
+        userFound = {
+          id: doc.id,
+          ...doc.data()
+        };
+        foundBy = "phone";
+      }
+    }
+
+    if (userFound) {
+      return {
+        registered: true,
+        user: userFound,
+        foundBy: foundBy,
+        verified: userFound.verified || false,
+        message: `Usuario encontrado por ${foundBy}`,
+        nextStep: userFound.verified ? "login" : "verify"
       };
     }
-  }
 
-  if (!userFound && phone) {
-    const phoneQuery = await db.collection("users")
-      .where("phone", "==", phone)
-      .limit(1)
-      .get();
-    
-    if (!phoneQuery.empty) {
-      userFound = {
-        id: phoneQuery.docs[0].id,
-        ...phoneQuery.docs[0].data(),
-        foundBy: "phone"
-      };
-    }
-  }
+    return {
+      registered: false,
+      message: "Usuario no registrado",
+      canRegister: true
+    };
 
-  return {
-    registered: !!userFound,
-    user: userFound,
-    message: userFound ? 
-      `Usuario encontrado por ${userFound.foundBy}` : 
-      "Usuario no registrado"
-  };
+  } catch (error) {
+    console.error("Error en detectRegistered:", error);
+    throw new HttpsError("internal", "Error detectando registro", error.message);
+  }
 });
 
 // =============================================================
 // FUNCIÓN 8: Test API - Salud del sistema
 // =============================================================
 exports.testAPI = onRequest({ maxInstances: 5 }, async (req, res) => {
-  res.json({
-    status: "operational",
-    service: "COLMENA HUB API",
-    version: "2.0.0",
-    timestamp: new Date().toISOString(),
-    endpoints: {
-      createVeriffSession: "Crea sesión de verificación",
-      veriffWebhook: "Recibe resultados de Veriff",
-      getVeriffStatus: "Consulta estado de verificación",
-      checkDuplicates: "Detecta duplicados",
-      searchWorkers: "Busca profesionales",
-      forceVerification: "Forza verificación post-pago",
-      detectRegistered: "Detecta usuario registrado"
-    },
-    veriff: {
-      configured: !!VERIFF_CONFIG.API_KEY && VERIFF_CONFIG.API_KEY !== "95d-xxxxxxxxxxxx",
-      mode: VERIFF_CONFIG.IS_DEVELOPMENT ? "development" : "production"
-    }
-  });
-});
-
-// =============================================================
-// FUNCIÓN AUXILIAR: Enviar email de verificación
-// =============================================================
-async function sendVerificationEmail(email, name) {
   try {
-    // En producción, implementar con nodemailer o SendGrid
-    console.log(`📧 [Email Simulado] Verificación exitosa para ${name} (${email})`);
-    return true;
+    // Verificar conexión a Firestore
+    const firestoreTest = await db.collection("health_checks").doc("test").set({
+      test: true,
+      timestamp: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Verificar conexión a Veriff (si está configurado)
+    let veriffStatus = "not_configured";
+    if (VERIFF_CONFIG.API_KEY && VERIFF_CONFIG.API_KEY !== "95d2dbf2-2592-4089-860c-10243c087fa0") {
+      try {
+        const testResponse = await axios.get(`${VERIFF_CONFIG.BASE_URL}/v1/sessions/test`, {
+          headers: {
+            "X-AUTH-CLIENT": VERIFF_CONFIG.API_KEY
+          },
+          timeout: 5000
+        });
+        veriffStatus = testResponse.status === 200 ? "connected" : "error";
+      } catch (veriffError) {
+        veriffStatus = "connection_error";
+      }
+    }
+
+    res.json({
+      status: "operational",
+      service: "COLMENA HUB API",
+      version: "2.0.0",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV || "development",
+      services: {
+        firestore: "connected",
+        veriff: veriffStatus,
+        environment: VERIFF_CONFIG.IS_DEVELOPMENT ? "sandbox" : "production"
+      },
+      endpoints: {
+        createVeriffSession: "POST - Crea sesión de verificación",
+        veriffWebhook: "POST - Recibe resultados de Veriff",
+        getVeriffStatus: "GET - Consulta estado de verificación",
+        checkDuplicates: "POST - Detecta duplicados",
+        searchWorkers: "POST - Busca profesionales",
+        forceVerification: "POST - Forza verificación post-pago",
+        detectRegistered: "POST - Detecta usuario registrado",
+        testAPI: "GET - Salud del sistema"
+      },
+      config: {
+        veriff_configured: !!VERIFF_CONFIG.API_KEY && VERIFF_CONFIG.API_KEY !== "95d2dbf2-2592-4089-860c-10243c087fa0",
+        node_version: process.version,
+        firebase_sdk: "admin"
+      }
+    });
+
   } catch (error) {
-    console.error("Error enviando email:", error);
-    return false;
+    console.error("Error en testAPI:", error);
+    res.status(500).json({
+      status: "unhealthy",
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
   }
-}
+});
 
 // =============================================================
 // FUNCIÓN 9: Crear índice para trabajador (trigger)
@@ -531,6 +693,11 @@ exports.createWorkerIndex = onDocumentCreated("professionals/{userId}", async (e
 
     const data = snapshot.data();
     
+    // Solo crear índice si el perfil está activo
+    if (data.status !== "active") {
+      return;
+    }
+
     // Crear documento en índice de búsqueda
     await db.collection("search_index").doc(event.params.userId).set({
       category: data.category,
@@ -538,13 +705,184 @@ exports.createWorkerIndex = onDocumentCreated("professionals/{userId}", async (e
       skills: data.skills || [],
       rating: data.rating || 0,
       verified: data.verified || false,
+      experience: data.experience || 0,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      searchable: true
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      searchable: true,
+      keywords: generateSearchKeywords(data)
     });
 
-    console.log(`Índice creado para profesional: ${event.params.userId}`);
+    console.log(`✅ Índice creado para profesional: ${event.params.userId}`);
 
   } catch (error) {
-    console.error("Error creando índice:", error);
+    console.error("❌ Error creando índice:", error);
   }
 });
+
+// =============================================================
+// FUNCIÓN 10: Health Check para monitoreo
+// =============================================================
+exports.healthCheck = onRequest({ maxInstances: 5 }, async (req, res) => {
+  const health = {
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    services: {},
+    checks: []
+  };
+
+  try {
+    // Check 1: Firestore
+    const firestoreStart = Date.now();
+    await db.collection("health_checks").doc("ping").set({
+      ping: "pong",
+      timestamp: admin.firestore.FieldValue.serverTimestamp()
+    });
+    const firestoreTime = Date.now() - firestoreStart;
+    
+    health.services.firestore = "connected";
+    health.checks.push({
+      service: "firestore",
+      status: "healthy",
+      responseTime: `${firestoreTime}ms`
+    });
+
+    // Check 2: Veriff API
+    if (VERIFF_CONFIG.API_KEY && VERIFF_CONFIG.API_KEY !== "95d2dbf2-2592-4089-860c-10243c087fa0") {
+      const veriffStart = Date.now();
+      try {
+        await axios.get(`${VERIFF_CONFIG.BASE_URL}/v1/sessions/health`, {
+          headers: {
+            "X-AUTH-CLIENT": VERIFF_CONFIG.API_KEY
+          },
+          timeout: 5000
+        });
+        const veriffTime = Date.now() - veriffStart;
+        
+        health.services.veriff = "connected";
+        health.checks.push({
+          service: "veriff",
+          status: "healthy",
+          responseTime: `${veriffTime}ms`
+        });
+      } catch (veriffError) {
+        health.services.veriff = "unreachable";
+        health.checks.push({
+          service: "veriff",
+          status: "unhealthy",
+          error: veriffError.message
+        });
+        health.status = "degraded";
+      }
+    } else {
+      health.services.veriff = "not_configured";
+      health.checks.push({
+        service: "veriff",
+        status: "not_configured"
+      });
+    }
+
+    res.json(health);
+
+  } catch (error) {
+    console.error("Health check error:", error);
+    res.status(500).json({
+      status: "unhealthy",
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// =============================================================
+// FUNCIONES AUXILIARES
+// =============================================================
+
+// Función para enviar email de verificación
+async function sendVerificationEmail(email, name) {
+  try {
+    // En producción, implementar con nodemailer o SendGrid
+    console.log(`📧 [Email Simulado] Verificación exitosa para ${name} (${email})`);
+    
+    // Guardar en Firestore para tracking
+    await db.collection("email_logs").add({
+      to: email,
+      type: "verification_success",
+      name: name,
+      sentAt: admin.firestore.FieldValue.serverTimestamp(),
+      status: "simulated"
+    });
+    
+    return true;
+  } catch (error) {
+    console.error("Error enviando email:", error);
+    return false;
+  }
+}
+
+// Generar palabras clave para búsqueda
+function generateSearchKeywords(data) {
+  const keywords = new Set();
+  
+  // Agregar categoría y ciudad
+  if (data.category) {
+    keywords.add(data.category.toLowerCase());
+    // Agregar variaciones
+    const categoryWords = data.category.toLowerCase().split(/\s+/);
+    categoryWords.forEach(word => {
+      if (word.length > 2) keywords.add(word);
+    });
+  }
+  
+  if (data.city) {
+    keywords.add(data.city.toLowerCase());
+  }
+  
+  // Agregar habilidades
+  if (data.skills && Array.isArray(data.skills)) {
+    data.skills.forEach(skill => {
+      if (skill && typeof skill === 'string') {
+        keywords.add(skill.toLowerCase());
+        const skillWords = skill.toLowerCase().split(/\s+/);
+        skillWords.forEach(word => {
+          if (word.length > 2) keywords.add(word);
+        });
+      }
+    });
+  }
+  
+  // Agregar título o descripción si existe
+  if (data.title) {
+    const titleWords = data.title.toLowerCase().split(/\s+/);
+    titleWords.forEach(word => {
+      if (word.length > 3) keywords.add(word);
+    });
+  }
+  
+  if (data.description) {
+    const descWords = data.description.toLowerCase().split(/\s+/);
+    descWords.forEach(word => {
+      if (word.length > 4) keywords.add(word);
+    });
+  }
+  
+  return Array.from(keywords);
+}
+
+// Función para verificar firma de webhook
+function verifyVeriffSignature(signature, payload, secret) {
+  try {
+    const hmac = crypto.createHmac('sha256', secret);
+    hmac.update(payload);
+    const expectedSignature = hmac.digest('hex');
+    
+    // Comparación segura contra timing attacks
+    return crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expectedSignature)
+    );
+  } catch (error) {
+    console.error("Error verificando firma:", error);
+    return false;
+  }
+}
