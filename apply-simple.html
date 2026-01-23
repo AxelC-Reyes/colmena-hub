@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro Simple - COLMENA HUB BETA</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  
+  <script>
+    // Misma configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeLIJ8ee9xUBduMKkijW4GdnY45W32Eew",
+      authDomain: "colmena-hub.firebaseapp.com",
+      projectId: "colmena-hub",
+      storageBucket: "colmena-hub.firebasestorage.app",
+      messagingSenderId: "806697924814",
+      appId: "1:806697924814:web:b11c9b057bc6d1dd71789f",
+      measurementId: "G-LQ9GLGJCX8"
+    };
+    
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+  
+  <style>
+    body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+    .card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+    .btn-primary { background: linear-gradient(135deg, #FFD700, #FFA500); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3); }
+  </style>
+</head>
+<body class="flex items-center justify-center p-4">
+  
+  <div class="card rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden">
+    
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 p-6 text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold">Registro Simplificado BETA</h1>
+          <p class="opacity-90">Solo 3 pasos para ser profesional</p>
+        </div>
+        <a href="index.html" class="text-white hover:text-yellow-200">
+          <i class="fas fa-times text-2xl"></i>
+        </a>
+      </div>
+      <div class="flex justify-center mt-6 space-x-4">
+        <div class="text-center">
+          <div class="w-10 h-10 bg-white text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-2 font-bold">1</div>
+          <p class="text-sm">Información</p>
+        </div>
+        <div class="text-center">
+          <div class="w-10 h-10 bg-white/20 text-white rounded-full flex items-center justify-center mx-auto mb-2 font-bold">2</div>
+          <p class="text-sm">Verificación</p>
+        </div>
+        <div class="text-center">
+          <div class="w-10 h-10 bg-white/20 text-white rounded-full flex items-center justify-center mx-auto mb-2 font-bold">3</div>
+          <p class="text-sm">Completado</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Contenido del formulario -->
+    <div class="p-8">
+      <div id="step-1">
+        <h2 class="text-xl font-bold text-gray-800 mb-6">¿Qué servicio ofreces?</h2>
+        
+        <!-- Búsqueda rápida -->
+        <div class="mb-6">
+          <label class="block text-gray-700 mb-2">Busca tu oficio:</label>
+          <div class="relative">
+            <input type="text" id="service-search" 
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                   placeholder="Ej: fotógrafo, electricista, diseñador...">
+            <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+          </div>
+        </div>
+        
+        <!-- Grid de servicios populares -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
+          <button class="service-btn p-4 border border-gray-300 rounded-lg hover:border-yellow-500 hover:bg-yellow-50 transition text-left">
+            <i class="fas fa-camera text-yellow-600 text-xl mb-2"></i>
+            <div class="font-medium">Fotógrafo</div>
+          </button>
+          <button class="service-btn p-4 border border-gray-300 rounded-lg hover:border-yellow-500 hover:bg-yellow-50 transition text-left">
+            <i class="fas fa-bolt text-yellow-600 text-xl mb-2"></i>
+            <div class="font-medium">Electricista</div>
+          </button>
+          <button class="service-btn p-4 border border-gray-300 rounded-lg hover:border-yellow-500 hover:bg-yellow-50 transition text-left">
+            <i class="fas fa-paint-brush text-yellow-600 text-xl mb-2"></i>
+            <div class="font-medium">Pintor</div>
+          </button>
+          <button class="service-btn p-4 border border-gray-300 rounded-lg hover:border-yellow-500 hover:bg-yellow-50 transition text-left">
+            <i class="fas fa-wrench text-yellow-600 text-xl mb-2"></i>
+            <div class="font-medium">Plomero</div>
+          </button>
+          <button class="service-btn p-4 border border-gray-300 rounded-lg hover:border-yellow-500 hover:bg-yellow-50 transition text-left">
+            <i class="fas fa-code text-yellow-600 text-xl mb-2"></i>
+            <div class="font-medium">Programador</div>
+          </button>
+          <button class="service-btn p-4 border border-gray-300 rounded-lg hover:border-yellow-500 hover:bg-yellow-50 transition text-left">
+            <i class="fas fa-user-tie text-yellow-600 text-xl mb-2"></i>
+            <div class="font-medium">Asistente</div>
+          </button>
+        </div>
+        
+        <!-- Información adicional -->
+        <div class="mb-6">
+          <label class="block text-gray-700 mb-2">Breve descripción de lo que haces:</label>
+          <textarea id="description" 
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" 
+                    rows="3"
+                    placeholder="Ej: Tomo fotos profesionales para eventos sociales..."></textarea>
+        </div>
+        
+        <!-- Precio por hora -->
+        <div class="mb-8">
+          <label class="block text-gray-700 mb-2">Precio por hora (aproximado):</label>
+          <div class="flex items-center">
+            <span class="bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg px-4 py-3">$</span>
+            <input type="number" id="hourly-rate" 
+                   class="flex-grow p-3 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                   placeholder="250"
+                   min="50"
+                   max="5000">
+            <span class="ml-3 text-gray-600">MXN/hora</span>
+          </div>
+        </div>
+        
+        <button id="next-step-1" class="btn-primary w-full py-4 rounded-lg font-bold text-lg">
+          Continuar <i class="fas fa-arrow-right ml-2"></i>
+        </button>
+      </div>
+      
+      <!-- Paso 2 (oculto inicialmente) -->
+      <div id="step-2" class="hidden">
+        <h2 class="text-xl font-bold text-gray-800 mb-6">Verificación rápida</h2>
+        
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
+          <div class="flex items-start">
+            <i class="fas fa-shield-alt text-blue-500 text-2xl mr-4 mt-1"></i>
+            <div>
+              <h3 class="font-bold text-blue-800 text-lg mb-2">Verificación simplificada BETA</h3>
+              <p class="text-blue-700 mb-3">Por ahora solo necesitamos:</p>
+              <ul class="text-blue-600 list-disc pl-5 space-y-1">
+                <li>Tu nombre completo</li>
+                <li>Número de teléfono</li>
+                <li>Correo de Gmail</li>
+              </ul>
+              <p class="text-sm text-blue-500 mt-3">
+                <i class="fas fa-info-circle mr-1"></i>
+                En producción se integrará Veriff completo
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="space-y-6">
+          <div>
+            <label class="block text-gray-700 mb-2">Nombre completo:</label>
+            <input type="text" id="full-name" 
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                   placeholder="Como aparece en tu INE">
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 mb-2">Teléfono:</label>
+            <input type="tel" id="phone" 
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                   placeholder="10 dígitos">
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 mb-2">Correo (Gmail):</label>
+            <input type="email" id="email" 
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                   placeholder="tu@gmail.com">
+          </div>
+        </div>
+        
+        <div class="flex justify-between mt-8">
+          <button id="back-step-2" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+            <i class="fas fa-arrow-left mr-2"></i> Atrás
+          </button>
+          <button id="next-step-2" class="btn-primary px-8 py-3 rounded-lg font-bold">
+            Verificar <i class="fas fa-check ml-2"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Paso 3 (oculto inicialmente) -->
+      <div id="step-3" class="hidden text-center py-8">
+        <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <i class="fas fa-check text-green-500 text-4xl"></i>
+        </div>
+        
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">¡Listo para comenzar!</h2>
+        <p class="text-gray-600 mb-8 max-w-md mx-auto">
+          Tu perfil ha sido registrado en nuestra base de datos BETA.
+          Pronto te contactaremos cuando haya clientes interesados.
+        </p>
+        
+        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8 max-w-md mx-auto">
+          <h3 class="font-bold text-yellow-800 mb-2">📋 Próximos pasos:</h3>
+          <ul class="text-yellow-700 text-left space-y-2">
+            <li class="flex items-center">
+              <i class="fas fa-clock text-yellow-600 mr-3"></i>
+              <span>Verificaremos tu información (24-48 hrs)</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fas fa-bell text-yellow-600 mr-3"></i>
+              <span>Te notificaremos cuando recibas ofertas</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fas fa-chart-line text-yellow-600 mr-3"></i>
+              <span>Podrás ver estadísticas en tu dashboard</span>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="index.html" class="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900">
+            <i class="fas fa-home mr-2"></i> Volver al inicio
+          </a>
+          <button id="view-profile" class="px-6 py-3 btn-primary rounded-lg">
+            <i class="fas fa-user mr-2"></i> Ver mi perfil BETA
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Script de funcionalidad -->
+  <script>
+    let selectedService = '';
+    let currentStep = 1;
+    
+    // Seleccionar servicio
+    document.querySelectorAll('.service-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        // Remover selección anterior
+        document.querySelectorAll('.service-btn').forEach(b => {
+          b.classList.remove('border-yellow-500', 'bg-yellow-50', 'ring-2', 'ring-yellow-300');
+        });
+        
+        // Agregar selección actual
+        this.classList.add('border-yellow-500', 'bg-yellow-50', 'ring-2', 'ring-yellow-300');
+        selectedService = this.querySelector('.font-medium').textContent;
+      });
+    });
+    
+    // Navegación entre pasos
+    document.getElementById('next-step-1').addEventListener('click', () => {
+      if (!selectedService) {
+        alert('Por favor selecciona un servicio');
+        return;
+      }
+      
+      document.getElementById('step-1').classList.add('hidden');
+      document.getElementById('step-2').classList.remove('hidden');
+      currentStep = 2;
+    });
+    
+    document.getElementById('back-step-2').addEventListener('click', () => {
+      document.getElementById('step-2').classList.add('hidden');
+      document.getElementById('step-1').classList.remove('hidden');
+      currentStep = 1;
+    });
+    
+    document.getElementById('next-step-2').addEventListener('click', async () => {
+      // Validar datos básicos
+      const fullName = document.getElementById('full-name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const email = document.getElementById('email').value.trim();
+      
+      if (!fullName || !phone || !email) {
+        alert('Por favor completa todos los campos');
+        return;
+      }
+      
+      // Verificar si el usuario está logueado
+      const user = auth.currentUser;
+      if (!user) {
+        alert('Primero inicia sesión en la página principal');
+        window.location.href = 'index.html';
+        return;
+      }
+      
+      // Mostrar loading
+      const btn = document.getElementById('next-step-2');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Guardando...';
+      btn.disabled = true;
+      
+      try {
+        // Guardar en Firestore
+        await db.collection('professionals_beta').doc(user.uid).set({
+          userId: user.uid,
+          service: selectedService,
+          description: document.getElementById('description').value.trim(),
+          hourlyRate: parseInt(document.getElementById('hourly-rate').value) || 250,
+          fullName: fullName,
+          phone: phone,
+          email: email,
+          userEmail: user.email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          status: 'pending',
+          verified: false,
+          stripeConnected: false
+        });
+        
+        // Actualizar UI
+        document.getElementById('step-2').classList.add('hidden');
+        document.getElementById('step-3').classList.remove('hidden');
+        currentStep = 3;
+        
+        console.log('Profesional registrado en Firestore');
+        
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar: ' + error.message);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    });
+    
+    // Ver perfil
+    document.getElementById('view-profile').addEventListener('click', async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+      
+      try {
+        const doc = await db.collection('professionals_beta').doc(user.uid).get();
+        if (doc.exists) {
+          const data = doc.data();
+          alert(`Perfil BETA:\n\nServicio: ${data.service}\nDescripción: ${data.description}\nPrecio/hora: $${data.hourlyRate} MXN\nEstado: ${data.status}\n\nID: ${user.uid.substring(0, 8)}...`);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+    
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Apply Simple BETA cargado');
+      
+      // Verificar autenticación
+      auth.onAuthStateChanged(user => {
+        if (!user) {
+          // Si no está logueado, mostrar mensaje
+          const step1 = document.getElementById('step-1');
+          step1.innerHTML = `
+            <div class="text-center py-12">
+              <i class="fas fa-user-lock text-5xl text-gray-300 mb-6"></i>
+              <h2 class="text-xl font-bold text-gray-800 mb-4">Primero inicia sesión</h2>
+              <p class="text-gray-600 mb-6">Necesitas tener una cuenta para registrarte como profesional.</p>
+              <a href="index.html" class="btn-primary px-8 py-3 rounded-lg font-bold inline-block">
+                <i class="fas fa-sign-in-alt mr-2"></i> Ir a iniciar sesión
+              </a>
+            </div>
+          `;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
