@@ -110,29 +110,45 @@
   });
   
   // Manejar verificación Veriff
-  document.getElementById('verify-btn')?.addEventListener('click', async () => {
-    const user = auth?.currentUser;
-    if (!user) {
-      alert('Primero inicia sesión');
-      return;
+  document.getElementById('verify-btn').addEventListener('click', async () => {
+  const user = auth?.currentUser;
+  if (!user) {
+    showStatus('Primero inicia sesión', true);
+    return;
+  }
+  
+  showStatus('Iniciando Veriff...');
+  
+  // Preparar datos del usuario
+  const userData = {
+    uid: user.uid,
+    email: user.email,
+    displayName: user.displayName,
+    firstName: user.displayName?.split(' ')[0] || 'Usuario',
+    lastName: user.displayName?.split(' ').slice(1).join(' ') || 'Test'
+  };
+  
+  // Usar VeriffWorking
+  if (window.VeriffWorking) {
+    try {
+      const sessionId = await window.VeriffWorking.startVerification(userData);
+      
+      if (sessionId) {
+        showStatus('Veriff iniciado. Sigue las instrucciones en pantalla.');
+        
+        // Guardar sessionId en localStorage para referencia
+        localStorage.setItem('veriff_session_id', sessionId);
+        localStorage.setItem('veriff_user_id', user.uid);
+      }
+      
+    } catch (error) {
+      console.error('Error Veriff:', error);
+      showStatus('Error: ' + error.message, true);
     }
-    
-    // Obtener datos del usuario
-    const userData = {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
-      firstName: user.displayName?.split(' ')[0] || 'Usuario',
-      lastName: user.displayName?.split(' ').slice(1).join(' ') || 'Test'
-    };
-    
-    // Iniciar Veriff
-    if (window.VeriffSimple) {
-      window.VeriffSimple.startVerification(userData);
-    } else {
-      alert('Veriff no está disponible. Recarga la página.');
-    }
-  });
+  } else {
+    showStatus('Veriff no está disponible', true);
+  }
+});
   
   // Actualizar UI
   function updateUI(user) {
