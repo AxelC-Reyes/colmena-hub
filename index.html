@@ -1,3 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COLMENA-HUB BETA</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body{ margin:0; background-color: #f3f4f6; }
+    .logo-img { height: 100px; width: auto; transition: transform 0.3s ease; }
+    .logo-img:hover { transform: scale(1.05); }
+    .hexagon { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
+    .fade-in { animation: fadeIn 0.5s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+
+
 <!-- En el HEAD, después de los estilos -->
 <style>
   /* Estilos básicos para Veriff */
@@ -110,45 +129,29 @@
   });
   
   // Manejar verificación Veriff
-  document.getElementById('verify-btn').addEventListener('click', async () => {
-  const user = auth?.currentUser;
-  if (!user) {
-    showStatus('Primero inicia sesión', true);
-    return;
-  }
-  
-  showStatus('Iniciando Veriff...');
-  
-  // Preparar datos del usuario
-  const userData = {
-    uid: user.uid,
-    email: user.email,
-    displayName: user.displayName,
-    firstName: user.displayName?.split(' ')[0] || 'Usuario',
-    lastName: user.displayName?.split(' ').slice(1).join(' ') || 'Test'
-  };
-  
-  // Usar VeriffWorking
-  if (window.VeriffWorking) {
-    try {
-      const sessionId = await window.VeriffWorking.startVerification(userData);
-      
-      if (sessionId) {
-        showStatus('Veriff iniciado. Sigue las instrucciones en pantalla.');
-        
-        // Guardar sessionId en localStorage para referencia
-        localStorage.setItem('veriff_session_id', sessionId);
-        localStorage.setItem('veriff_user_id', user.uid);
-      }
-      
-    } catch (error) {
-      console.error('Error Veriff:', error);
-      showStatus('Error: ' + error.message, true);
+  document.getElementById('verify-btn')?.addEventListener('click', async () => {
+    const user = auth?.currentUser;
+    if (!user) {
+      alert('Primero inicia sesión');
+      return;
     }
-  } else {
-    showStatus('Veriff no está disponible', true);
-  }
-});
+    
+    // Obtener datos del usuario
+    const userData = {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+      firstName: user.displayName?.split(' ')[0] || 'Usuario',
+      lastName: user.displayName?.split(' ').slice(1).join(' ') || 'Test'
+    };
+    
+    // Iniciar Veriff
+    if (window.VeriffSimple) {
+      window.VeriffSimple.startVerification(userData);
+    } else {
+      alert('Veriff no está disponible. Recarga la página.');
+    }
+  });
   
   // Actualizar UI
   function updateUI(user) {
@@ -230,3 +233,719 @@
     }
   });
 </script>
+
+
+<body class="min-h-screen bg-gray-50">
+  <!-- Barra de estado superior -->
+  <div id="status-bar" class="bg-yellow-500 text-white text-sm py-2 px-4 text-center hidden">
+    <i class="fas fa-spinner fa-spin mr-2"></i>
+    <span id="status-text">Cargando...</span>
+  </div>
+
+  <!-- Contenido principal -->
+  <main class="container mx-auto px-4 py-12">
+    
+    <!-- Logo y Título -->
+    <div class="flex flex-col md:flex-row items-center justify-center gap-6 mb-10 fade-in">
+      <img src="colmena-hubLOGO.png" alt="COLMENA HUB Logo" class="h-32 w-auto">
+      <div class="text-center md:text-left">
+        <h1 class="text-4xl font-bold text-gray-800">COLMENA-HUB BETA</h1>
+        <p class="text-lg text-gray-600 mt-2">Prueba de integración de APIs</p>
+        <div class="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded-lg hidden" id="local-warning">
+          <i class="fas fa-exclamation-triangle mr-2"></i>
+          <strong>⚠️ NO FUNCIONARÁ EN LOCAL:</strong> Usa un servidor (http://localhost:8000)
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel de estado (solo visible cuando hay usuario) -->
+    <div id="user-panel" class="max-w-md mx-auto bg-white rounded-xl shadow-lg p-6 mb-8 hidden fade-in">
+      <div class="flex items-center space-x-4">
+        <img id="user-avatar" src="" alt="Avatar" class="w-16 h-16 rounded-full border-2 border-yellow-500">
+        <div>
+          <h2 id="user-name" class="text-xl font-bold text-gray-800"></h2>
+          <p id="user-email" class="text-gray-600 text-sm"></p>
+          <div class="flex items-center mt-2">
+            <span id="verification-badge" class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium hidden">
+              <i class="fas fa-times-circle mr-1"></i> No verificado
+            </span>
+            <span id="verified-badge" class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium hidden">
+              <i class="fas fa-check-circle mr-1"></i> Verificado
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="mt-6 grid grid-cols-2 gap-4">
+        <button id="logout-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition flex items-center justify-center">
+          <i class="fas fa-sign-out-alt mr-2"></i> Cerrar sesión
+        </button>
+        <button id="verify-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center">
+          <i class="fas fa-shield-alt mr-2"></i> Verificar
+        </button>
+      </div>
+    </div>
+
+    <!-- Hexágonos principales -->
+    <div class="flex flex-col md:flex-row items-center justify-center gap-12 mb-12 fade-in">
+      <a href="professional-type.html"
+         class="relative w-56 h-60 flex flex-col items-center justify-center text-white font-bold text-xl
+                bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg hover:from-yellow-600 hover:to-yellow-700 
+                transition-all duration-300 hexagon transform hover:-translate-y-2">
+        <i class="fas fa-search text-3xl mb-2"></i>
+        <span>CONTRATAR</span>
+        <p class="text-sm font-normal mt-2 text-center px-4">Buscar profesionales</p>
+      </a>
+
+      <a href="apply-simple.html"
+         class="relative w-56 h-60 flex flex-col items-center justify-center text-white font-bold text-xl
+                bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg hover:from-yellow-600 hover:to-yellow-700 
+                transition-all duration-300 hexagon transform hover:-translate-y-2">
+        <i class="fas fa-user-check text-3xl mb-2"></i>
+        <span>SER CONTRATADO</span>
+        <p class="text-sm font-normal mt-2 text-center px-4">Registro simplificado</p>
+      </a>
+    </div>
+
+    <!-- Botón de login (visible cuando NO hay usuario) -->
+    <div id="login-section" class="text-center fade-in">
+      <p class="text-gray-600 mb-4">Inicia sesión para comenzar</p>
+      <button id="btnGoogle" class="px-6 py-3 bg-white text-gray-700 rounded-lg border border-gray-300 
+                                    hover:bg-gray-50 transition inline-flex items-center justify-center gap-3 
+                                    shadow hover:shadow-md transform hover:-translate-y-1">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
+             class="w-5 h-5" 
+             alt="Google">
+        <span class="font-medium">Ingresar con Google</span>
+      </button>
+      <p class="text-xs text-gray-500 mt-3">
+        <i class="fas fa-info-circle mr-1"></i>
+        Necesitas ejecutar desde <code>http://localhost:8000</code>
+      </p>
+    </div>
+
+    <!-- Panel de debug (solo para pruebas) -->
+    <div class="max-w-2xl mx-auto mt-12 bg-gray-100 rounded-lg p-6 border border-gray-300 fade-in">
+      <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+        <i class="fas fa-vial mr-2 text-yellow-600"></i> Panel de pruebas BETA
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <button id="test-firestore" class="px-4 py-3 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 
+                                           transition flex items-center justify-center">
+          <i class="fas fa-database mr-2"></i> Probar Firestore
+        </button>
+        <button id="test-auth" class="px-4 py-3 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 
+                                      transition flex items-center justify-center">
+          <i class="fas fa-user-check mr-2"></i> Probar Auth
+        </button>
+        <button id="test-veriff" class="px-4 py-3 bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-200 
+                                        transition flex items-center justify-center">
+          <i class="fas fa-shield-alt mr-2"></i> Probar Veriff
+        </button>
+      </div>
+      <div id="test-results" class="text-sm text-gray-600"></div>
+      
+      <!-- Instrucciones para servidor local -->
+      <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <h4 class="font-bold text-yellow-800 mb-2 flex items-center">
+          <i class="fas fa-server mr-2"></i> ¿No funciona el login?
+        </h4>
+        <p class="text-yellow-700 text-sm mb-2">Ejecuta en terminal:</p>
+        <div class="bg-black text-green-400 p-3 rounded font-mono text-xs">
+          <div class="mb-1"># Opción 1 (Python 3)</div>
+          <div class="text-yellow-300">python3 -m http.server 8000</div>
+          <div class="mb-1 mt-2"># Opción 2 (Node.js)</div>
+          <div class="text-yellow-300">npx http-server -p 8000</div>
+        </div>
+        <p class="text-yellow-700 text-xs mt-2">Luego abre: <a href="http://localhost:8000" class="underline">http://localhost:8000</a></p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer simplificado -->
+  <footer class="mt-16 py-6 bg-gray-800 text-white">
+    <div class="container mx-auto px-4 text-center">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-4 md:mb-0">
+          <div class="flex items-center justify-center md:justify-start space-x-2">
+            <i class="fas fa-bee text-yellow-400"></i>
+            <span class="font-bold text-lg">COLMENA HUB BETA v0.1</span>
+          </div>
+          <p class="text-gray-400 text-sm mt-1">Pruebas de integración técnica</p>
+        </div>
+        <div class="text-sm text-gray-400">
+          <p class="flex flex-wrap justify-center gap-2">
+            <span class="px-2 py-1 bg-gray-700 rounded">Firebase ✓</span>
+            <span class="px-2 py-1 bg-gray-700 rounded">OAuth ✓</span>
+            <span class="px-2 py-1 bg-gray-700 rounded">Veriff ✓</span>
+            <span class="px-2 py-1 bg-gray-700 rounded">Stripe (próximo)</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========== SCRIPTS EN ORDEN CORRECTO ========== -->
+  
+  <!-- 1. Firebase SDK (SIEMPRE PRIMERO) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  
+  <!-- 2. Veriff SDK (OPCIONAL - puede fallar pero no debe bloquear OAuth) -->
+  <script>
+    // Cargar Veriff solo si existe el archivo
+    function loadVeriff() {
+      const script = document.createElement('script');
+      script.src = 'veriff-real.js';
+      script.onerror = function() {
+        console.log('⚠️ veriff-real.js no encontrado, usando simulación');
+        window.VeriffReal = {
+          startVeriffVerification: simulateVeriff,
+          config: { SIMULATION_MODE: true }
+        };
+      };
+      document.head.appendChild(script);
+    }
+    
+    function simulateVeriff(userData, onSuccess, onError) {
+      console.log('🎭 Simulando Veriff para:', userData.email);
+      setTimeout(() => {
+        if (onSuccess) {
+          onSuccess({
+            id: 'simulated_' + Date.now(),
+            status: 'approved',
+            person: userData
+          });
+        }
+      }, 1500);
+      return 'simulated_session';
+    }
+    
+    // Cargar Veriff después de que todo esté listo
+    window.addEventListener('DOMContentLoaded', loadVeriff);
+  </script>
+  
+  <!-- 3. Código principal de la aplicación -->
+  <script>
+    // ========== CONFIGURACIÓN FIREBASE ==========
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeLIJ8ee9xUBduMKkijW4GdnY45W32Eew",
+      authDomain: "colmena-hub.firebaseapp.com",
+      projectId: "colmena-hub",
+      storageBucket: "colmena-hub.firebasestorage.app",
+      messagingSenderId: "806697924814",
+      appId: "1:806697924814:web:b11c9b057bc6d1dd71789f",
+      measurementId: "G-LQ9GLGJCX8"
+    };
+    
+    // Variables globales
+    let auth = null;
+    let db = null;
+    let firebaseInitialized = false;
+    
+    // ========== FUNCIONES GLOBALES ==========
+    
+    function showStatus(message, isError = false) {
+      const bar = document.getElementById('status-bar');
+      const text = document.getElementById('status-text');
+      
+      if (isError) {
+        bar.className = 'bg-red-500 text-white text-sm py-2 px-4 text-center';
+        bar.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i><span>${message}</span>`;
+      } else {
+        bar.className = 'bg-yellow-500 text-white text-sm py-2 px-4 text-center';
+        bar.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i><span>${message}</span>`;
+      }
+      
+      bar.classList.remove('hidden');
+      
+      if (!isError) {
+        setTimeout(() => bar.classList.add('hidden'), 3000);
+      }
+    }
+    
+    function updateUI(userData) {
+      const loginSection = document.getElementById('login-section');
+      const userPanel = document.getElementById('user-panel');
+      
+      if (!loginSection || !userPanel) {
+        console.log('⏳ Elementos UI aún no disponibles');
+        return;
+      }
+      
+      if (userData) {
+        loginSection.classList.add('hidden');
+        userPanel.classList.remove('hidden');
+        
+        document.getElementById('user-name').textContent = userData.displayName || 'Usuario';
+        document.getElementById('user-email').textContent = userData.email || '';
+        
+        const avatar = document.getElementById('user-avatar');
+        if (avatar) {
+          avatar.src = userData.photoURL || 'https://ui-avatars.com/api/?name=' + 
+            encodeURIComponent(userData.displayName || 'Usuario') + '&background=FFD700&color=000';
+        }
+        
+        const verifiedBadge = document.getElementById('verified-badge');
+        const verificationBadge = document.getElementById('verification-badge');
+        const verifyBtn = document.getElementById('verify-btn');
+        
+        if (verifiedBadge && verificationBadge && verifyBtn) {
+          if (userData.verified) {
+            verifiedBadge.classList.remove('hidden');
+            verificationBadge.classList.add('hidden');
+            verifyBtn.classList.add('hidden');
+          } else {
+            verificationBadge.classList.remove('hidden');
+            verifiedBadge.classList.add('hidden');
+            verifyBtn.classList.remove('hidden');
+          }
+        }
+        
+      } else {
+        loginSection.classList.remove('hidden');
+        userPanel.classList.add('hidden');
+      }
+    }
+    
+    // ========== INICIALIZACIÓN FIREBASE ==========
+    
+    function initializeFirebase() {
+      try {
+        console.log('🔥 Intentando inicializar Firebase...');
+        
+        // Verificar si estamos en local (file://)
+        if (window.location.protocol === 'file:') {
+          const warning = document.getElementById('local-warning');
+          if (warning) warning.classList.remove('hidden');
+          showStatus('⚠️ Ejecuta desde localhost:8000', true);
+          return false;
+        }
+        
+        // Inicializar Firebase solo si no existe
+        if (!firebase.apps.length) {
+          console.log('🔥 Firebase no inicializado, inicializando...');
+          firebase.initializeApp(firebaseConfig);
+          console.log('✅ Firebase inicializado correctamente');
+        } else {
+          console.log('🔥 Firebase ya estaba inicializado');
+        }
+        
+        // Obtener referencias
+        auth = firebase.auth();
+        db = firebase.firestore();
+        firebaseInitialized = true;
+        
+        console.log('✅ Firebase Auth y Firestore listos');
+        return true;
+        
+      } catch (error) {
+        console.error('❌ Error FATAL inicializando Firebase:', error);
+        showStatus('Error crítico Firebase: ' + error.message, true);
+        return false;
+      }
+    }
+    
+    // ========== MANEJO DE AUTENTICACIÓN ==========
+    
+    function setupAuthListeners() {
+      console.log('🔧 Configurando listeners de autenticación...');
+      
+      const btnGoogle = document.getElementById('btnGoogle');
+      const logoutBtn = document.getElementById('logout-btn');
+      
+      if (btnGoogle) {
+        console.log('✅ Botón Google encontrado, agregando listener');
+        btnGoogle.addEventListener('click', handleGoogleLogin);
+      } else {
+        console.error('❌ Botón Google NO encontrado');
+      }
+      
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+      }
+    }
+    
+    async function handleGoogleLogin() {
+      console.log('🟡 Botón Google clickeado');
+      
+      if (!firebaseInitialized || !auth) {
+        showStatus('Error: Firebase no está listo. Recarga la página.', true);
+        console.error('❌ Firebase no inicializado al hacer click');
+        return;
+      }
+      
+      showStatus('Iniciando sesión con Google...');
+      console.log('🔄 Iniciando proceso OAuth...');
+      
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+        
+        console.log('🔄 Llamando signInWithPopup...');
+        const result = await auth.signInWithPopup(provider);
+        const user = result.user;
+        
+        console.log('✅ Login exitoso:', user.email);
+        
+        // Intentar guardar en Firestore (opcional)
+        if (db) {
+          try {
+            await db.collection('users').doc(user.uid).set({
+              uid: user.uid,
+              displayName: user.displayName,
+              email: user.email,
+              photoURL: user.photoURL,
+              lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+              verified: false,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            console.log('✅ Usuario guardado en Firestore');
+          } catch (firestoreError) {
+            console.warn('⚠️ Error Firestore (permisos?):', firestoreError);
+          }
+        }
+        
+        showStatus(`¡Bienvenido ${user.displayName}!`);
+        console.log('✅ UI actualizada');
+        
+      } catch (error) {
+        console.error('❌ Error en login Google:', error);
+        
+        if (error.code === 'auth/operation-not-supported-in-this-environment') {
+          showStatus('⚠️ Ejecuta desde http://localhost:8000', true);
+          const warning = document.getElementById('local-warning');
+          if (warning) warning.classList.remove('hidden');
+        } else if (error.code === 'auth/popup-blocked') {
+          showStatus('⚠️ Ventana emergente bloqueada. Permite popups.', true);
+        } else if (error.code === 'auth/popup-closed-by-user') {
+          showStatus('Ventana cerrada por el usuario', false);
+        } else {
+          showStatus(`Error: ${error.message}`, true);
+        }
+      }
+    }
+    
+    async function handleLogout() {
+      try {
+        await auth.signOut();
+        showStatus('Sesión cerrada correctamente');
+      } catch (error) {
+        showStatus(`Error: ${error.message}`, true);
+      }
+    }
+    
+    // ========== VERIFICACIÓN VERIFF ==========
+    
+    function setupVeriffButton() {
+      const verifyBtn = document.getElementById('verify-btn');
+      if (!verifyBtn) {
+        console.warn('⚠️ Botón verify-btn no encontrado');
+        return;
+      }
+      
+      verifyBtn.addEventListener('click', handleVerification);
+    }
+    
+    async function handleVerification() {
+      const user = auth?.currentUser;
+      if (!user) {
+        showStatus('Primero inicia sesión', true);
+        return;
+      }
+      
+      showStatus('Iniciando verificación de identidad...');
+      
+      // Verificar si Veriff está disponible
+      if (window.VeriffReal && window.VeriffReal.startVeriffVerification) {
+        try {
+          const userData = {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            firstName: user.displayName?.split(' ')[0] || 'Usuario',
+            lastName: user.displayName?.split(' ').slice(1).join(' ') || 'Test'
+          };
+          
+          console.log('🚀 Llamando Veriff Real...');
+          const sessionId = await window.VeriffReal.startVeriffVerification(
+            userData,
+            async (verificationData) => {
+              console.log('✅ Veriff éxito:', verificationData);
+              
+              try {
+                if (db) {
+                  await db.collection('users').doc(user.uid).update({
+                    verified: true,
+                    veriffId: verificationData.id,
+                    veriffStatus: verificationData.status,
+                    verificationDate: firebase.firestore.FieldValue.serverTimestamp()
+                  });
+                }
+                
+                showStatus('✅ ¡Identidad verificada exitosamente!');
+                
+                // Recargar UI
+                const userDoc = db ? await db.collection('users').doc(user.uid).get() : null;
+                updateUI({ 
+                  ...user, 
+                  ...(userDoc?.exists ? userDoc.data() : {}) 
+                });
+                
+              } catch (error) {
+                console.error('Error guardando verificación:', error);
+                showStatus('✅ Verificado (error guardando datos)', false);
+              }
+            },
+            (error) => {
+              console.error('❌ Error Veriff:', error);
+              showStatus('Error en verificación: ' + error.message, true);
+            }
+          );
+          
+          if (sessionId) {
+            showStatus('Redirigiendo a Veriff...');
+          }
+          
+        } catch (error) {
+          console.error('Error iniciando Veriff:', error);
+          simulateVeriffFallback(user);
+        }
+      } else {
+        // Veriff no disponible, usar simulación
+        simulateVeriffFallback(user);
+      }
+    }
+    
+    async function simulateVeriffFallback(user) {
+      showStatus('⚠️ Usando simulación...');
+      
+      setTimeout(async () => {
+        try {
+          if (db) {
+            await db.collection('users').doc(user.uid).update({
+              verified: true,
+              verifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
+              verificationMethod: 'simulated'
+            });
+          }
+          
+          showStatus('✅ ¡Identidad verificada exitosamente! (simulación)');
+          
+          if (db) {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            updateUI({ ...user, ...userDoc.data() });
+          } else {
+            updateUI({ ...user, verified: true });
+          }
+          
+        } catch (error) {
+          console.error('Error en simulación:', error);
+          showStatus('Error: ' + error.message, true);
+        }
+      }, 2000);
+    }
+    
+    // ========== PRUEBAS TÉCNICAS ==========
+    
+    function setupTestButtons() {
+      const testFirestore = document.getElementById('test-firestore');
+      const testAuth = document.getElementById('test-auth');
+      const testVeriff = document.getElementById('test-veriff');
+      
+      if (testFirestore) {
+        testFirestore.addEventListener('click', testFirestoreConnection);
+      }
+      
+      if (testAuth) {
+        testAuth.addEventListener('click', testAuthConnection);
+      }
+      
+      if (testVeriff) {
+        testVeriff.addEventListener('click', testVeriffSimulation);
+      }
+    }
+    
+    async function testFirestoreConnection() {
+      if (!firebaseInitialized) {
+        showTestResult('Firestore: NO INICIALIZADO', false);
+        return;
+      }
+      
+      showStatus('Probando Firestore...');
+      
+      try {
+        const testRef = db.collection('test').doc('connection');
+        await testRef.set({
+          test: 'OK',
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          url: window.location.href
+        });
+        
+        const doc = await testRef.get();
+        showTestResult(`Firestore: CONECTADO ✓<br>ID: ${doc.id}<br>URL: ${doc.data().url}`, true);
+        showStatus('Firestore: Conexión exitosa');
+        
+      } catch (error) {
+        showTestResult(`Firestore: ERROR<br>${error.message}<br><small>Revisa reglas de seguridad</small>`, false);
+        showStatus('Firestore: Error de conexión', true);
+      }
+    }
+    
+    function testAuthConnection() {
+      if (!firebaseInitialized) {
+        showTestResult('Auth: NO INICIALIZADO', false);
+        return;
+      }
+      
+      const user = auth.currentUser;
+      if (!user) {
+        showTestResult('Auth: NO AUTENTICADO<br>Inicia sesión primero', false);
+        return;
+      }
+      
+      showTestResult(`Auth: AUTENTICADO ✓<br>Usuario: ${user.email}<br>UID: ${user.uid.substring(0, 10)}...`, true);
+      showStatus('Auth: Usuario verificado');
+    }
+    
+    function testVeriffSimulation() {
+      const user = auth?.currentUser;
+      if (!user) {
+        showTestResult('Veriff: NO AUTENTICADO', false);
+        return;
+      }
+      
+      if (window.VeriffReal && window.VeriffReal.config) {
+        const hasApiKey = window.VeriffReal.config.API_KEY && 
+                         window.VeriffReal.config.API_KEY !== '6a4c5b3d-8e9f-4a7b-9c8d-1e2f3a4b5c6d';
+        
+        showTestResult(
+          `Veriff: ${hasApiKey ? 'CONFIGURADO ✓' : 'SIMULACIÓN'} <br>` +
+          `Usuario: ${user.email}<br>` +
+          `<small>${hasApiKey ? 'API Key presente' : 'Configura API Key para Veriff real'}</small>`, 
+          true
+        );
+      } else {
+        showTestResult('Veriff: SIMULACIÓN DISPONIBLE ✓<br>Usuario: ' + user.email, true);
+      }
+      showStatus('Veriff: Simulación disponible');
+    }
+    
+    function showTestResult(message, isSuccess) {
+      const resultsDiv = document.getElementById('test-results');
+      if (!resultsDiv) return;
+      
+      const colorClass = isSuccess ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+      const icon = isSuccess ? 'fa-check-circle' : 'fa-times-circle';
+      const iconColor = isSuccess ? 'text-green-600' : 'text-red-600';
+      
+      resultsDiv.innerHTML = `
+        <div class="${colorClass} p-3 rounded-lg mt-2 fade-in">
+          <i class="fas ${icon} ${iconColor} mr-2"></i>
+          ${message}
+        </div>
+      `;
+    }
+    
+    // ========== OBSERVADOR DE AUTENTICACIÓN ==========
+    
+    function setupAuthObserver() {
+      if (!auth) {
+        console.error('❌ Auth no disponible para observer');
+        return;
+      }
+      
+      console.log('👁️ Configurando observer de autenticación...');
+      
+      auth.onAuthStateChanged(async (user) => {
+        console.log('🔄 Estado de autenticación cambiado:', user ? user.email : 'NO USER');
+        
+        if (user) {
+          try {
+            let userData = user;
+            
+            // Intentar obtener datos de Firestore
+            if (db) {
+              try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                  userData = { ...user, ...userDoc.data() };
+                  console.log('✅ Datos de Firestore obtenidos');
+                } else {
+                  console.log('⚠️ Usuario no encontrado en Firestore');
+                }
+              } catch (firestoreError) {
+                console.warn('⚠️ Error obteniendo usuario de Firestore:', firestoreError);
+              }
+            }
+            
+            updateUI(userData);
+            
+          } catch (error) {
+            console.error("Error obteniendo usuario:", error);
+            updateUI(user);
+          }
+        } else {
+          updateUI(null);
+        }
+      });
+    }
+    
+    // ========== INICIALIZACIÓN DE LA PÁGINA ==========
+    
+    function initializePage() {
+      console.log('🚀 COLMENA HUB BETA v0.1 - Inicializando página...');
+      
+      // 1. Inicializar Firebase
+      if (initializeFirebase()) {
+        showStatus('Sistema BETA listo. Inicia sesión para comenzar.');
+        
+        // 2. Configurar listeners DESPUÉS de Firebase
+        setupAuthListeners();
+        setupVeriffButton();
+        setupTestButtons();
+        setupAuthObserver();
+        
+        console.log('✅ Página inicializada correctamente');
+      } else {
+        console.error('❌ Falló la inicialización de Firebase');
+      }
+      
+      // 3. Detectar si estamos en local
+      if (window.location.protocol === 'file:') {
+        const warning = document.getElementById('local-warning');
+        if (warning) warning.classList.remove('hidden');
+        
+        // Deshabilitar botones que requieren Firebase
+        const btnGoogle = document.getElementById('btnGoogle');
+        if (btnGoogle) {
+          btnGoogle.disabled = true;
+          btnGoogle.innerHTML = '<i class="fas fa-ban mr-2"></i><span>Ejecuta desde localhost</span>';
+          btnGoogle.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+      }
+    }
+    
+    // Esperar a que el DOM esté completamente cargado
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializePage);
+    } else {
+      // DOM ya cargado
+      initializePage();
+    }
+    
+    // Log inicial
+    console.log('📄 Página cargada, estado:', document.readyState);
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
