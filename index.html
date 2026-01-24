@@ -171,7 +171,7 @@
   </footer>
 
   <!-- Scripts -->
-  <script src="veriff-config.js"></script>
+  <script src="veriff-real.js"></script>
   <script>
     // ========== CONFIGURACIÓN FIREBASE ==========
     
@@ -376,56 +376,38 @@
       showStatus('Iniciando verificación de identidad...');
       
       // Usar Veriff si está disponible, si no, simulación
-      if (window.VeriffSDK && window.VeriffSDK.startVeriffVerification) {
-        try {
-          const userData = {
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            firstName: user.displayName?.split(' ')[0] || 'Usuario',
-            lastName: user.displayName?.split(' ').slice(1).join(' ') || 'Test'
-          };
-          
-          const sessionId = await window.VeriffSDK.startVeriffVerification(
-            userData,
-            async (verificationData) => {
-              console.log('✅ Veriff éxito:', verificationData);
-              
-              try {
-                await db.collection('users').doc(user.uid).update({
-                  verified: true,
-                  veriffId: verificationData.id,
-                  veriffStatus: verificationData.status,
-                  verificationDate: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                showStatus('✅ ¡Identidad verificada exitosamente!');
-                
-                // Recargar UI
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                updateUI({ ...user, ...userDoc.data() });
-                
-              } catch (error) {
-                console.error('Error guardando verificación:', error);
-                showStatus('✅ Verificado (error guardando datos)', false);
-              }
-            },
-            (error) => {
-              console.error('❌ Error Veriff:', error);
-              showStatus('Error en verificación: ' + error.message, true);
-            }
-          );
-          
-          if (sessionId) {
-            showStatus('Redirigiendo a Veriff...');
-          }
-          
-        } catch (error) {
-          console.error('Error iniciando Veriff:', error);
-          // Fallback a simulación
-          simulateVerification(user);
-        }
-      } else {
+      if (window.VeriffReal && window.VeriffReal.startVeriffVerification) {
+  const sessionId = await window.VeriffReal.startVeriffVerification(
+    userData,
+    async (verificationData) => {
+      console.log('✅ Veriff REAL éxito:', verificationData);
+      
+      try {
+        await db.collection('users').doc(user.uid).update({
+          verified: true,
+          veriffId: verificationData.id,
+          veriffStatus: verificationData.status,
+          verificationDate: firebase.firestore.FieldValue.serverTimestamp(),
+          veriffData: verificationData
+        });
+        
+        showStatus('✅ ¡Identidad verificada exitosamente!');
+        
+        // Recargar UI
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        updateUI({ ...user, ...userDoc.data() });
+        
+      } catch (error) {
+        console.error('Error guardando verificación:', error);
+        showStatus('✅ Verificado (error guardando datos)', false);
+      }
+    },
+    (error) => {
+      console.error('❌ Error Veriff REAL:', error);
+      showStatus('Error en verificación: ' + error.message, true);
+    }
+  );
+   else {
         // Simulación si Veriff no está disponible
         simulateVerification(user);
       }
