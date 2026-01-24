@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Flappy Bee 8-bit – COLMENA HUB</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <style>
+    body { 
+      margin: 0; 
+      background: linear-gradient(180deg, #87CEEB 0%, #98FB98 100%);
+      color: #fff; 
+      font-family: 'Press Start 2P', cursive, sans-serif;
+      overflow: hidden;
+      touch-action: manipulation;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #lienzo { 
+      display: block; 
+      margin: 0 auto; 
+      border: 4px solid #8B4513;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      max-width: 100%;
+      height: auto;
+      touch-action: none; /* Solo para el lienzo */
+    }
+    #panel{ 
+      position:absolute; 
+      top:50%; 
+      left:50%; 
+      transform:translate(-50%,-50%); 
+      background:rgba(255,255,255,0.95); 
+      color:#000; 
+      padding:20px; 
+      border-radius:10px; 
+      box-shadow:0 0 25px rgba(0,0,0,0.5); 
+      text-align:center; 
+      z-index:10; 
+      width: 85%;
+      max-width: 350px;
+      border: 3px solid #8B4513;
+      font-family: 'Press Start 2P', cursive;
+      touch-action: auto; /* Permitir interacción táctil normal */
+    }
+    .oculto{ display:none; }
+    #respuesta{ 
+      padding:12px; 
+      width:100%; 
+      font-size:14px; 
+      margin-bottom: 15px;
+      box-sizing: border-box;
+      border: 2px solid #8B4513;
+      border-radius: 5px;
+      font-family: 'Press Start 2P', cursive;
+      background: #FFFACD;
+      touch-action: auto;
+      -webkit-user-select: auto;
+      user-select: auto;
+    }
+    button{ 
+      padding:12px 20px; 
+      font-size:14px; 
+      width: 100%;
+      cursor:pointer; 
+      background-color: #FFD700;
+      color: #8B4513;
+      border: 2px solid #8B4513;
+      border-radius: 5px;
+      font-family: 'Press Start 2P', cursive;
+      font-weight: bold;
+      transition: all 0.1s;
+    }
+    button:active {
+      transform: scale(0.95);
+      background-color: #FFA500;
+    }
+    #retro{ 
+      margin-top:15px; 
+      font-weight:bold;
+      font-size: 12px;
+      color: #228B22;
+    }
+    
+    /* Botón de salto para móviles */
+    #boton-salto {
+      position: absolute;
+      bottom: 25px;
+      right: 25px;
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle, #FFD700 30%, #FFA500 100%);
+      border: 3px solid #8B4513;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #8B4513;
+      font-weight: bold;
+      font-size: 10px;
+      text-align: center;
+      z-index: 5;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      font-family: 'Press Start 2P', cursive;
+      line-height: 1.2;
+      padding: 5px;
+      touch-action: manipulation;
+    }
+    
+    /* Instrucciones para móviles */
+    #instrucciones-movil {
+      position: absolute;
+      bottom: 25px;
+      left: 25px;
+      background: rgba(139, 69, 19, 0.9);
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 10px;
+      z-index: 5;
+      border: 2px solid #FFD700;
+      color: #FFD700;
+      font-family: 'Press Start 2P', cursive;
+      text-align: center;
+    }
+    
+    .pixel-text {
+      font-family: 'Press Start 2P', cursive;
+    }
+    
+    /* Ajustes para pantallas pequeñas */
+    @media (max-width: 480px) {
+      #panel {
+        padding: 15px;
+      }
+      
+      h1.text-3xl {
+        font-size: 1.3rem;
+      }
+      
+      #boton-salto {
+        width: 70px;
+        height: 70px;
+        bottom: 20px;
+        right: 20px;
+        font-size: 9px;
+      }
+      
+      #instrucciones-movil {
+        bottom: 20px;
+        left: 20px;
+        font-size: 9px;
+        padding: 8px 12px;
+      }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.min.js"></script>
+</head>
+
+<body class="min-h-screen flex items-center justify-center">
+  <div class="text-center">
+    <h1 class="text-3xl font-bold mb-4 pixel-text" style="color: #8B4513; text-shadow: 3px 3px 0 #000;">FLAPPY BEE 8-BIT</h1>
+    <div id="lienzo"></div>
+    <p class="mt-3 text-sm pixel-text" style="color: #8B4513;">Espacio = saltar • Enter = enviar</p>
+  </div>
+
+  <!-- Panel de pregunta -->
+  <div id="panel" class="oculto">
+    <p id="enunciado" class="pixel-text" style="color: #8B4513; font-size: 12px; margin-bottom: 15px;"></p>
+    <input id="respuesta" type="text" placeholder="Tu respuesta">
+    <button onclick="verificar()">ENVIAR</button>
+    <p id="retro" class="pixel-text"></p>
+  </div>
+  
+  <!-- Botón de salto para móviles -->
+  <div id="boton-salto" class="oculto">TOCAR<br>PARA<br>SALTAR</div>
+  
+  <!-- Instrucciones para móviles -->
+  <div id="instrucciones-movil" class="oculto">TOCA LA PANTALLA PARA VOLAR</div>
+
+  <script>
+    // Simulación de preguntas.js
+    const banco = [
+      { nivel: 1, pregunta: "¿Cuánto es 2+2?", respuesta: "4" },
+      { nivel: 2, pregunta: "¿Capital de Francia?", respuesta: "paris" },
+      { nivel: 3, pregunta: "¿Color del cielo?", respuesta: "azul" },
+      { nivel: 4, pregunta: "¿Animal que hace 'miau'?", respuesta: "gato" },
+      { nivel: 5, pregunta: "¿Fruto del roble?", respuesta: "bellota" }
+    ];
+    
+    let nivel = 1;
+    let juegoCongelado = false;
+    let preguntaActiva = false;
+    let velocidad = 2;
+  </script>
+  
+  <script>
+    // Variables del juego mejoradas
+    let abeja;
+    let tuberias = [];
+    let nubes = [];
+    let gravedad = 0.5; // Física más realista como Flappy Bird
+    let salto = -7;    // Salto más fuerte
+    let ancho = 320;    // Resolución estilo 8-bit
+    let alto = 480;
+    let puntuacion = 0;
+    let juegoTerminado = false;
+    let esMovil = false;
+    let mejorPuntuacion = 0;
+    let sueloY;
+    let gameStarted = false;
+    
+    // Sprites en formato pixel art
+    function crearAbejaSprite() {
+      let pg = createGraphics(24, 24);
+      pg.fill(255, 204, 0);  // Cuerpo amarillo
+      pg.ellipse(12, 12, 20, 16); // Cuerpo
+      
+      pg.fill(255, 255, 0);  // Amarillo más claro para alas
+      pg.ellipse(8, 8, 10, 8);   // Ala izquierda
+      pg.ellipse(16, 8, 10, 8);  // Ala derecha
+      
+      pg.fill(0);  // Negro para detalles
+      pg.ellipse(16, 10, 4, 4);  // Ojo
+      pg.triangle(22, 12, 26, 10, 26, 14); // Aguijón
+      
+      pg.fill(255, 100, 0);  // Naranja para rayas
+      pg.rect(8, 10, 2, 8);
+      pg.rect(12, 10, 2, 8);
+      return pg;
+    }
+    
+    function crearNubeSprite() {
+      let pg = createGraphics(64, 32);
+      pg.fill(255);
+      pg.noStroke();
+      // Forma de nube pixelada
+      pg.ellipse(16, 16, 24, 20);
+      pg.ellipse(32, 12, 28, 24);
+      pg.ellipse(48, 16, 24, 20);
+      pg.rect(16, 8, 32, 16);
+      return pg;
+    }
+    
+    function setup() {
+      // Detectar si es un dispositivo móvil
+      esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      // Ajustar tamaño del lienzo según el dispositivo
+      if (esMovil) {
+        ancho = min(windowWidth - 30, 320);
+        alto = min(windowHeight - 150, 480);
+        
+        // Mostrar controles para móviles
+        document.getElementById('boton-salto').classList.remove('oculto');
+        document.getElementById('instrucciones-movil').classList.remove('oculto');
+      }
+      
+      let lienzo = createCanvas(ancho, alto);
+      lienzo.parent('lienzo');
+      frameRate(60); // Frame rate consistente como Flappy Bird
+      
+      sueloY = alto - 40;
+      
+      // Inicializar abeja
+      abeja = {
+        x: 80,
+        y: alto / 2,
+        velocidad: 0,
+        radio: 12,
+        sprite: null,
+        angulo: 0
+      };
+      
+      abeja.sprite = crearAbejaSprite();
+      
+      // Generar nubes iniciales
+      for (let i = 0; i < 3; i++) {
+        nubes.push({
+          x: random(0, ancho),
+          y: random(20, alto / 2),
+          velocidad: random(0.5, 1.5),
+          sprite: crearNubeSprite()
+        });
+      }
+      
+      // Cargar mejor puntuación
+      mejorPuntuacion = parseInt(localStorage.getItem('mejorPuntuacionFlappyBee')) || 0;
+      
+      textFont('Press Start 2P');
+    }
+    
+    function draw() {
+      // Fondo cielo gradient
+      drawGradientBackground();
+      
+      // Dibujar y actualizar nubes
+      drawNubes();
+      
+      if (!gameStarted) {
+        drawMenuInicio();
+        return;
+      }
+      
+      if (!juegoCongelado && !juegoTerminado) {
+        // Aplicar gravedad (física similar a Flappy Bird)
+        abeja.velocidad += gravedad;
+        abeja.y += abeja.velocidad;
+        
+        // Rotación de la abeja basada en la velocidad
+        abeja.angulo = constrain(abeja.velocidad * 3, -25, 90);
+        
+        // Dibujar y mover tuberías
+        drawTuberias();
+        
+        // Verificar colisiones con tuberías
+        checkColisionesTuberias();
+        
+        // Verificar límites de pantalla
+        if (abeja.y + abeja.radio > sueloY || abeja.y - abeja.radio < 0) {
+          juegoTerminado = true;
+          if (puntuacion > mejorPuntuacion) {
+            mejorPuntuacion = puntuacion;
+            localStorage.setItem('mejorPuntuacionFlappyBee', mejorPuntuacion.toString());
+          }
+        }
+        
+        // Generar nueva tubería
+        if (tuberias.length === 0 || tuberias[tuberias.length - 1].x < ancho - 150) {
+          generarTuberia();
+        }
+      }
+      
+      // Dibujar elementos estáticos
+      drawSuelo();
+      drawAbeja();
+      drawUI();
+      
+      // Mostrar game over
+      if (juegoTerminado) {
+        drawGameOver();
+      }
+    }
+    
+    function drawGradientBackground() {
+      // Cielo gradient simple
+      for (let y = 0; y < alto; y++) {
+        let inter = map(y, 0, alto, 0, 1);
+        let c = lerpColor(color(135, 206, 235), color(176, 226, 255), inter);
+        stroke(c);
+        line(0, y, ancho, y);
+      }
+    }
+    
+    function drawNubes() {
+      for (let nube of nubes) {
+        nube.x -= nube.velocidad;
+        if (nube.x < -64) {
+          nube.x = ancho;
+          nube.y = random(20, alto / 2);
+        }
+        image(nube.sprite, nube.x, nube.y);
+      }
+    }
+    
+    function drawTuberias() {
+      for (let i = tuberias.length - 1; i >= 0; i--) {
+        let tubo = tuberias[i];
+        tubo.x -= velocidad;
+        
+        // Dibujar tubería superior
+        fill(34, 177, 76); // Verde brillante pixel art
+        stroke(0);
+        strokeWeight(2);
+        rect(tubo.x, 0, tubo.ancho, tubo.arriba);
+        
+        // Dibujar tubería inferior
+        rect(tubo.x, tubo.abajo, tubo.ancho, alto - tubo.abajo);
+        
+        // Dibujar bordes de tubería (detalle pixel art)
+        fill(0);
+        rect(tubo.x - 2, tubo.arriba - 10, tubo.ancho + 4, 10);
+        rect(tubo.x - 2, tubo.abajo, tubo.ancho + 4, 10);
+        
+        // Puntuación
+        if (tubo.x + tubo.ancho < abeja.x && !tubo.contado) {
+          puntuacion++;
+          tubo.contado = true;
+          
+          // Cada 5 puntos, mostrar pregunta
+          if (puntuacion % 5 === 0) {
+            mostrarPregunta();
+          }
+        }
+        
+        // Eliminar tuberías fuera de pantalla
+        if (tubo.x < -tubo.ancho) {
+          tuberias.splice(i, 1);
+        }
+      }
+    }
+    
+    function checkColisionesTuberias() {
+      for (let tubo of tuberias) {
+        if (
+          abeja.x + abeja.radio - 2 > tubo.x &&
+          abeja.x - abeja.radio + 2 < tubo.x + tubo.ancho &&
+          (abeja.y - abeja.radio < tubo.arriba || abeja.y + abeja.radio > tubo.abajo)
+        ) {
+          juegoTerminado = true;
+          if (puntuacion > mejorPuntuacion) {
+            mejorPuntuacion = puntuacion;
+            localStorage.setItem('mejorPuntuacionFlappyBee', mejorPuntuacion.toString());
+          }
+          break;
+        }
+      }
+    }
+    
+    function drawSuelo() {
+      // Suelo con textura
+      fill(139, 69, 19); // Marrón
+      noStroke();
+      rect(0, sueloY, ancho, alto - sueloY);
+      
+      // Hierba encima del suelo
+      fill(34, 177, 76);
+      rect(0, sueloY, ancho, 5);
+      
+      // Patrón de suelo pixelado
+      stroke(101, 67, 33);
+      strokeWeight(1);
+      for (let x = 0; x < ancho; x += 8) {
+        line(x, sueloY + 10, x, alto);
+      }
+    }
+    
+    function drawAbeja() {
+      push();
+      translate(abeja.x, abeja.y);
+      rotate(radians(abeja.angulo));
+      imageMode(CENTER);
+      image(abeja.sprite, 0, 0);
+      pop();
+    }
+    
+    function drawUI() {
+      // Puntuación
+      fill(255);
+      stroke(0);
+      strokeWeight(3);
+      textSize(16);
+      textAlign(LEFT);
+      text(`PUNTAJE: ${puntuacion}`, 10, 25);
+      
+      // Mejor puntuación
+      textSize(10);
+      text(`MEJOR: ${mejorPuntuacion}`, 10, 45);
+    }
+    
+    function drawMenuInicio() {
+      // Fondo
+      drawGradientBackground();
+      drawNubes();
+      drawSuelo();
+      
+      // Título
+      fill(255, 215, 0);
+      stroke(0);
+      strokeWeight(4);
+      textSize(20);
+      textAlign(CENTER);
+      text("FLAPPY BEE", ancho / 2, alto / 2 - 40);
+      
+      // Instrucciones
+      fill(255);
+      stroke(0);
+      strokeWeight(2);
+      textSize(10);
+      text("PRESIONA ESPACIO O TOCA", ancho / 2, alto / 2);
+      text("PARA COMENZAR", ancho / 2, alto / 2 + 15);
+      
+      // Abeja animada en el menú
+      let abejaFlotanteY = alto / 2 - 80 + sin(frameCount * 0.1) * 10;
+      push();
+      translate(ancho / 2, abejaFlotanteY);
+      imageMode(CENTER);
+      image(abeja.sprite, 0, 0);
+      pop();
+      
+      // Mejor puntuación
+      textSize(12);
+      text(`MEJOR PUNTAJE: ${mejorPuntuacion}`, ancho / 2, alto / 2 + 50);
+    }
+    
+    function drawGameOver() {
+      // Overlay semi-transparente
+      fill(0, 0, 0, 150);
+      noStroke();
+      rect(0, 0, ancho, alto);
+      
+      // Texto Game Over
+      fill(255, 50, 50);
+      stroke(0);
+      strokeWeight(3);
+      textSize(20);
+      textAlign(CENTER);
+      text("GAME OVER", ancho / 2, alto / 2 - 30);
+      
+      // Puntuación final
+      fill(255);
+      stroke(0);
+      strokeWeight(2);
+      textSize(14);
+      text(`PUNTAJE: ${puntuacion}`, ancho / 2, alto / 2);
+      
+      if (puntuacion === mejorPuntuacion && puntuacion > 0) {
+        textSize(12);
+        text("¡NUEVO RECORD!", ancho / 2, alto / 2 + 20);
+      }
+      
+      // Instrucciones para reiniciar - MEJORADO PARA MÓVILES
+      textSize(10);
+      text("TOCA LA PANTALLA", ancho / 2, alto / 2 + 50);
+      text("PARA REINICIAR", ancho / 2, alto / 2 + 65);
+    }
+    
+    function generarTuberia() {
+      let espacio = 120; // Espacio entre tuberías (como Flappy Bird)
+      let posicion = random(80, alto - espacio - 80);
+      
+      tuberias.push({
+        x: ancho,
+        ancho: 52,
+        arriba: posicion,
+        abajo: posicion + espacio,
+        contado: false
+      });
+    }
+    
+    function saltar() {
+      abeja.velocidad = salto;
+    }
+    
+    function keyPressed() {
+      if (key === ' ' && !juegoCongelado) {
+        if (!gameStarted) {
+          gameStarted = true;
+        } else if (juegoTerminado) {
+          reiniciarJuego();
+        } else {
+          saltar();
+        }
+        return false;
+      }
+    }
+    
+    function mousePressed() {
+      if (!gameStarted) {
+        gameStarted = true;
+        return;
+      }
+      
+      // REINICIO AL TOCAR LA PANTALLA CUANDO EL JUEGO TERMINÓ
+      if (juegoTerminado) {
+        reiniciarJuego();
+        return;
+      }
+      
+      if (esMovil && !juegoCongelado && !juegoTerminado) {
+        saltar();
+      }
+    }
+    
+    function touchStarted() {
+      if (esMovil) {
+        if (!gameStarted) {
+          gameStarted = true;
+        } else if (juegoTerminado) {
+          // REINICIAR AL TOCAR CUANDO EL JUEGO TERMINÓ
+          reiniciarJuego();
+        } else if (!juegoCongelado && !juegoTerminado) {
+          saltar();
+        }
+        return false;
+      }
+    }
+    
+    function reiniciarJuego() {
+      abeja.y = alto / 2;
+      abeja.velocidad = 0;
+      abeja.angulo = 0;
+      tuberias = [];
+      puntuacion = 0;
+      juegoTerminado = false;
+      nivel = 1;
+      velocidad = 2;
+      gameStarted = true;
+      generarTuberia();
+    }
+    
+    function mostrarPregunta() {
+      juegoCongelado = true;
+      preguntaActiva = true;
+      
+      const pregunta = banco.find(p => p.nivel === nivel);
+      if (pregunta) {
+        document.getElementById('enunciado').textContent = pregunta.pregunta;
+        document.getElementById('panel').classList.remove('oculto');
+        document.getElementById('respuesta').value = '';
+        document.getElementById('retro').textContent = '';
+        
+        // SOLUCIÓN SIMPLE: Enfocar el input después de un pequeño delay
+        setTimeout(() => {
+          const input = document.getElementById('respuesta');
+          input.focus();
+          
+          // Para iOS necesitamos un enfoque especial
+          if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+            input.blur();
+            setTimeout(() => {
+              input.focus();
+            }, 100);
+          }
+        }, 100);
+      }
+    }
+    
+    function windowResized() {
+      if (esMovil) {
+        ancho = min(windowWidth - 30, 320);
+        alto = min(windowHeight - 150, 480);
+        sueloY = alto - 40;
+        resizeCanvas(ancho, alto);
+      }
+    }
+  </script>
+
+  <!-- Lógica del panel - VERSIÓN SIMPLIFICADA -->
+  <script>
+    // Sincroniza variables globales
+    setInterval(() => {
+      window.nivel = nivel;
+      window.banco = banco;
+      window.juegoCongelado = juegoCongelado;
+      window.preguntaActiva = preguntaActiva;
+      window.velocidad = velocidad;
+    }, 100);
+
+    // Función que llama el botón del panel
+    window.verificar = function () {
+      const q = window.banco.find(p => p.nivel === window.nivel);
+      const user = document.getElementById('respuesta').value.trim();
+      if (user.toLowerCase() === q.respuesta.toLowerCase()) {
+        document.getElementById('retro').textContent = '¡CORRECTO!';
+        setTimeout(() => {
+          document.getElementById('panel').classList.add('oculto');
+          juegoCongelado = false;
+          preguntaActiva = false;
+          nivel++;
+          velocidad += 0.3;
+        }, 1000);
+      } else {
+        document.getElementById('retro').textContent = 'INTENTA DE NUEVO';
+      }
+    };
+
+    // Enviar con Enter
+    document.getElementById('respuesta').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') window.verificar();
+    });
+    
+    // Evento para el botón de salto en móviles
+    document.getElementById('boton-salto').addEventListener('click', function(e) {
+      if (gameStarted && !juegoCongelado && !juegoTerminado) {
+        saltar();
+      }
+    });
+    
+    // **SOLUCIÓN PRINCIPAL**: Eventos MUY simples para el lienzo
+    document.getElementById('lienzo').addEventListener('touchstart', function(e) {
+      // SOLO manejar el lienzo cuando NO hay pregunta activa
+      if (!preguntaActiva) {
+        if (juegoTerminado) {
+          reiniciarJuego();
+        } else if (gameStarted && !juegoCongelado && !juegoTerminado) {
+          saltar();
+        }
+        e.preventDefault(); // Solo prevenir cuando estamos en el juego
+      }
+      // Cuando hay pregunta activa, NO hacer nada - el teclado funcionará
+    }, { passive: false });
+    
+    // **SOLUCIÓN CRÍTICA**: Remover TODOS los eventos complejos del body
+    // Solo mantener el evento simple del lienzo
+    
+    // Agregar evento táctil al botón de salto
+    document.getElementById('boton-salto').addEventListener('touchstart', function(e) {
+      if (gameStarted && !juegoCongelado && !juegoTerminado) {
+        saltar();
+        e.stopPropagation(); // No propagar al lienzo
+      }
+    });
+    
+    // Asegurar que el panel NO interfiera con los eventos del juego
+    document.getElementById('panel').addEventListener('touchstart', function(e) {
+      e.stopPropagation(); // No propagar eventos táctiles
+    });
+    
+    document.getElementById('respuesta').addEventListener('touchstart', function(e) {
+      e.stopPropagation(); // No propagar eventos táctiles
+      this.focus(); // Enfocar inmediatamente
+    });
+  </script>
+</body>
+</html>
