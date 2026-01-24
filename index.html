@@ -14,226 +14,12 @@
     .fade-in { animation: fadeIn 0.5s ease-in; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   </style>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
-
-
-<!-- En el HEAD, después de los estilos -->
-<style>
-  /* Estilos básicos para Veriff */
-  .veriff-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-weight: bold;
-    font-size: 14px;
-  }
-  
-  .veriff-pending {
-    background: #FEF3C7;
-    color: #92400E;
-  }
-  
-  .veriff-success {
-    background: #D1FAE5;
-    color: #065F46;
-  }
-  
-  .veriff-error {
-    background: #FEE2E2;
-    color: #991B1B;
-  }
-</style>
-
-<!-- En el BODY, antes del cierre </body> -->
-<script src="veriff-simple.js"></script>
-
-<script>
-  // ========== CONFIGURACIÓN SIMPLIFICADA ==========
-  
-  // Variables globales
-  let auth = null;
-  let db = null;
-  
-  // Inicializar Firebase
-  function initFirebase() {
-    try {
-      const firebaseConfig = {
-        apiKey: "AIzaSyAeLIJ8ee9xUBduMKkijW4GdnY45W32Eew",
-        authDomain: "colmena-hub.firebaseapp.com",
-        projectId: "colmena-hub",
-        storageBucket: "colmena-hub.firebasestorage.app",
-        messagingSenderId: "806697924814",
-        appId: "1:806697924814:web:b11c9b057bc6d1dd71789f",
-        measurementId: "G-LQ9GLGJCX8"
-      };
-      
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      }
-      
-      auth = firebase.auth();
-      db = firebase.firestore();
-      
-      console.log('✅ Firebase inicializado');
-      return true;
-    } catch (error) {
-      console.error('❌ Error Firebase:', error);
-      return false;
-    }
-  }
-  
-  // Manejar login Google
-  document.getElementById('btnGoogle').addEventListener('click', async () => {
-    if (!auth) {
-      alert('Firebase no está listo. Recarga la página.');
-      return;
-    }
-    
-    try {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      const result = await auth.signInWithPopup(provider);
-      const user = result.user;
-      
-      // Guardar en Firestore
-      if (db) {
-        await db.collection('users').doc(user.uid).set({
-          uid: user.uid,
-          displayName: user.displayName,
-          email: user.email,
-          photoURL: user.photoURL,
-          lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
-          verified: false,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-      }
-      
-      updateUI(user);
-      alert(`¡Bienvenido ${user.displayName}!`);
-      
-    } catch (error) {
-      console.error('Error login:', error);
-      alert('Error: ' + error.message);
-    }
-  });
-  
-  // Manejar logout
-  document.getElementById('logout-btn')?.addEventListener('click', async () => {
-    try {
-      await auth.signOut();
-      updateUI(null);
-    } catch (error) {
-      console.error('Error logout:', error);
-    }
-  });
-  
-  // Manejar verificación Veriff
-  document.getElementById('verify-btn')?.addEventListener('click', async () => {
-    const user = auth?.currentUser;
-    if (!user) {
-      alert('Primero inicia sesión');
-      return;
-    }
-    
-    // Obtener datos del usuario
-    const userData = {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
-      firstName: user.displayName?.split(' ')[0] || 'Usuario',
-      lastName: user.displayName?.split(' ').slice(1).join(' ') || 'Test'
-    };
-    
-    // Iniciar Veriff
-    if (window.VeriffSimple) {
-      window.VeriffSimple.startVerification(userData);
-    } else {
-      alert('Veriff no está disponible. Recarga la página.');
-    }
-  });
-  
-  // Actualizar UI
-  function updateUI(user) {
-    const loginSection = document.getElementById('login-section');
-    const userPanel = document.getElementById('user-panel');
-    
-    if (user) {
-      loginSection.classList.add('hidden');
-      userPanel.classList.remove('hidden');
-      
-      document.getElementById('user-name').textContent = user.displayName || 'Usuario';
-      document.getElementById('user-email').textContent = user.email || '';
-      
-      const avatar = document.getElementById('user-avatar');
-      if (avatar) {
-        avatar.src = user.photoURL || 'https://ui-avatars.com/api/?name=' + 
-          encodeURIComponent(user.displayName || 'Usuario') + '&background=FFD700&color=000';
-      }
-      
-      // Mostrar estado de verificación
-      const verifiedBadge = document.getElementById('verified-badge');
-      const verificationBadge = document.getElementById('verification-badge');
-      
-      if (user.verified) {
-        verifiedBadge?.classList.remove('hidden');
-        verificationBadge?.classList.add('hidden');
-        document.getElementById('verify-btn')?.classList.add('hidden');
-      } else {
-        verificationBadge?.classList.remove('hidden');
-        verifiedBadge?.classList.add('hidden');
-        document.getElementById('verify-btn')?.classList.remove('hidden');
-      }
-      
-    } else {
-      loginSection.classList.remove('hidden');
-      userPanel.classList.add('hidden');
-    }
-  }
-  
-  // Observador de autenticación
-  function setupAuthObserver() {
-    if (!auth) return;
-    
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        let userData = user;
-        
-        // Obtener datos de Firestore
-        if (db) {
-          try {
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if (userDoc.exists) {
-              userData = { ...user, ...userDoc.data() };
-            }
-          } catch (error) {
-            console.warn('Error Firestore:', error);
-          }
-        }
-        
-        updateUI(userData);
-      } else {
-        updateUI(null);
-      }
-    });
-  }
-  
-  // Inicializar
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 COLMENA HUB cargando...');
-    
-    // Inicializar Firebase
-    if (initFirebase()) {
-      setupAuthObserver();
-    }
-    
-    // Verificar si estamos en local
-    if (window.location.protocol === 'file:') {
-      alert('⚠️ Ejecuta desde: http://localhost:8000');
-    }
-  });
-</script>
-
 
 <body class="min-h-screen bg-gray-50">
   <!-- Barra de estado superior -->
@@ -280,7 +66,7 @@
           <i class="fas fa-sign-out-alt mr-2"></i> Cerrar sesión
         </button>
         <button id="verify-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center">
-          <i class="fas fa-shield-alt mr-2"></i> Verificar
+          <i class="fas fa-shield-alt mr-2"></i> Verificar con Veriff
         </button>
       </div>
     </div>
@@ -386,49 +172,19 @@
 
   <!-- ========== SCRIPTS EN ORDEN CORRECTO ========== -->
   
-  <!-- 1. Firebase SDK (SIEMPRE PRIMERO) -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <!-- 1. Veriff -->
+  <script src="veriff-working.js"></script>
   
-  <!-- 2. Veriff SDK (OPCIONAL - puede fallar pero no debe bloquear OAuth) -->
+  <!-- 2. Código principal (TODO EN UN SOLO SCRIPT) -->
   <script>
-    // Cargar Veriff solo si existe el archivo
-    function loadVeriff() {
-      const script = document.createElement('script');
-      script.src = 'veriff-real.js';
-      script.onerror = function() {
-        console.log('⚠️ veriff-real.js no encontrado, usando simulación');
-        window.VeriffReal = {
-          startVeriffVerification: simulateVeriff,
-          config: { SIMULATION_MODE: true }
-        };
-      };
-      document.head.appendChild(script);
-    }
+    // ========== CONFIGURACIÓN GLOBAL (DECLARADO UNA SOLA VEZ) ==========
     
-    function simulateVeriff(userData, onSuccess, onError) {
-      console.log('🎭 Simulando Veriff para:', userData.email);
-      setTimeout(() => {
-        if (onSuccess) {
-          onSuccess({
-            id: 'simulated_' + Date.now(),
-            status: 'approved',
-            person: userData
-          });
-        }
-      }, 1500);
-      return 'simulated_session';
-    }
+    // 📍 Variables globales - SOLO UNA DECLARACIÓN
+    let auth = null;
+    let db = null;
+    let firebaseInitialized = false;
     
-    // Cargar Veriff después de que todo esté listo
-    window.addEventListener('DOMContentLoaded', loadVeriff);
-  </script>
-  
-  <!-- 3. Código principal de la aplicación -->
-  <script>
-    // ========== CONFIGURACIÓN FIREBASE ==========
-    
+    // 📍 Config Firebase - SOLO UNA DECLARACIÓN
     const firebaseConfig = {
       apiKey: "AIzaSyAeLIJ8ee9xUBduMKkijW4GdnY45W32Eew",
       authDomain: "colmena-hub.firebaseapp.com",
@@ -438,11 +194,6 @@
       appId: "1:806697924814:web:b11c9b057bc6d1dd71789f",
       measurementId: "G-LQ9GLGJCX8"
     };
-    
-    // Variables globales
-    let auth = null;
-    let db = null;
-    let firebaseInitialized = false;
     
     // ========== FUNCIONES GLOBALES ==========
     
@@ -532,7 +283,7 @@
           console.log('🔥 Firebase ya estaba inicializado');
         }
         
-        // Obtener referencias
+        // Obtener referencias (SOLO UNA VEZ)
         auth = firebase.auth();
         db = firebase.firestore();
         firebaseInitialized = true;
@@ -658,8 +409,8 @@
       
       showStatus('Iniciando verificación de identidad...');
       
-      // Verificar si Veriff está disponible
-      if (window.VeriffReal && window.VeriffReal.startVeriffVerification) {
+      // Usar VeriffWorking si está disponible
+      if (window.VeriffWorking) {
         try {
           const userData = {
             uid: user.uid,
@@ -669,58 +420,32 @@
             lastName: user.displayName?.split(' ').slice(1).join(' ') || 'Test'
           };
           
-          console.log('🚀 Llamando Veriff Real...');
-          const sessionId = await window.VeriffReal.startVeriffVerification(
-            userData,
-            async (verificationData) => {
-              console.log('✅ Veriff éxito:', verificationData);
-              
-              try {
-                if (db) {
-                  await db.collection('users').doc(user.uid).update({
-                    verified: true,
-                    veriffId: verificationData.id,
-                    veriffStatus: verificationData.status,
-                    verificationDate: firebase.firestore.FieldValue.serverTimestamp()
-                  });
-                }
-                
-                showStatus('✅ ¡Identidad verificada exitosamente!');
-                
-                // Recargar UI
-                const userDoc = db ? await db.collection('users').doc(user.uid).get() : null;
-                updateUI({ 
-                  ...user, 
-                  ...(userDoc?.exists ? userDoc.data() : {}) 
-                });
-                
-              } catch (error) {
-                console.error('Error guardando verificación:', error);
-                showStatus('✅ Verificado (error guardando datos)', false);
-              }
-            },
-            (error) => {
-              console.error('❌ Error Veriff:', error);
-              showStatus('Error en verificación: ' + error.message, true);
-            }
-          );
+          console.log('🚀 Llamando VeriffWorking...');
+          const sessionId = await window.VeriffWorking.startVerification(userData);
           
           if (sessionId) {
-            showStatus('Redirigiendo a Veriff...');
+            showStatus('Veriff iniciado. Sigue las instrucciones en pantalla.');
+            
+            // Guardar sessionId en localStorage
+            localStorage.setItem('veriff_session_id', sessionId);
+            localStorage.setItem('veriff_user_id', user.uid);
           }
           
         } catch (error) {
-          console.error('Error iniciando Veriff:', error);
-          simulateVeriffFallback(user);
+          console.error('❌ Error Veriff:', error);
+          showStatus('Error: ' + error.message, true);
+          
+          // Fallback a simulación
+          simulateVerification(user);
         }
       } else {
         // Veriff no disponible, usar simulación
-        simulateVeriffFallback(user);
+        simulateVerification(user);
       }
     }
     
-    async function simulateVeriffFallback(user) {
-      showStatus('⚠️ Usando simulación...');
+    async function simulateVerification(user) {
+      showStatus('⚠️ Veriff no disponible, usando simulación...');
       
       setTimeout(async () => {
         try {
@@ -817,20 +542,20 @@
         return;
       }
       
-      if (window.VeriffReal && window.VeriffReal.config) {
-        const hasApiKey = window.VeriffReal.config.API_KEY && 
-                         window.VeriffReal.config.API_KEY !== '6a4c5b3d-8e9f-4a7b-9c8d-1e2f3a4b5c6d';
+      if (window.VeriffWorking) {
+        const hasApiKey = window.VeriffWorking.API_KEY && 
+                         window.VeriffWorking.API_KEY !== 'b04b260e-ae04-466b-85c8-f674ecbb09ac';
         
         showTestResult(
           `Veriff: ${hasApiKey ? 'CONFIGURADO ✓' : 'SIMULACIÓN'} <br>` +
           `Usuario: ${user.email}<br>` +
-          `<small>${hasApiKey ? 'API Key presente' : 'Configura API Key para Veriff real'}</small>`, 
+          `<small>API Key: ${window.VeriffWorking.API_KEY ? 'Presente' : 'Faltante'}</small>`, 
           true
         );
       } else {
-        showTestResult('Veriff: SIMULACIÓN DISPONIBLE ✓<br>Usuario: ' + user.email, true);
+        showTestResult('Veriff: NO DISPONIBLE<br>Verifica veriff-working.js', false);
       }
-      showStatus('Veriff: Simulación disponible');
+      showStatus('Veriff: Test completado');
     }
     
     function showTestResult(message, isSuccess) {
@@ -941,11 +666,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
