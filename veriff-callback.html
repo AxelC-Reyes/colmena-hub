@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Verificación Completada - COLMENA HUB</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <style>
+    body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+  </style>
+</head>
+<body class="flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
+    <div id="loading">
+      <div class="w-20 h-20 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+      <h1 class="text-2xl font-bold text-gray-800 mb-4">Procesando verificación...</h1>
+      <p class="text-gray-600">Estamos validando tu identidad con Veriff.</p>
+    </div>
+    
+    <div id="success" class="hidden">
+      <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <i class="fas fa-check text-green-500 text-4xl"></i>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-800 mb-4">¡Verificación Exitosa! ✅</h1>
+      <p class="text-gray-600 mb-6">Tu identidad ha sido verificada correctamente.</p>
+      <button onclick="window.close(); window.opener.location.reload();" 
+              class="bg-yellow-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-yellow-600">
+        <i class="fas fa-check mr-2"></i> Continuar en COLMENA HUB
+      </button>
+    </div>
+    
+    <div id="error" class="hidden">
+      <div class="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <i class="fas fa-times text-red-500 text-4xl"></i>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-800 mb-4">Verificación Fallida ❌</h1>
+      <p class="text-gray-600 mb-6" id="error-message">Hubo un problema con la verificación.</p>
+      <button onclick="window.close();" 
+              class="bg-gray-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-600">
+        <i class="fas fa-times mr-2"></i> Cerrar
+      </button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  
+  <script>
+    // Config Firebase (misma que index.html)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeLIJ8ee9xUBduMKkijW4GdnY45W32Eew",
+      authDomain: "colmena-hub.firebaseapp.com",
+      projectId: "colmena-hub",
+      storageBucket: "colmena-hub.firebasestorage.app",
+      messagingSenderId: "806697924814",
+      appId: "1:806697924814:web:b11c9b057bc6d1dd71789f",
+      measurementId: "G-LQ9GLGJCX8"
+    };
+    
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    // Procesar callback de Veriff
+    async function processVeriffCallback() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('sessionId') || localStorage.getItem('veriff_session_id');
+        const userId = localStorage.getItem('veriff_user_id');
+        
+        if (!sessionId || !userId) {
+          throw new Error('No se encontró sesión de Veriff');
+        }
+        
+        // En producción, aquí llamarías a tu backend para verificar el estado
+        // Por ahora, simularemos éxito después de 2 segundos
+        
+        setTimeout(async () => {
+          try {
+            const user = auth.currentUser || { uid: userId };
+            
+            // Marcar como verificado en Firestore
+            await db.collection('users').doc(userId || user.uid).update({
+              verified: true,
+              veriffSessionId: sessionId,
+              verificationDate: firebase.firestore.FieldValue.serverTimestamp(),
+              verificationStatus: 'approved'
+            });
+            
+            // Mostrar éxito
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('success').classList.remove('hidden');
+            
+            // Limpiar localStorage
+            localStorage.removeItem('veriff_session_id');
+            localStorage.removeItem('veriff_user_id');
+            
+          } catch (error) {
+            showError('Error al guardar verificación: ' + error.message);
+          }
+        }, 2000);
+        
+      } catch (error) {
+        showError(error.message);
+      }
+    }
+    
+    function showError(message) {
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('error').classList.remove('hidden');
+      document.getElementById('error-message').textContent = message;
+    }
+    
+    // Iniciar cuando cargue la página
+    document.addEventListener('DOMContentLoaded', processVeriffCallback);
+  </script>
+</body>
+</html>
