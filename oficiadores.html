@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oficiadores – COLMENA HUB</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-yellow: #FBBF24;
+      --secondary-brown: #92400E;
+      --light-beige: #FFFBEB;
+      --dark-gray: #1F2937;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    }
+    
+    .glass-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .bee-pattern {
+      background-image: radial-gradient(circle at 10px 10px, rgba(251, 191, 36, 0.1) 2px, transparent 3px);
+      background-size: 40px 40px;
+    }
+    
+    .category-card {
+      transition: all 0.3s ease;
+      border-left: 4px solid transparent;
+    }
+    
+    .category-card:hover {
+      transform: translateY(-4px);
+      border-left-color: var(--primary-yellow);
+      box-shadow: 0 8px 25px rgba(251, 191, 36, 0.15);
+    }
+    
+    .section-divider {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--primary-yellow), transparent);
+      margin: 2rem 0;
+    }
+    
+    .category-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    
+    /* Animación para aparición de tarjetas */
+    .fade-in-up {
+      animation: fadeInUp 0.5s ease-out forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen bee-pattern">
+  <!-- Header con logo de abeja -->
+  <header class="glass-card sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="relative">
+            <div class="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center">
+              <i class="fas fa-bee text-white text-xl"></i>
+              <div class="absolute -top-1 -right-1 w-4 h-4 bg-amber-300 rounded-full"></div>
+            </div>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">COLMENA HUB</h1>
+            <p class="text-xs text-amber-700 font-medium">Conectando talento</p>
+          </div>
+        </div>
+        <nav class="hidden md:flex space-x-6">
+          <a href="index.html" class="text-gray-600 hover:text-amber-600 transition-colors">
+            <i class="fas fa-home mr-1"></i>Inicio
+          </a>
+          <a href="professional-type.html" class="text-gray-600 hover:text-amber-600 transition-colors">
+            <i class="fas fa-user-tie mr-1"></i>Profesionistas
+          </a>
+          <a href="apply.html" class="text-amber-600 font-semibold">
+            <i class="fas fa-user-plus mr-1"></i>Regístrate
+          </a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Título y buscador -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-gray-900 mb-3">
+        <i class="fas fa-tools text-amber-500 mr-3"></i>
+        Oficiadores Disponibles
+      </h1>
+      <p class="text-gray-600 max-w-2xl mx-auto">
+        Encuentra talento especializado y verificado para cualquier trabajo. Cada profesional pasa por nuestro proceso de verificación.
+      </p>
+      
+      <div class="mt-8 max-w-xl mx-auto">
+        <div class="relative">
+          <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          <input type="text" 
+                 id="search" 
+                 placeholder="Buscar oficiadores por nombre o especialidad..." 
+                 class="w-full pl-12 pr-4 py-4 glass-card rounded-xl border border-gray-200 focus:border-amber-300 focus:ring-2 focus:ring-amber-200 outline-none transition-all">
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid de categorías -->
+    <div id="list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <!-- Aquí se insertarán dinámicamente las categorías -->
+      <div id="categoriesContainer"></div>
+    </div>
+
+    <!-- Llamada a la acción -->
+    <div class="mt-12 text-center">
+      <div class="glass-card rounded-2xl p-8 max-w-2xl mx-auto">
+        <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <i class="fas fa-bee text-3xl text-amber-600"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">¿No encuentras tu oficio?</h3>
+        <p class="text-gray-600 mb-6">Si tienes habilidades especializadas que no aparecen en la lista, regístrate y únete a nuestra comunidad.</p>
+        <a href="apply.html" class="inline-flex items-center bg-amber-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-600 transition-colors">
+          <i class="fas fa-user-plus mr-2"></i>
+          Regístrate como Profesional
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-16 border-t border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-6 md:mb-0">
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
+              <i class="fas fa-bee text-white text-sm"></i>
+            </div>
+            <span class="text-lg font-bold text-gray-900">COLMENA HUB</span>
+          </div>
+          <p class="text-gray-500 text-sm mt-2">Conectando talento con oportunidades</p>
+        </div>
+        <div class="text-center md:text-right">
+          <p class="text-gray-500 text-sm">© 2024 COLMENA HUB. Todos los derechos reservados.</p>
+          <div class="flex space-x-4 mt-3 justify-center md:justify-end">
+            <a href="#" class="text-gray-400 hover:text-amber-500">
+              <i class="fab fa-facebook"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-amber-500">
+              <i class="fab fa-instagram"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-amber-500">
+              <i class="fab fa-whatsapp"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script de categorías y búsqueda -->
+  <script>
+    // Nueva lista de oficios categorizados
+    const categories = [
+      {
+        name: "📸 Fotografía y Multimedia",
+        icon: "camera",
+        color: "purple",
+        items: [
+          "Fotógrafo de retratos (sesiones predefinidas: individual, familiar, etc.)",
+          "Editor de fotos / Retocador digital (por foto, por lote, estilo específico)",
+          "Diseñador gráfico para redes sociales (posts, banners, historias)"
+        ]
+      },
+      {
+        name: "✍️ Redacción y Traducción",
+        icon: "pen",
+        color: "indigo",
+        items: [
+          "Traductor (por palabra, por página, idiomas comunes)",
+          "Redactor de contenidos web / Bloguero (por palabra, por artículo)"
+        ]
+      },
+      {
+        name: "💼 Servicios Virtuales y Administrativos",
+        icon: "laptop",
+        color: "blue",
+        items: [
+          "Asistente virtual (por hora, o paquetes de tareas: gestión de email, calendar)",
+          "Community Manager",
+          "Capturista"
+        ]
+      },
+      {
+        name: "🏠 Organización y Hogar",
+        icon: "home",
+        color: "green",
+        items: [
+          "Organizador profesional (home organizer) (por hora, por habitación)",
+          "Limpieza profunda del hogar",
+          "Montador de muebles (por pieza, por hora - IKEA-style)",
+          "Instalador de cortinas y persianas",
+          "Costurero",
+          "Planchador de ropa"
+        ]
+      },
+      {
+        name: "👨‍🏫 Educación y Enseñanza",
+        icon: "graduation-cap",
+        color: "orange",
+        items: [
+          "Profesor particular (por hora, por materia escolar: matemáticas, idiomas)",
+          "Profesor de instrumento musical",
+          "Entrenador personal (coach fitness) (sesión presencial/virtual, plan mensual)"
+        ]
+      },
+      {
+        name: "👗 Imagen y Estilo",
+        icon: "user-tie",
+        color: "pink",
+        items: [
+          "Asesor de imagen personal (paquete de diagnóstico, shopping acompañado)",
+          "Maquillista profesional (por estilo: social, novia, artístico)",
+          "Diseñador de interiores consultor (consulta por hora, plan de diseño básico)"
+        ]
+      },
+      {
+        name: "🎨 Arte y Entretenimiento",
+        icon: "palette",
+        color: "red",
+        items: [
+          "Pianista / Músico para eventos (por hora, por repertorio)",
+          "Tatuador (por diseño, por hora)",
+          "Decorador de eventos",
+          "Animador"
+        ]
+      },
+      {
+        name: "🍽️ Alimentación y Cocina",
+        icon: "utensils",
+        color: "amber",
+        items: [
+          "Chef a domicilio / Personal cook (por evento, por menú, por persona)"
+        ]
+      },
+      {
+        name: "🚗 Transporte y Mensajería",
+        icon: "truck",
+        color: "yellow",
+        items: [
+          "Conductor designado / Chofer por horas",
+          "Mensajero en moto / bicicleta (por entrega, por zona)",
+          "Guía de turistas local (por tour, por hora, temático)"
+        ]
+      },
+      {
+        name: "🐾 Cuidado de Mascotas",
+        icon: "paw",
+        color: "emerald",
+        items: [
+          "Cuidador de mascotas / Paseador de perros"
+        ]
+      },
+      {
+        name: "🔧 Reparación y Técnica",
+        icon: "tools",
+        color: "gray",
+        items: [
+          "Técnico en reparación de celulares"
+        ]
+      }
+    ];
+
+    // Funciones auxiliares
+    function getColorClass(color) {
+      const colors = {
+        purple: { bg: 'bg-purple-100', text: 'text-purple-600' },
+        indigo: { bg: 'bg-indigo-100', text: 'text-indigo-600' },
+        blue: { bg: 'bg-blue-100', text: 'text-blue-600' },
+        green: { bg: 'bg-green-100', text: 'text-green-600' },
+        orange: { bg: 'bg-orange-100', text: 'text-orange-600' },
+        pink: { bg: 'bg-pink-100', text: 'text-pink-600' },
+        red: { bg: 'bg-red-100', text: 'text-red-600' },
+        amber: { bg: 'bg-amber-100', text: 'text-amber-600' },
+        yellow: { bg: 'bg-yellow-100', text: 'text-yellow-600' },
+        emerald: { bg: 'bg-emerald-100', text: 'text-emerald-600' },
+        gray: { bg: 'bg-gray-100', text: 'text-gray-600' }
+      };
+      return colors[color] || colors.gray;
+    }
+
+    function getDescription(itemName) {
+      const lowerItem = itemName.toLowerCase();
+      
+      // Descripciones específicas para cada oficio
+      if (lowerItem.includes('fotógrafo')) return "Sesiones profesionales de retrato y eventos";
+      if (lowerItem.includes('editor de fotos')) return "Retoque digital y edición profesional";
+      if (lowerItem.includes('diseñador gráfico')) return "Diseño para redes sociales y marketing";
+      if (lowerItem.includes('traductor')) return "Traducción precisa en múltiples idiomas";
+      if (lowerItem.includes('redactor')) return "Contenido web optimizado y creativo";
+      if (lowerItem.includes('asistente virtual')) return "Gestión administrativa y organización";
+      if (lowerItem.includes('organizador profesional')) return "Optimización de espacios en el hogar";
+      if (lowerItem.includes('profesor particular')) return "Clases personalizadas y apoyo académico";
+      if (lowerItem.includes('entrenador personal')) return "Entrenamiento físico personalizado";
+      if (lowerItem.includes('chef')) return "Cocina gourmet a domicilio y menús personalizados";
+      if (lowerItem.includes('diseñador de interiores')) return "Consultoría y planificación de espacios";
+      if (lowerItem.includes('pianista')) return "Música en vivo para eventos especiales";
+      if (lowerItem.includes('maquillista')) return "Maquillaje profesional para toda ocasión";
+      if (lowerItem.includes('tatuador')) return "Tatuajes personalizados y artísticos";
+      if (lowerItem.includes('conductor')) return "Servicio de transporte seguro y confiable";
+      if (lowerItem.includes('mensajero')) return "Entrega rápida y eficiente en la ciudad";
+      if (lowerItem.includes('montador de muebles')) return "Ensamblaje profesional de muebles";
+      if (lowerItem.includes('asesor de imagen')) return "Consultoría de estilo personal";
+      if (lowerItem.includes('guía de turistas')) return "Tours locales y experiencias culturales";
+      if (lowerItem.includes('cuidador de mascotas')) return "Cuidado amoroso para tu mejor amigo";
+      if (lowerItem.includes('técnico en reparación')) return "Reparación de dispositivos móviles";
+      if (lowerItem.includes('instalador de cortinas')) return "Instalación profesional de cortinas";
+      if (lowerItem.includes('limpieza profunda')) return "Limpieza integral del hogar";
+      if (lowerItem.includes('decorador de eventos')) return "Decoración para fiestas y celebraciones";
+      if (lowerItem.includes('profesor de instrumento')) return "Clases de música personalizadas";
+      if (lowerItem.includes('community manager')) return "Gestión de redes sociales y marca";
+      if (lowerItem.includes('capturista')) return "Digitalización y procesamiento de datos";
+      if (lowerItem.includes('costurero')) return "Confección y reparación de prendas";
+      if (lowerItem.includes('planchador')) return "Planchado profesional de ropa";
+      if (lowerItem.includes('animador')) return "Animación de eventos y fiestas";
+      
+      return "Servicio profesional especializado";
+    }
+
+    function getIcon(itemName) {
+      const lowerItem = itemName.toLowerCase();
+      
+      if (lowerItem.includes('fotógrafo') || lowerItem.includes('cámara')) return 'fas fa-camera';
+      if (lowerItem.includes('editor') || lowerItem.includes('fotos')) return 'fas fa-edit';
+      if (lowerItem.includes('diseñador gráfico')) return 'fas fa-paint-brush';
+      if (lowerItem.includes('traductor') || lowerItem.includes('idioma')) return 'fas fa-language';
+      if (lowerItem.includes('redactor') || lowerItem.includes('contenido')) return 'fas fa-keyboard';
+      if (lowerItem.includes('asistente virtual')) return 'fas fa-headset';
+      if (lowerItem.includes('organizador')) return 'fas fa-boxes';
+      if (lowerItem.includes('profesor') || lowerItem.includes('enseñanza')) return 'fas fa-chalkboard-teacher';
+      if (lowerItem.includes('entrenador') || lowerItem.includes('fitness')) return 'fas fa-running';
+      if (lowerItem.includes('chef') || lowerItem.includes('cocina')) return 'fas fa-chef-hat';
+      if (lowerItem.includes('diseñador de interiores')) return 'fas fa-couch';
+      if (lowerItem.includes('pianista') || lowerItem.includes('músico')) return 'fas fa-music';
+      if (lowerItem.includes('maquillista')) return 'fas fa-paint-brush';
+      if (lowerItem.includes('tatuador')) return 'fas fa-pen-fancy';
+      if (lowerItem.includes('conductor') || lowerItem.includes('chofer')) return 'fas fa-car';
+      if (lowerItem.includes('mensajero') || lowerItem.includes('entrega')) return 'fas fa-shipping-fast';
+      if (lowerItem.includes('montador de muebles')) return 'fas fa-tools';
+      if (lowerItem.includes('asesor de imagen')) return 'fas fa-user-tie';
+      if (lowerItem.includes('guía de turistas')) return 'fas fa-map-marked-alt';
+      if (lowerItem.includes('mascota') || lowerItem.includes('perro')) return 'fas fa-paw';
+      if (lowerItem.includes('técnico') || lowerItem.includes('reparación')) return 'fas fa-mobile-alt';
+      if (lowerItem.includes('cortina') || lowerItem.includes('persiana')) return 'fas fa-window-maximize';
+      if (lowerItem.includes('limpieza')) return 'fas fa-broom';
+      if (lowerItem.includes('decorador') || lowerItem.includes('evento')) return 'fas fa-birthday-cake';
+      if (lowerItem.includes('instrumento')) return 'fas fa-guitar';
+      if (lowerItem.includes('community manager')) return 'fas fa-hashtag';
+      if (lowerItem.includes('capturista')) return 'fas fa-keyboard';
+      if (lowerItem.includes('costurero')) return 'fas fa-tshirt';
+      if (lowerItem.includes('planchador')) return 'fas fa-iron';
+      if (lowerItem.includes('animador')) return 'fas fa-smile-beam';
+      
+      return 'fas fa-briefcase';
+    }
+
+    function getVerificationText(itemName) {
+      const lowerItem = itemName.toLowerCase();
+      
+      if (lowerItem.includes('fotógrafo') || lowerItem.includes('editor')) {
+        return 'Portafolio verificado';
+      }
+      if (lowerItem.includes('traductor') || lowerItem.includes('redactor')) {
+        return 'Certificación lingüística verificada';
+      }
+      if (lowerItem.includes('profesor') || lowerItem.includes('entrenador')) {
+        return 'Certificación profesional verificada';
+      }
+      if (lowerItem.includes('chef') || lowerItem.includes('cocina')) {
+        return 'Certificación sanitaria verificada';
+      }
+      if (lowerItem.includes('técnico') || lowerItem.includes('reparación')) {
+        return 'Certificación técnica verificada';
+      }
+      if (lowerItem.includes('conductor') || lowerItem.includes('chofer')) {
+        return 'Licencia verificada y seguro vigente';
+      }
+      if (lowerItem.includes('cuidador') || lowerItem.includes('mascota')) {
+        return 'Referencias verificadas';
+      }
+      
+      return 'Profesionales verificados';
+    }
+
+    // Función para renderizar todas las categorías
+    function renderCategories() {
+      const container = document.getElementById('categoriesContainer');
+      const listContainer = document.getElementById('list');
+      
+      categories.forEach((category, categoryIndex) => {
+        // Añadir divisor de categoría
+        const divider = document.createElement('div');
+        divider.className = `section-divider md:col-span-2 lg:col-span-3 xl:col-span-4 category-divider fade-in-up`;
+        divider.style.animationDelay = `${categoryIndex * 0.1}s`;
+        divider.innerHTML = `<span class="px-4 bg-white text-gray-700 font-medium">${category.name}</span>`;
+        listContainer.appendChild(divider);
+        
+        // Añadir items de la categoría
+        category.items.forEach((item, itemIndex) => {
+          const colorClass = getColorClass(category.color);
+          const description = getDescription(item);
+          const icon = getIcon(item);
+          const verification = getVerificationText(item);
+          
+          const card = document.createElement('a');
+          card.href = `listings.html?category=${encodeURIComponent(item)}`;
+          card.className = `category-card glass-card rounded-xl p-5 flex flex-col hover:bg-amber-50 cursor-pointer fade-in-up`;
+          card.style.animationDelay = `${(categoryIndex * 0.1) + (itemIndex * 0.05)}s`;
+          card.innerHTML = `
+            <div class="flex items-center justify-between mb-3">
+              <div class="category-icon ${colorClass.bg}">
+                <i class="${icon} ${colorClass.text}"></i>
+              </div>
+              <i class="fas fa-chevron-right text-gray-300"></i>
+            </div>
+            <h3 class="font-semibold text-gray-900 text-lg mb-2">${item.split('(')[0].trim()}</h3>
+            <p class="text-gray-600 text-sm mb-4">${description}</p>
+            <div class="flex items-center text-xs text-gray-500 mt-auto">
+              <i class="fas fa-shield-alt mr-2"></i>
+              <span>${verification}</span>
+            </div>
+          `;
+          listContainer.appendChild(card);
+        });
+      });
+    }
+
+    // Función de búsqueda
+    function setupSearch() {
+      const search = document.getElementById('search');
+      
+      search.addEventListener('input', () => {
+        const term = search.value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.category-card');
+        const dividers = document.querySelectorAll('.category-divider');
+        
+        // Ocultar todos los elementos primero
+        cards.forEach(card => {
+          card.style.display = 'none';
+        });
+        dividers.forEach(divider => {
+          divider.style.display = 'none';
+        });
+        
+        // Mostrar elementos que coinciden
+        if (term === '') {
+          // Mostrar todo si no hay término de búsqueda
+          cards.forEach(card => {
+            card.style.display = 'flex';
+          });
+          dividers.forEach(divider => {
+            divider.style.display = 'block';
+          });
+        } else {
+          // Filtrar tarjetas
+          cards.forEach(card => {
+            const title = card.querySelector('h3').textContent.toLowerCase();
+            const description = card.querySelector('p').textContent.toLowerCase();
+            
+            if (title.includes(term) || description.includes(term)) {
+              card.style.display = 'flex';
+              
+              // Mostrar el divisor correspondiente
+              let currentDivider = card.previousElementSibling;
+              while (currentDivider && !currentDivider.classList.contains('category-divider')) {
+                currentDivider = currentDivider.previousElementSibling;
+              }
+              if (currentDivider) {
+                currentDivider.style.display = 'block';
+              }
+            }
+          });
+        }
+      });
+    }
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCategories();
+      setupSearch();
+      
+      // Asegurar que la animación se aplique
+      setTimeout(() => {
+        const elements = document.querySelectorAll('.fade-in-up');
+        elements.forEach(el => {
+          el.style.animationPlayState = 'running';
+        });
+      }, 100);
+    });
+  </script>
+</body>
+</html>
