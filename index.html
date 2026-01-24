@@ -22,66 +22,6 @@
 </head>
 
 <body class="min-h-screen bg-gray-50">
-
-  <!-- Después de Firebase SDK -->
-<script src="veriff-config.js"></script>
-
-<script>
-  // Botón de verificación Veriff
-  document.getElementById('verify-btn').addEventListener('click', async () => {
-    const user = auth.currentUser;
-    if (!user) {
-      showStatus('Primero inicia sesión', true);
-      return;
-    }
-    
-    showStatus('Preparando verificación Veriff...');
-    
-    // Obtener datos del usuario desde Firestore
-    const userDoc = await db.collection('users').doc(user.uid).get();
-    const userData = userDoc.exists ? userDoc.data() : {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
-      firstName: user.displayName?.split(' ')[0],
-      lastName: user.displayName?.split(' ').slice(1).join(' ')
-    };
-    
-    // Iniciar Veriff
-    const veriffSessionId = await window.VeriffSDK.startVeriffVerification(
-      userData,
-      // onSuccess
-      async (verificationData) => {
-        console.log('✅ Veriff éxito:', verificationData);
-        
-        // Guardar en Firestore
-        await db.collection('users').doc(user.uid).update({
-          verified: true,
-          veriffId: verificationData.id,
-          veriffStatus: verificationData.status,
-          verificationDate: firebase.firestore.FieldValue.serverTimestamp(),
-          verificationData: verificationData
-        });
-        
-        showStatus('✅ ¡Identidad verificada exitosamente!');
-        
-        // Actualizar UI
-        const updatedDoc = await db.collection('users').doc(user.uid).get();
-        updateUI({ ...user, ...updatedDoc.data() });
-      },
-      // onError
-      (error) => {
-        console.error('❌ Error Veriff:', error);
-        showStatus('Error en verificación: ' + error.message, true);
-      }
-    );
-    
-    if (veriffSessionId) {
-      showStatus('Redirigiendo a Veriff...');
-    }
-  });
-</script>
-
   <!-- Barra de estado superior -->
   <div id="status-bar" class="bg-yellow-500 text-white text-sm py-2 px-4 text-center hidden">
     <i class="fas fa-spinner fa-spin mr-2"></i>
@@ -104,10 +44,9 @@
       </div>
     </div>
 
-    <!-- Panel de estado -->
-    <button id="verify-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-  <i class="fas fa-shield-alt mr-2"></i> Verificar con Veriff
-</button>
+    <!-- Panel de estado (solo visible cuando hay usuario) -->
+    <div id="user-panel" class="max-w-md mx-auto bg-white rounded-xl shadow-lg p-6 mb-8 hidden fade-in">
+      <div class="flex items-center space-x-4">
         <img id="user-avatar" src="" alt="Avatar" class="w-16 h-16 rounded-full border-2 border-yellow-500">
         <div>
           <h2 id="user-name" class="text-xl font-bold text-gray-800"></h2>
@@ -143,7 +82,6 @@
         <p class="text-sm font-normal mt-2 text-center px-4">Buscar profesionales</p>
       </a>
 
-      <!-- 📍📍📍 ESTE ES EL BOTÓN CORREGIDO: apply-simple.html -->
       <a href="apply-simple.html"
          class="relative w-56 h-60 flex flex-col items-center justify-center text-white font-bold text-xl
                 bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg hover:from-yellow-600 hover:to-yellow-700 
@@ -154,7 +92,7 @@
       </a>
     </div>
 
-    <!-- Botón de login -->
+    <!-- Botón de login (visible cuando NO hay usuario) -->
     <div id="login-section" class="text-center fade-in">
       <p class="text-gray-600 mb-4">Inicia sesión para comenzar</p>
       <button id="btnGoogle" class="px-6 py-3 bg-white text-gray-700 rounded-lg border border-gray-300 
@@ -207,7 +145,6 @@
         <p class="text-yellow-700 text-xs mt-2">Luego abre: <a href="http://localhost:8000" class="underline">http://localhost:8000</a></p>
       </div>
     </div>
-
   </main>
 
   <!-- Footer simplificado -->
@@ -233,11 +170,11 @@
     </div>
   </footer>
 
-  <!-- Scripts principales -->
+  <!-- Scripts -->
+  <script src="veriff-config.js"></script>
   <script>
     // ========== CONFIGURACIÓN FIREBASE ==========
     
-    // 📍 TUS CLAVES DE FIREBASE (YA LAS TIENES)
     const firebaseConfig = {
       apiKey: "AIzaSyAeLIJ8ee9xUBduMKkijW4GdnY45W32Eew",
       authDomain: "colmena-hub.firebaseapp.com",
@@ -278,6 +215,11 @@
       const loginSection = document.getElementById('login-section');
       const userPanel = document.getElementById('user-panel');
       
+      if (!loginSection || !userPanel) {
+        console.error('Elementos UI no encontrados');
+        return;
+      }
+      
       if (userData) {
         loginSection.classList.add('hidden');
         userPanel.classList.remove('hidden');
@@ -288,14 +230,20 @@
         const avatar = document.getElementById('user-avatar');
         avatar.src = userData.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(userData.displayName || 'Usuario') + '&background=FFD700&color=000';
         
-        if (userData.verified) {
-          document.getElementById('verified-badge').classList.remove('hidden');
-          document.getElementById('verification-badge').classList.add('hidden');
-          document.getElementById('verify-btn').classList.add('hidden');
-        } else {
-          document.getElementById('verification-badge').classList.remove('hidden');
-          document.getElementById('verified-badge').classList.add('hidden');
-          document.getElementById('verify-btn').classList.remove('hidden');
+        const verifiedBadge = document.getElementById('verified-badge');
+        const verificationBadge = document.getElementById('verification-badge');
+        const verifyBtn = document.getElementById('verify-btn');
+        
+        if (verifiedBadge && verificationBadge && verifyBtn) {
+          if (userData.verified) {
+            verifiedBadge.classList.remove('hidden');
+            verificationBadge.classList.add('hidden');
+            verifyBtn.classList.add('hidden');
+          } else {
+            verificationBadge.classList.remove('hidden');
+            verifiedBadge.classList.add('hidden');
+            verifyBtn.classList.remove('hidden');
+          }
         }
         
       } else {
@@ -310,7 +258,8 @@
       try {
         // Verificar si estamos en local (file://)
         if (window.location.protocol === 'file:') {
-          document.getElementById('local-warning').classList.remove('hidden');
+          const warning = document.getElementById('local-warning');
+          if (warning) warning.classList.remove('hidden');
           showStatus('⚠️ Ejecuta desde localhost:8000', true);
           return false;
         }
@@ -336,7 +285,20 @@
     
     // ========== MANEJO DE AUTENTICACIÓN ==========
     
-    document.getElementById('btnGoogle').addEventListener('click', async () => {
+    function setupAuthListeners() {
+      const btnGoogle = document.getElementById('btnGoogle');
+      const logoutBtn = document.getElementById('logout-btn');
+      
+      if (btnGoogle) {
+        btnGoogle.addEventListener('click', handleGoogleLogin);
+      }
+      
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+      }
+    }
+    
+    async function handleGoogleLogin() {
       if (!firebaseInitialized) {
         showStatus('Firebase no inicializado. ¿Ejecutas desde localhost?', true);
         return;
@@ -352,16 +314,21 @@
         const result = await auth.signInWithPopup(provider);
         const user = result.user;
         
-        // Guardar en Firestore
-        await db.collection('users').doc(user.uid).set({
-          uid: user.uid,
-          displayName: user.displayName,
-          email: user.email,
-          photoURL: user.photoURL,
-          lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
-          verified: false,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
+        // Guardar en Firestore con manejo de errores
+        try {
+          await db.collection('users').doc(user.uid).set({
+            uid: user.uid,
+            displayName: user.displayName,
+            email: user.email,
+            photoURL: user.photoURL,
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+            verified: false,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        } catch (firestoreError) {
+          console.warn('⚠️ Error guardando en Firestore (pueden ser permisos):', firestoreError);
+          // Continuamos aunque falle Firestore
+        }
         
         showStatus(`¡Bienvenido ${user.displayName}!`);
         
@@ -370,25 +337,36 @@
         
         if (error.code === 'auth/operation-not-supported-in-this-environment') {
           showStatus('⚠️ Ejecuta desde http://localhost:8000', true);
-          document.getElementById('local-warning').classList.remove('hidden');
+          const warning = document.getElementById('local-warning');
+          if (warning) warning.classList.remove('hidden');
         } else {
           showStatus(`Error: ${error.message}`, true);
         }
       }
-    });
+    }
     
-    document.getElementById('logout-btn').addEventListener('click', async () => {
+    async function handleLogout() {
       try {
         await auth.signOut();
         showStatus('Sesión cerrada correctamente');
       } catch (error) {
         showStatus(`Error: ${error.message}`, true);
       }
-    });
+    }
     
-    // ========== VERIFICACIÓN SIMULADA ==========
+    // ========== VERIFICACIÓN VERIFF ==========
     
-    document.getElementById('verify-btn').addEventListener('click', async () => {
+    function setupVeriffButton() {
+      const verifyBtn = document.getElementById('verify-btn');
+      if (!verifyBtn) {
+        console.warn('⚠️ Botón verify-btn no encontrado');
+        return;
+      }
+      
+      verifyBtn.addEventListener('click', handleVerification);
+    }
+    
+    async function handleVerification() {
       const user = auth?.currentUser;
       if (!user) {
         showStatus('Primero inicia sesión', true);
@@ -397,29 +375,107 @@
       
       showStatus('Iniciando verificación de identidad...');
       
+      // Usar Veriff si está disponible, si no, simulación
+      if (window.VeriffSDK && window.VeriffSDK.startVeriffVerification) {
+        try {
+          const userData = {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            firstName: user.displayName?.split(' ')[0] || 'Usuario',
+            lastName: user.displayName?.split(' ').slice(1).join(' ') || 'Test'
+          };
+          
+          const sessionId = await window.VeriffSDK.startVeriffVerification(
+            userData,
+            async (verificationData) => {
+              console.log('✅ Veriff éxito:', verificationData);
+              
+              try {
+                await db.collection('users').doc(user.uid).update({
+                  verified: true,
+                  veriffId: verificationData.id,
+                  veriffStatus: verificationData.status,
+                  verificationDate: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                showStatus('✅ ¡Identidad verificada exitosamente!');
+                
+                // Recargar UI
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                updateUI({ ...user, ...userDoc.data() });
+                
+              } catch (error) {
+                console.error('Error guardando verificación:', error);
+                showStatus('✅ Verificado (error guardando datos)', false);
+              }
+            },
+            (error) => {
+              console.error('❌ Error Veriff:', error);
+              showStatus('Error en verificación: ' + error.message, true);
+            }
+          );
+          
+          if (sessionId) {
+            showStatus('Redirigiendo a Veriff...');
+          }
+          
+        } catch (error) {
+          console.error('Error iniciando Veriff:', error);
+          // Fallback a simulación
+          simulateVerification(user);
+        }
+      } else {
+        // Simulación si Veriff no está disponible
+        simulateVerification(user);
+      }
+    }
+    
+    async function simulateVerification(user) {
+      showStatus('⚠️ Usando simulación (Veriff no configurado)...');
+      
       setTimeout(async () => {
         try {
           await db.collection('users').doc(user.uid).update({
             verified: true,
             verifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
-            verificationMethod: 'simulated_veriff'
+            verificationMethod: 'simulated'
           });
           
-          showStatus('✅ ¡Identidad verificada exitosamente!');
+          showStatus('✅ ¡Identidad verificada exitosamente! (simulación)');
           
           // Recargar UI
           const userDoc = await db.collection('users').doc(user.uid).get();
           updateUI({ ...user, ...userDoc.data() });
           
         } catch (error) {
-          showStatus(`Error: ${error.message}`, true);
+          console.error('Error en simulación:', error);
+          showStatus('Error: ' + error.message, true);
         }
       }, 2000);
-    });
+    }
     
     // ========== PRUEBAS TÉCNICAS ==========
     
-    document.getElementById('test-firestore').addEventListener('click', async () => {
+    function setupTestButtons() {
+      const testFirestore = document.getElementById('test-firestore');
+      const testAuth = document.getElementById('test-auth');
+      const testVeriff = document.getElementById('test-veriff');
+      
+      if (testFirestore) {
+        testFirestore.addEventListener('click', testFirestoreConnection);
+      }
+      
+      if (testAuth) {
+        testAuth.addEventListener('click', testAuthConnection);
+      }
+      
+      if (testVeriff) {
+        testVeriff.addEventListener('click', testVeriffSimulation);
+      }
+    }
+    
+    async function testFirestoreConnection() {
       if (!firebaseInitialized) {
         showTestResult('Firestore: NO INICIALIZADO', false);
         return;
@@ -440,12 +496,12 @@
         showStatus('Firestore: Conexión exitosa');
         
       } catch (error) {
-        showTestResult(`Firestore: ERROR<br>${error.message}`, false);
+        showTestResult(`Firestore: ERROR<br>${error.message}<br><small>Revisa reglas de seguridad</small>`, false);
         showStatus('Firestore: Error de conexión', true);
       }
-    });
+    }
     
-    document.getElementById('test-auth').addEventListener('click', () => {
+    function testAuthConnection() {
       if (!firebaseInitialized) {
         showTestResult('Auth: NO INICIALIZADO', false);
         return;
@@ -459,21 +515,23 @@
       
       showTestResult(`Auth: AUTENTICADO ✓<br>Usuario: ${user.email}<br>UID: ${user.uid.substring(0, 10)}...`, true);
       showStatus('Auth: Usuario verificado');
-    });
+    }
     
-    document.getElementById('test-veriff').addEventListener('click', () => {
+    function testVeriffSimulation() {
       const user = auth?.currentUser;
       if (!user) {
         showTestResult('Veriff: NO AUTENTICADO', false);
         return;
       }
       
-      showTestResult('Veriff: SIMULACIÓN EXITOSA ✓<br>Usuario: ' + user.email + '<br><small>En producción usaría SDK real</small>', true);
-      showStatus('Veriff: Simulación completada');
-    });
+      showTestResult('Veriff: SIMULACIÓN DISPONIBLE ✓<br>Usuario: ' + user.email + '<br><small>Configura API Key para Veriff real</small>', true);
+      showStatus('Veriff: Simulación disponible');
+    }
     
     function showTestResult(message, isSuccess) {
       const resultsDiv = document.getElementById('test-results');
+      if (!resultsDiv) return;
+      
       const colorClass = isSuccess ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
       const icon = isSuccess ? 'fa-check-circle' : 'fa-times-circle';
       const iconColor = isSuccess ? 'text-green-600' : 'text-red-600';
@@ -494,16 +552,26 @@
       auth.onAuthStateChanged(async (user) => {
         if (user) {
           try {
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            const userData = userDoc.exists 
-              ? { ...user, ...userDoc.data() }
-              : user;
+            let userData = user;
+            
+            // Intentar obtener datos de Firestore
+            if (db) {
+              try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                  userData = { ...user, ...userDoc.data() };
+                }
+              } catch (firestoreError) {
+                console.warn('⚠️ Error obteniendo usuario de Firestore:', firestoreError);
+                // Usamos solo datos de auth si Firestore falla
+              }
+            }
             
             updateUI(userData);
             
           } catch (error) {
             console.error("Error obteniendo usuario:", error);
-            updateUI(user);
+            updateUI(user); // Mostrar solo datos básicos
           }
         } else {
           updateUI(null);
@@ -513,26 +581,37 @@
     
     // ========== INICIALIZACIÓN DE LA PÁGINA ==========
     
-    document.addEventListener('DOMContentLoaded', () => {
+    function initializePage() {
       console.log('🚀 COLMENA HUB BETA v0.1 cargado');
       
       // Inicializar Firebase
       if (initializeFirebase()) {
         showStatus('Sistema BETA listo. Inicia sesión para comenzar.');
+        
+        // Configurar listeners
+        setupAuthListeners();
+        setupVeriffButton();
+        setupTestButtons();
         setupAuthObserver();
       }
       
       // Detectar si estamos en local
       if (window.location.protocol === 'file:') {
-        document.getElementById('local-warning').classList.remove('hidden');
+        const warning = document.getElementById('local-warning');
+        if (warning) warning.classList.remove('hidden');
         
         // Deshabilitar botones que requieren Firebase
-        document.getElementById('btnGoogle').disabled = true;
-        document.getElementById('btnGoogle').innerHTML = 
-          '<i class="fas fa-ban mr-2"></i><span>Ejecuta desde localhost</span>';
-        document.getElementById('btnGoogle').classList.add('opacity-50', 'cursor-not-allowed');
+        const btnGoogle = document.getElementById('btnGoogle');
+        if (btnGoogle) {
+          btnGoogle.disabled = true;
+          btnGoogle.innerHTML = '<i class="fas fa-ban mr-2"></i><span>Ejecuta desde localhost</span>';
+          btnGoogle.classList.add('opacity-50', 'cursor-not-allowed');
+        }
       }
-    });
+    }
+    
+    // Esperar a que el DOM esté completamente cargado
+    document.addEventListener('DOMContentLoaded', initializePage);
   </script>
 </body>
 </html>
