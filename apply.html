@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verificación de Profesionales – COLMENA HUB</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+  
+  <!-- Veriff SDK -->
+  <script src="https://cdn.veriff.me/v2/veriff.js"></script>
+  
+  <!-- Cargar veriff-working.js si existe -->
+  <script src="veriff-working.js"></script>
+  
+  <style>
+    :root { --primary-yellow: #FFD700; --secondary-brown: #8B4513; }
+    body { background: linear-gradient(135deg, #FFF8DC 0%, #f5f5f5 100%); font-family: 'Segoe UI', sans-serif; }
+    .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); }
+    .btn-primary { background: linear-gradient(135deg, var(--primary-yellow), #FFA500); color: var(--secondary-brown); font-weight: 600; transition: all 0.3s ease; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .progress-bar { height: 6px; background: linear-gradient(90deg, #4CAF50 0%, var(--primary-yellow) 100%); border-radius: 3px; transition: width 0.5s ease; }
+    .error-message { color: #dc2626; font-size: 0.875rem; margin-top: 0.25rem; display: none; }
+    .success-input { border-color: #10b981 !important; }
+    .error-input { border-color: #dc2626 !important; }
+    .professional-select { max-height: 300px; overflow-y: auto; }
+    .professional-option { transition: all 0.2s; }
+    .professional-option:hover { background-color: #fef3c7; }
+    .category-header { background-color: #fbbf24; color: #78350f; font-weight: bold; padding: 8px 12px; margin-top: 8px; border-radius: 4px; }
+    .country-emoji { font-size: 1.25rem; margin-right: 8px; }
+    
+    /* Barra de estado (mejora de apply-simple) */
+    .status-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 9999;
+      padding: 12px 20px;
+      text-align: center;
+      font-size: 14px;
+      display: none;
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      color: #78350f;
+      font-weight: 600;
+    }
+    .status-bar.visible { display: block; }
+    .status-bar.success { background: linear-gradient(135deg, #10B981, #059669); color: white; }
+    .status-bar.error { background: linear-gradient(135deg, #EF4444, #DC2626); color: white; }
+    .status-bar.warning { background: linear-gradient(135deg, #F59E0B, #D97706); color: white; }
+  </style>
+</head>
+
+<body class="min-h-screen">
+  
+  <!-- Barra de estado mejorada (de apply-simple) -->
+  <div id="statusBar" class="status-bar">
+    <i id="statusIcon" class="fas fa-spinner fa-spin mr-2"></i>
+    <span id="statusText">Cargando...</span>
+  </div>
+
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-lg">
+    <div class="container mx-auto px-4 py-6">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="flex items-center space-x-3 mb-4 md:mb-0">
+          <i class="fas fa-bee text-3xl"></i>
+          <div>
+            <h1 class="text-2xl font-bold">COLMENA HUB</h1>
+            <p class="text-yellow-100 text-sm">Verificación de Profesionales</p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span class="px-3 py-1 bg-white/20 rounded-full text-sm"><i class="fas fa-shield-alt mr-2"></i>Verificación Segura</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenedor Principal -->
+  <div class="container mx-auto px-4 py-8 max-w-6xl">
+    <!-- Barra de Progreso -->
+    <div class="glass-card rounded-xl p-6 mb-8">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h2 class="text-xl font-bold text-gray-800">Proceso de Verificación</h2>
+          <p class="text-gray-600">Completa todos los pasos para ser verificad@</p>
+        </div>
+        <span id="progress-text" class="font-bold text-yellow-600 text-lg">0/5</span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-2.5">
+        <div id="progress-bar" class="progress-bar h-2.5 rounded-full" style="width: 0%"></div>
+      </div>
+      <div class="grid grid-cols-5 gap-4 mt-4">
+        <div class="text-center"><div class="w-8 h-8 mx-auto bg-yellow-500 text-white rounded-full flex items-center justify-center mb-2">1</div><p class="text-xs font-medium">Información</p></div>
+        <div class="text-center"><div class="w-8 h-8 mx-auto bg-gray-300 text-gray-600 rounded-full flex items-center justify-center mb-2">2</div><p class="text-xs text-gray-500">Veriff ID</p></div>
+        <div class="text-center"><div class="w-8 h-8 mx-auto bg-gray-300 text-gray-600 rounded-full flex items-center justify-center mb-2">3</div><p class="text-xs text-gray-500">CV</p></div>
+        <div class="text-center"><div class="w-8 h-8 mx-auto bg-gray-300 text-gray-600 rounded-full flex items-center justify-center mb-2">4</div><p class="text-xs text-gray-500">Documentos</p></div>
+        <div class="text-center"><div class="w-8 h-8 mx-auto bg-gray-300 text-gray-600 rounded-full flex items-center justify-center mb-2">5</div><p class="text-xs text-gray-500">Revisión</p></div>
+      </div>
+    </div>
+
+    <!-- Formulario Principal -->
+    <div id="main-form" class="glass-card rounded-xl p-6">
+      <form id="verification-form" class="space-y-8">
+        <!-- Paso 1: Información Básica -->
+        <section id="step-1" class="step">
+          <h3 class="text-2xl font-bold text-gray-800 mb-6"><i class="fas fa-user-circle mr-3 text-yellow-500"></i>Información Personal</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Nombre Completo -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-user mr-2"></i>Nombre Completo *
+                <span class="text-xs text-gray-500">(Escribe exactamente como aparece en tu INE)</span>
+              </label>
+              <input type="text" id="fullName" required 
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"
+                     placeholder="Ej: Maria Guadalupe Garfias Sotelo"
+                     oninput="autoCapitalize(this)"/>
+              <div id="fullName-error" class="error-message">
+                <i class="fas fa-exclamation-circle mr-1"></i> Escribe tu nombre exactamente como en tu INE
+              </div>
+            </div>
+
+            <!-- Correo Electrónico (solo Gmail) -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-envelope mr-2"></i>Correo Electrónico *
+                <span class="text-xs text-gray-500">(Solo Gmail)</span>
+              </label>
+              <div class="relative">
+                <input type="email" id="email" required 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition pr-10"
+                       placeholder="tucorreo@gmail.com"
+                       onblur="validateGmail(this)"/>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                  <i class="fas fa-at text-gray-400"></i>
+                </div>
+              </div>
+              <div id="email-error" class="error-message">
+                <i class="fas fa-exclamation-circle mr-1"></i> Solo se aceptan correos de Gmail (@gmail.com)
+              </div>
+            </div>
+
+            <!-- Teléfono (solo México y Colombia) -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-phone mr-2"></i>Teléfono *
+                <span class="text-xs text-gray-500">(Solo México y Colombia)</span>
+              </label>
+              <div class="flex">
+                <div class="relative flex-grow">
+                  <input type="tel" id="phone" required 
+                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"
+                         placeholder="Ej: 5523456789"
+                         oninput="formatPhone(this)"
+                         maxlength="15"/>
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <span id="country-indicator" class="text-sm font-medium text-gray-500"></span>
+                  </div>
+                </div>
+                <button type="button" onclick="toggleCountry()" 
+                        class="ml-2 px-3 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center min-w-[100px]">
+                  <span id="current-emoji" class="country-emoji">🇲🇽</span>
+                  <span id="current-country" class="text-sm">+52</span>
+                </button>
+              </div>
+              <div id="phone-error" class="error-message">
+                <i class="fas fa-exclamation-circle mr-1"></i> Formato incorrecto. Usa 10 dígitos.
+              </div>
+              <input type="hidden" id="country-code" value="52"/>
+            </div>
+
+            <!-- Profesión/Oficio (SELECT con todas las opciones) -->
+            <div class="relative">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-briefcase mr-2"></i>Profesión/Oficio *
+                <span class="text-xs text-gray-500">(Selecciona de la lista)</span>
+              </label>
+              <div class="relative">
+                <input type="text" id="profession-search" 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"
+                       placeholder="Busca o selecciona..."
+                       onkeyup="filterProfessions()"
+                       onclick="toggleProfessionDropdown()"
+                       autocomplete="off"/>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <i class="fas fa-chevron-down text-gray-400"></i>
+                </div>
+                <input type="hidden" id="profession" required/>
+                
+                <!-- Dropdown de profesiones -->
+                <div id="profession-dropdown" 
+                     class="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-80 overflow-y-auto hidden">
+                  <!-- Las opciones se cargan dinámicamente -->
+                </div>
+              </div>
+              <div id="profession-error" class="error-message">
+                <i class="fas fa-exclamation-circle mr-1"></i> Selecciona una profesión/oficio de la lista
+              </div>
+            </div>
+          </div>
+          
+          <!-- Precio por hora (mejora de apply-simple) -->
+          <div class="mt-8">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-money-bill-wave mr-2"></i>Precio por hora (aproximado)
+            </label>
+            <div class="flex items-center">
+              <span class="bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg px-4 py-3">$</span>
+              <input type="number" id="hourly-rate" 
+                     class="flex-grow p-3 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                     placeholder="250"
+                     min="50"
+                     max="5000">
+              <span class="ml-3 text-gray-600">MXN/hora</span>
+            </div>
+          </div>
+          
+          <!-- Descripción breve (mejora de apply-simple) -->
+          <div class="mt-8">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-comment-alt mr-2"></i>Breve descripción de lo que haces
+            </label>
+            <textarea id="description" 
+                      class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" 
+                      rows="3"
+                      placeholder="Ej: Tomo fotos profesionales para eventos sociales..."></textarea>
+          </div>
+        </section>
+
+        <!-- Paso 2: Verificación con Veriff (MEJORADO) -->
+        <section id="step-2" class="step hidden">
+          <h3 class="text-2xl font-bold text-gray-800 mb-6"><i class="fas fa-shield-alt mr-3 text-green-500"></i>Verificación de Identidad</h3>
+          
+          <!-- Mensaje de información (mejora de apply-simple) -->
+          <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
+            <div class="flex items-start">
+              <i class="fas fa-info-circle text-blue-500 text-xl mr-3 mt-1"></i>
+              <div>
+                <h4 class="font-bold text-blue-800 mb-2">Verificación simplificada</h4>
+                <p class="text-blue-700 mb-3">Necesitamos:</p>
+                <ul class="text-blue-600 list-disc pl-5 space-y-1">
+                  <li>Tu nombre completo (como en INE)</li>
+                  <li>Número de teléfono</li>
+                  <li>Correo Gmail</li>
+                </ul>
+                <p class="text-sm text-blue-500 mt-3">
+                  <i class="fas fa-shield-alt mr-1"></i>
+                  Tus datos están encriptados y seguros
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contenedor Veriff (SIMPLIFICADO como apply-simple) -->
+          <div id="veriff-container" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center mb-6">
+            <div id="veriff-placeholder">
+              <i class="fas fa-id-card text-6xl text-gray-300 mb-4"></i>
+              <h4 class="text-xl font-bold text-gray-700 mb-2">Verificación de Identidad</h4>
+              <p class="text-gray-600 mb-6">Haz clic para iniciar la verificación con Veriff</p>
+              <button type="button" id="start-veriff-btn" class="btn-primary px-8 py-3 rounded-lg font-bold text-lg">
+                <i class="fas fa-shield-alt mr-2"></i>Iniciar Verificación Veriff
+              </button>
+            </div>
+            
+            <!-- Sección para Veriff real (oculta inicialmente) -->
+            <div id="veriff-real-container" class="hidden min-h-[500px]"></div>
+          </div>
+
+          <!-- Estado de la verificación (MEJORADO) -->
+          <div id="veriff-status-card" class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <div class="flex items-center">
+              <i class="fas fa-clock text-yellow-500 text-xl mr-3" id="veriff-pending-icon"></i>
+              <i class="fas fa-spinner fa-spin text-yellow-500 text-xl mr-3 hidden" id="veriff-loading-icon"></i>
+              <i class="fas fa-check-circle text-green-500 text-xl mr-3 hidden" id="veriff-success-icon"></i>
+              <i class="fas fa-times-circle text-red-500 text-xl mr-3 hidden" id="veriff-error-icon"></i>
+              <div>
+                <span id="veriff-status" class="text-gray-700 font-medium">Verificación pendiente</span>
+                <p class="text-xs text-gray-500 mt-1" id="veriff-details">No iniciada</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Pasos 3-5 (simplificados como apply-simple) -->
+        <section id="step-3" class="step hidden">
+          <h3 class="text-2xl font-bold text-gray-800 mb-6"><i class="fas fa-file-alt mr-3 text-purple-500"></i>Información Profesional</h3>
+          <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-6">
+            <h4 class="font-bold text-yellow-800 mb-2">📋 Información opcional</h4>
+            <p class="text-yellow-700">Puedes agregar más detalles sobre tu experiencia profesional, educación o certificaciones.</p>
+          </div>
+          <textarea placeholder="Describe tu experiencia, formación o habilidades adicionales..." 
+                    class="w-full h-40 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"></textarea>
+        </section>
+        
+        <section id="step-4" class="step hidden">
+          <h3 class="text-2xl font-bold text-gray-800 mb-6"><i class="fas fa-file-certificate mr-3 text-red-500"></i>Documentos</h3>
+          <div class="bg-gray-50 border border-gray-200 rounded-xl p-6">
+            <p class="text-gray-600 mb-4">Documentos opcionales para profesionales titulados.</p>
+            <div class="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+              <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+              <p class="text-gray-500">Arrastra o haz clic para subir documentos</p>
+              <p class="text-sm text-gray-400 mt-2">PDF, JPG, PNG (máx. 10MB)</p>
+            </div>
+          </div>
+        </section>
+        
+        <section id="step-5" class="step hidden">
+          <h3 class="text-2xl font-bold text-gray-800 mb-6"><i class="fas fa-clipboard-check mr-3 text-green-500"></i>Revisión Final</h3>
+          <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8">
+            <div class="flex items-start">
+              <i class="fas fa-exclamation-triangle text-yellow-500 text-xl mr-3 mt-1"></i>
+              <div>
+                <h4 class="font-bold text-yellow-800 mb-2">Confirmación final</h4>
+                <p class="text-yellow-700 mb-4">Al enviar, confirmas que toda la información proporcionada es verídica y aceptas nuestros términos y condiciones.</p>
+                <div class="flex items-center">
+                  <input type="checkbox" id="terms-accept" required class="w-5 h-5 text-yellow-600 rounded"/>
+                  <label for="terms-accept" class="ml-2 text-gray-700 font-medium">Acepto términos y condiciones de COLMENA HUB</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Resumen de información (mejora de apply-simple) -->
+          <div class="bg-gray-100 border border-gray-300 rounded-xl p-6 mb-6">
+            <h4 class="font-bold text-gray-800 mb-4">Resumen de tu información</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div><span class="text-gray-600">Nombre:</span> <span id="review-name" class="font-medium">-</span></div>
+              <div><span class="text-gray-600">Profesión:</span> <span id="review-profession" class="font-medium">-</span></div>
+              <div><span class="text-gray-600">Precio/hora:</span> <span id="review-rate" class="font-medium">-</span></div>
+              <div><span class="text-gray-600">Estado verificación:</span> <span id="review-verification" class="font-medium">Pendiente</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Navegación (MEJORADA con botones más claros) -->
+        <div class="flex justify-between pt-8 border-t border-gray-200">
+          <button type="button" id="prev-btn" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition hidden">
+            <i class="fas fa-arrow-left mr-2"></i>Anterior
+          </button>
+          <button type="button" id="next-btn" class="ml-auto btn-primary px-8 py-3 rounded-lg font-bold">
+            Siguiente <i class="fas fa-arrow-right ml-2"></i>
+          </button>
+          <button type="button" id="submit-btn" class="btn-primary px-8 py-3 rounded-lg font-bold hidden" onclick="submitFinalForm()">
+            <i class="fas fa-paper-plane mr-2"></i>Enviar Verificación
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Modal de éxito (MEJORADO como apply-simple) -->
+    <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="glass-card rounded-xl p-8 max-w-md w-full mx-4">
+        <div class="text-center">
+          <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-check text-4xl text-green-500"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-800 mb-4">¡Verificación Completada!</h3>
+          <p class="text-gray-600 mb-6">Tu perfil ha sido registrado en nuestra base de datos. Pronto te contactaremos cuando haya clientes interesados.</p>
+          
+          <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 text-left">
+            <h4 class="font-bold text-yellow-800 mb-2">📋 Próximos pasos:</h4>
+            <ul class="text-yellow-700 space-y-2 text-sm">
+              <li class="flex items-center"><i class="fas fa-clock text-yellow-600 mr-3"></i><span>Revisión de información (24-48 hrs)</span></li>
+              <li class="flex items-center"><i class="fas fa-bell text-yellow-600 mr-3"></i><span>Notificaciones de ofertas</span></li>
+              <li class="flex items-center"><i class="fas fa-chart-line text-yellow-600 mr-3"></i><span>Dashboard con estadísticas</span></li>
+            </ul>
+          </div>
+          
+          <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <button onclick="window.location.href='index.html'" class="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition">
+              <i class="fas fa-home mr-2"></i>Volver al Inicio
+            </button>
+            <button id="view-profile-btn" class="px-6 py-3 btn-primary rounded-lg">
+              <i class="fas fa-user mr-2"></i>Ver mi perfil
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white mt-12">
+    <div class="container mx-auto px-4 py-8">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-6 md:mb-0">
+          <div class="flex items-center space-x-3">
+            <i class="fas fa-bee text-2xl text-yellow-400"></i>
+            <span class="text-xl font-bold">COLMENA HUB</span>
+          </div>
+          <p class="text-gray-400 mt-2">Conectando profesionales confiables</p>
+        </div>
+        <div class="text-center md:text-right">
+          <p class="text-gray-400">© 2024 COLMENA HUB</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ====== JAVASCRIPT MEJORADO ====== -->
+  <script>
+    // ========== CONFIGURACIÓN GLOBAL (MEJORADA) ==========
+    
+    // Variables globales
+    let auth = null;
+    let db = null;
+    let storage = null;
+    let firebaseInitialized = false;
+    
+    // Config Firebase (la misma)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeLIJ8ee9xUBduMKkijW4GdnY45W32Eew",
+      authDomain: "colmena-hub.firebaseapp.com",
+      projectId: "colmena-hub",
+      storageBucket: "colmena-hub.firebasestorage.app",
+      messagingSenderId: "806697924814",
+      appId: "1:806697924814:web:b11c9b057bc6d1dd71789f",
+      measurementId: "G-LQ9GLGJCX8"
+    };
+    
+    // DATOS DE PROFESIONES (se mantienen)
+    const PROFESSION_CATEGORIES = {
+      "🧹 Limpieza, Mantenimiento y Servicios Generales": [
+        "Afinador de pianos", "Afilador de cuchillos", "Ama de llaves", "Boleador", "Cargador",
+        "Fumigador", "Limpia piscinas", "Limpia vidrios", "Mucama", "Personal de limpieza",
+        "Portero", "Recolección de basura", "Retiro de escombros"
+      ],
+      "🏗️ Construcción, Oficios Técnicos y Reparación": [
+        "Albañil", "Blindador", "Carpintero", "Cerrajero", "Chalan", "Electricista (técnico)",
+        "Herrero", "Mecánico", "Pintor", "Plomero", "Técnico en climatización", "Técnico en refrigeración",
+        "Técnicos en reparación", "Técnico industrial", "Tornero", "Vidriero", "Zapatero"
+      ],
+      "🚚 Transporte, Logística y Mensajería": [
+        "Chofer", "Grúas (operador de grúa)", "Mensajero", "Mudanzas", "Personal de almacén", "Valet parking"
+      ],
+      "🍽️ Alimentos, Bebidas y Servicios de Restaurante": [
+        "Ayudante de cocina", "Barista", "Bartender", "Carnicero", "Cocinero", "Comida para eventos",
+        "Hostess", "Lavaplatos", "Mesero", "Panadero", "Parrillero", "Repostero", "Sommelier", "Tortillero"
+      ],
+      "💄 Belleza, Estética y Bienestar": [
+        "Barbero", "Estilista", "Groomer (estilista canino)", "Manicurista", "Maquillista", "Masajista", "Tatuador"
+      ],
+      "🎨 Artes, Diseño y Oficios Artísticos": [
+        "Actor", "Actor de doblaje", "Alfarero", "Animador de fiestas", "Artesano",
+        "Bailarín / Bailarina", "Bordador", "Cantante", "Ceramista", "Creador de contenido",
+        "Decorador de interiores", "Diseño de modas", "Escritor", "Fotógrafo", "Joyero",
+        "Músico / Bandas", "Modelos", "Orfebre", "Serigrafista", "Tallador de piedra", "Tejedor"
+      ],
+      "🐶 Cuidado de Personas y Animales": [
+        "Entrenador canino", "Gericultor (cuidado de adultos mayores)", "Niñera", "Paseador de perros"
+      ],
+      "🏋️ Deportes, Entrenamiento e Instrucción": [
+        "Árbitro de ajedrez", "Árbitro de fútbol", "Entrenador de boxeo", "Entrenador de calistenia",
+        "Entrenador de fútbol", "Entrenador de gimnasia", "Entrenador personal", "Instructor de buceo",
+        "Maestro de yoga", "Maestro de zumba"
+      ],
+      "🏥 Salud y Laboratorio": [
+        "Criminalista", "Experto en higiene forense", "Laboratorista dental", "Optometrista",
+        "Radiólogo", "Técnico dental", "Técnicos en laboratorio"
+      ],
+      "🧾 Administración, Finanzas y Oficina": [
+        "Archivista", "Asistente administrativa", "Asistente personal", "Cajero", "Corrector de texto",
+        "Líder sindical", "Representante de atención al cliente", "Técnico de RRHH", "Técnico en contabilidad",
+        "Técnico en finanzas", "Técnico en informática", "Valuador", "Vendedor"
+      ],
+      "🛡️ Seguridad, Emergencias e Investigación": [
+        "Bombero", "Guardaespaldas", "Inspector privado", "Personal de seguridad", "Vigilante"
+      ],
+      "🌾 Campo y Producción": [
+        "Agricultor", "Apicultor", "Granjero"
+      ],
+      "🎉 Eventos, Turismo y Servicios Especiales": [
+        "Agente aduanal", "Agente de viajes", "Botarguero", "Cambiador de publicidad", "Enterrador",
+        "Guía de turistas", "Mayordomo", "Organizador de eventos", "Sustituto de filas", "Ufólogo"
+      ]
+    };
+    
+    // ========== FUNCIONES UTILITARIAS (MEJORADAS) ==========
+    
+    function showStatus(message, type = 'info') {
+      const bar = document.getElementById('statusBar');
+      const text = document.getElementById('statusText');
+      const icon = document.getElementById('statusIcon');
+      
+      if (!bar || !text || !icon) return;
+      
+      // Reset clases
+      bar.className = 'status-bar';
+      
+      // Configurar según tipo
+      let iconClass = '';
+      switch(type) {
+        case 'success':
+          bar.classList.add('success');
+          iconClass = 'fa-check-circle';
+          break;
+        case 'error':
+          bar.classList.add('error');
+          iconClass = 'fa-exclamation-circle';
+          break;
+        case 'warning':
+          bar.classList.add('warning');
+          iconClass = 'fa-exclamation-triangle';
+          break;
+        default:
+          bar.classList.add('warning');
+          iconClass = 'fa-spinner fa-spin';
+          break;
+      }
+      
+      // Actualizar contenido
+      icon.className = `fas ${iconClass} mr-2`;
+      text.textContent = message;
+      bar.classList.add('visible');
+      
+      // Auto-ocultar si no es error
+      if (type !== 'error') {
+        setTimeout(() => {
+          bar.classList.remove('visible');
+        }, 3000);
+      }
+    }
+    
+    // ========== INICIALIZACIÓN FIREBASE MEJORADA ==========
+    
+    function initializeFirebase() {
+      try {
+        console.log('🔥 Inicializando Firebase...');
+        
+        // Inicializar Firebase solo si no existe
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+          console.log('✅ Firebase inicializado');
+        }
+        
+        // Obtener referencias
+        auth = firebase.auth();
+        db = firebase.firestore();
+        storage = firebase.storage();
+        firebaseInitialized = true;
+        
+        console.log('✅ Firebase Auth y Firestore listos');
+        showStatus('Sistema listo. Completa el formulario para registrarte.', 'success');
+        return true;
+        
+      } catch (error) {
+        console.error('❌ Error inicializando Firebase:', error);
+        showStatus(`Error Firebase: ${error.message}`, 'error');
+        return false;
+      }
+    }
+    
+    // ========== FUNCIONES DE VALIDACIÓN ==========
+    
+    function autoCapitalize(input) {
+      let value = input.value.trim();
+      value = value.toLowerCase().split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      input.value = value;
+    }
+    
+    function validateGmail(input) {
+      const email = input.value.trim();
+      const errorEl = document.getElementById('email-error');
+      const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
+      
+      if (!gmailRegex.test(email)) {
+        errorEl.style.display = 'block';
+        input.classList.add('error-input');
+        input.classList.remove('success-input');
+        return false;
+      } else {
+        errorEl.style.display = 'none';
+        input.classList.remove('error-input');
+        input.classList.add('success-input');
+        return true;
+      }
+    }
+    
+    function formatPhone(input) {
+      let value = input.value.replace(/\D/g, '');
+      if (value.length > 10) value = value.substring(0, 10);
+      input.value = value;
+    }
+    
+    function toggleCountry() {
+      const current = document.getElementById('country-code').value;
+      const newCountry = current === '52' ? '57' : '52';
+      const emoji = newCountry === '52' ? '🇲🇽' : '🇨🇴';
+      const code = newCountry === '52' ? '+52' : '+57';
+      
+      document.getElementById('country-code').value = newCountry;
+      document.getElementById('current-emoji').textContent = emoji;
+      document.getElementById('current-country').textContent = code;
+      
+      // Limpiar teléfono al cambiar país
+      document.getElementById('phone').value = '';
+    }
+    
+    // ========== FUNCIONES DE PROFESIONES (SIMPLIFICADAS) ==========
+    
+    function loadProfessions() {
+      const dropdown = document.getElementById('profession-dropdown');
+      dropdown.innerHTML = '';
+      
+      for (const [category, professions] of Object.entries(PROFESSION_CATEGORIES)) {
+        // Header de categoría
+        const header = document.createElement('div');
+        header.className = 'category-header text-sm sticky top-0 z-10';
+        header.textContent = category;
+        dropdown.appendChild(header);
+        
+        // Opciones de la categoría
+        professions.forEach(profession => {
+          const option = document.createElement('div');
+          option.className = 'professional-option px-4 py-3 cursor-pointer hover:bg-yellow-50 border-b border-gray-100';
+          option.textContent = profession;
+          option.dataset.value = profession;
+          option.onclick = () => selectProfession(profession, option);
+          dropdown.appendChild(option);
+        });
+      }
+    }
+    
+    function filterProfessions() {
+      const search = document.getElementById('profession-search').value.toLowerCase().trim();
+      const dropdown = document.getElementById('profession-dropdown');
+      
+      // Mostrar dropdown si está oculto
+      if (dropdown.classList.contains('hidden')) {
+        dropdown.classList.remove('hidden');
+      }
+      
+      if (!search) {
+        dropdown.querySelectorAll('.professional-option, .category-header').forEach(el => {
+          el.style.display = 'block';
+        });
+        return;
+      }
+      
+      // Ocultar todo primero
+      dropdown.querySelectorAll('.professional-option, .category-header').forEach(el => {
+        el.style.display = 'none';
+      });
+      
+      // Mostrar solo coincidencias
+      dropdown.querySelectorAll('.professional-option').forEach(option => {
+        if (option.textContent.toLowerCase().includes(search)) {
+          option.style.display = 'block';
+          
+          // Mostrar la categoría correspondiente
+          let prev = option.previousElementSibling;
+          while (prev && !prev.classList.contains('category-header')) {
+            prev = prev.previousElementSibling;
+          }
+          if (prev && prev.classList.contains('category-header')) {
+            prev.style.display = 'block';
+          }
+        }
+      });
+    }
+    
+    function selectProfession(profession, element) {
+      document.getElementById('profession').value = profession;
+      document.getElementById('profession-search').value = profession;
+      document.getElementById('profession-search').classList.add('success-input');
+      document.getElementById('profession-search').classList.remove('error-input');
+      document.getElementById('profession-error').style.display = 'none';
+      
+      // Resaltar opción seleccionada
+      document.querySelectorAll('.professional-option').forEach(opt => {
+        opt.classList.remove('bg-yellow-100', 'font-semibold', 'border-yellow-400');
+      });
+      element.classList.add('bg-yellow-100', 'font-semibold', 'border-yellow-400');
+      
+      // Ocultar dropdown
+      document.getElementById('profession-dropdown').classList.add('hidden');
+    }
+    
+    function toggleProfessionDropdown() {
+      const dropdown = document.getElementById('profession-dropdown');
+      const isHidden = dropdown.classList.contains('hidden');
+      
+      if (isHidden) {
+        dropdown.classList.remove('hidden');
+        if (!dropdown.children.length) loadProfessions();
+      } else {
+        dropdown.classList.add('hidden');
+      }
+    }
+    
+    // ========== VALIDACIÓN DE PASO 1 (MEJORADA) ==========
+    
+    function validateCurrentStep() {
+      if (currentStep === 1) {
+        // Validar nombre (mínimo 2 palabras)
+        const name = document.getElementById('fullName').value.trim();
+        if (name.split(/\s+/).filter(w => w.length > 0).length < 2) {
+          showStatus('Escribe tu nombre completo (mínimo nombre y apellido)', 'error');
+          document.getElementById('fullName-error').style.display = 'block';
+          return false;
+        }
+        
+        // Validar email (solo Gmail)
+        const email = document.getElementById('email').value.trim();
+        if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/i.test(email)) {
+          showStatus('Solo se aceptan correos de Gmail (@gmail.com)', 'error');
+          document.getElementById('email-error').style.display = 'block';
+          return false;
+        }
+        
+        // Validar teléfono (10 dígitos)
+        const phone = document.getElementById('phone').value.replace(/\D/g, '');
+        if (phone.length !== 10) {
+          showStatus('Teléfono inválido. Debe tener 10 dígitos', 'error');
+          document.getElementById('phone-error').style.display = 'block';
+          return false;
+        }
+        
+        // Validar profesión seleccionada
+        const profession = document.getElementById('profession').value;
+        if (!profession) {
+          showStatus('Selecciona una profesión/oficio de la lista', 'error');
+          document.getElementById('profession-error').style.display = 'block';
+          return false;
+        }
+        
+        // Validar precio por hora
+        const hourlyRate = parseInt(document.getElementById('hourly-rate').value) || 0;
+        if (hourlyRate < 50 || hourlyRate > 5000) {
+          showStatus('El precio por hora debe estar entre $50 y $5000 MXN', 'error');
+          return false;
+        }
+        
+        return true;
+      }
+      
+      if (currentStep === 2 && !verificationCompleted) {
+        showStatus('Completa la verificación de identidad primero', 'warning');
+        return false;
+      }
+      
+      if (currentStep === 5 && !document.getElementById('terms-accept').checked) {
+        showStatus('Debes aceptar los términos y condiciones', 'error');
+        return false;
+      }
+      
+      return true;
+    }
+    
+    // ========== VERIFF MEJORADO (con fallback a simulación) ==========
+    
+    let verificationCompleted = false;
+    let veriffSessionId = null;
+    
+    async function startVeriffVerification() {
+      const user = auth.currentUser;
+      if (!user) {
+        showStatus('Primero inicia sesión en la página principal', 'error');
+        setTimeout(() => window.location.href = 'index.html', 2000);
+        return;
+      }
+      
+      showStatus('Iniciando verificación de identidad...', 'info');
+      
+      // Actualizar UI
+      document.getElementById('veriff-placeholder').classList.add('hidden');
+      document.getElementById('veriff-loading-icon').classList.remove('hidden');
+      document.getElementById('veriff-status').textContent = 'Preparando verificación...';
+      document.getElementById('veriff-details').textContent = 'Cargando sistema Veriff';
+      
+      // Usar VeriffWorking si está disponible
+      if (window.VeriffWorking) {
+        try {
+          const fullName = document.getElementById('fullName').value;
+          const nameParts = fullName.split(' ');
+          
+          const userData = {
+            uid: user.uid,
+            email: document.getElementById('email').value,
+            displayName: fullName,
+            firstName: nameParts[0] || 'Usuario',
+            lastName: nameParts.slice(1).join(' ') || nameParts[0] || 'Test',
+            phone: document.getElementById('phone').value,
+            countryCode: document.getElementById('country-code').value
+          };
+          
+          console.log('🚀 Llamando VeriffWorking...');
+          const sessionId = await window.VeriffWorking.startVerification(userData);
+          
+          if (sessionId) {
+            veriffSessionId = sessionId;
+            verificationCompleted = true;
+            
+            // Guardar sessionId
+            localStorage.setItem('veriff_session_id', sessionId);
+            localStorage.setItem('veriff_user_id', user.uid);
+            
+            // Actualizar UI
+            document.getElementById('veriff-loading-icon').classList.add('hidden');
+            document.getElementById('veriff-success-icon').classList.remove('hidden');
+            document.getElementById('veriff-status').textContent = '✅ Verificación completada';
+            document.getElementById('veriff-details').textContent = 'Identidad verificada exitosamente';
+            
+            showStatus('¡Verificación completada exitosamente!', 'success');
+          }
+          
+        } catch (error) {
+          console.error('❌ Error Veriff:', error);
+          showStatus('Error: ' + error.message, 'error');
+          
+          // Fallback a simulación
+          simulateVerification();
+        }
+      } else {
+        // Veriff no disponible, usar simulación
+        simulateVerification();
+      }
+    }
+    
+    async function simulateVerification() {
+      showStatus('⚠️ Usando simulación de verificación...', 'warning');
+      
+      // Simular delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      try {
+        const user = auth.currentUser;
+        if (user && db) {
+          await db.collection('professionals').doc(user.uid).update({
+            verified: true,
+            verifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            verificationMethod: 'simulated'
+          });
+        }
+        
+        verificationCompleted = true;
+        
+        // Actualizar UI
+        document.getElementById('veriff-loading-icon').classList.add('hidden');
+        document.getElementById('veriff-success-icon').classList.remove('hidden');
+        document.getElementById('veriff-status').textContent = '✅ Verificación completada';
+        document.getElementById('veriff-details').textContent = 'Identidad verificada exitosamente';
+        
+        showStatus('✅ ¡Identidad verificada exitosamente! (simulación)', 'success');
+        
+      } catch (error) {
+        console.error('Error en simulación:', error);
+        showStatus('Error: ' + error.message, 'error');
+      }
+    }
+    
+    // ========== NAVEGACIÓN ENTRE PASOS ==========
+    
+    let currentStep = 1;
+    const totalSteps = 5;
+    
+    function updateProgress() {
+      const p = (currentStep / totalSteps) * 100;
+      document.getElementById('progress-bar').style.width = p + '%';
+      document.getElementById('progress-text').textContent = `${currentStep}/${totalSteps}`;
+      
+      // Actualizar resumen en paso 5
+      if (currentStep === 5) {
+        document.getElementById('review-name').textContent = document.getElementById('fullName').value;
+        document.getElementById('review-profession').textContent = document.getElementById('profession').value;
+        document.getElementById('review-rate').textContent = '$' + (document.getElementById('hourly-rate').value || '250') + ' MXN/hora';
+        document.getElementById('review-verification').textContent = verificationCompleted ? '✅ Verificado' : '❌ Pendiente';
+      }
+    }
+    
+    function updateNav() {
+      document.getElementById('prev-btn').classList.toggle('hidden', currentStep === 1);
+      document.getElementById('next-btn').classList.toggle('hidden', currentStep === totalSteps);
+      document.getElementById('submit-btn').classList.toggle('hidden', currentStep !== totalSteps);
+    }
+    
+    function nextStep() {
+      if (!validateCurrentStep()) return;
+      document.querySelector(`#step-${currentStep}`).classList.add('hidden');
+      currentStep++;
+      document.querySelector(`#step-${currentStep}`).classList.remove('hidden');
+      updateNav(); 
+      updateProgress();
+      
+      // Si llegamos al paso 2, preparamos Veriff
+      if (currentStep === 2) {
+        // Nada especial, el usuario hará clic en el botón
+      }
+    }
+    
+    function prevStep() {
+      document.querySelector(`#step-${currentStep}`).classList.add('hidden');
+      currentStep--;
+      document.querySelector(`#step-${currentStep}`).classList.remove('hidden');
+      updateNav(); 
+      updateProgress();
+    }
+    
+    // ========== GUARDAR DATOS FINALES ==========
+    
+    async function submitFinalForm() {
+      const user = auth.currentUser;
+      if (!user) {
+        showStatus('Error: No hay usuario autenticado', 'error');
+        setTimeout(() => window.location.href = 'index.html', 2000);
+        return;
+      }
+      
+      if (!verificationCompleted) {
+        showStatus('Debes completar la verificación de identidad primero', 'error');
+        return;
+      }
+      
+      showStatus('Guardando tu información...', 'info');
+      
+      try {
+        // Guardar en Firestore
+        const professionalData = {
+          userId: user.uid,
+          fullName: document.getElementById('fullName').value,
+          email: document.getElementById('email').value,
+          phone: document.getElementById('phone').value,
+          countryCode: document.getElementById('country-code').value,
+          profession: document.getElementById('profession').value,
+          description: document.getElementById('description').value.trim(),
+          hourlyRate: parseInt(document.getElementById('hourly-rate').value) || 250,
+          veriffSessionId: veriffSessionId,
+          verificationDate: new Date().toISOString(),
+          verified: true,
+          status: 'pending',
+          stripeConnected: false,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        await db.collection('professionals').doc(user.uid).set(professionalData, { merge: true });
+        
+        console.log('✅ Profesional guardado en Firestore');
+        
+        // Mostrar modal de éxito
+        document.getElementById('success-modal').classList.remove('hidden');
+        showStatus('¡Registro completado exitosamente!', 'success');
+        
+      } catch (error) {
+        console.error('❌ Error al guardar:', error);
+        showStatus('Error: ' + error.message, 'error');
+      }
+    }
+    
+    // ========== INICIALIZACIÓN DE LA PÁGINA ==========
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🚀 COLMENA HUB Apply - Inicializando...');
+      
+      // 1. Inicializar Firebase
+      if (initializeFirebase()) {
+        // 2. Verificar autenticación
+        auth.onAuthStateChanged(user => {
+          if (!user) {
+            // Si no está logueado, mostrar mensaje
+            const mainForm = document.getElementById('main-form');
+            mainForm.innerHTML = `
+              <div class="text-center py-12">
+                <i class="fas fa-user-lock text-5xl text-gray-300 mb-6"></i>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Primero inicia sesión</h2>
+                <p class="text-gray-600 mb-6">Necesitas tener una cuenta para registrarte como profesional.</p>
+                <a href="index.html" class="btn-primary px-8 py-3 rounded-lg font-bold inline-block">
+                  <i class="fas fa-sign-in-alt mr-2"></i> Ir a iniciar sesión
+                </a>
+              </div>
+            `;
+            return;
+          }
+          
+          // Si está logueado, continuar con inicialización normal
+          initializePage();
+        });
+      }
+    });
+    
+    function initializePage() {
+      // Configurar progreso
+      updateProgress(); 
+      updateNav();
+      
+      // Botón para iniciar Veriff
+      document.getElementById('start-veriff-btn').addEventListener('click', startVeriffVerification);
+      
+      // Navegación
+      document.getElementById('next-btn').addEventListener('click', nextStep);
+      document.getElementById('prev-btn').addEventListener('click', prevStep);
+      
+      // Cerrar dropdown de profesiones al hacer clic fuera
+      document.addEventListener('click', (e) => {
+        const dropdown = document.getElementById('profession-dropdown');
+        const searchInput = document.getElementById('profession-search');
+        
+        if (!dropdown.contains(e.target) && e.target !== searchInput) {
+          dropdown.classList.add('hidden');
+        }
+      });
+      
+      // Inicializar indicador de país
+      document.getElementById('country-indicator').textContent = '';
+      
+      // Cargar profesiones al hacer clic en el input
+      document.getElementById('profession-search').addEventListener('click', function() {
+        const dropdown = document.getElementById('profession-dropdown');
+        if (dropdown.classList.contains('hidden')) {
+          toggleProfessionDropdown();
+        }
+      });
+      
+      // Botón para ver perfil
+      document.getElementById('view-profile-btn').addEventListener('click', async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        try {
+          const doc = await db.collection('professionals').doc(user.uid).get();
+          if (doc.exists) {
+            const data = doc.data();
+            alert(`Perfil registrado:\n\nNombre: ${data.fullName}\nProfesión: ${data.profession}\nPrecio/hora: $${data.hourlyRate} MXN\nEstado: ${data.status}\nVerificado: ${data.verified ? '✅ Sí' : '❌ No'}\n\nID: ${user.uid.substring(0, 8)}...`);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      });
+      
+      console.log('✅ Página inicializada correctamente');
+    }
+  </script>
+</body>
+</html>

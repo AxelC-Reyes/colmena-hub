@@ -3,188 +3,321 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>COLMENA-HUB BETA</title>
+  <title>COLMENA-HUB</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body{ margin:0; background-color: #f3f4f6; }
-    .logo-img { height: 100px; width: auto; transition: transform 0.3s ease; }
-    .logo-img:hover { transform: scale(1.05); }
-    .hexagon { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
+    body{ margin:0; background:#fff; background-color: #f3f4f6; }
+    #juego-contenedor{ background:#fff; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,.1); }
+    #lienzo-juego{ margin:0 auto; }
+    #panel-juego.hidden{ display:none; }
+    .logo-container { 
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
+      padding: 20px 0 10px 0;
+    }
+    .logo-img {
+      height: 100px;
+      width: auto;
+      transition: transform 0.3s ease;
+    }
+    .logo-img:hover {
+      transform: scale(1.05);
+    }
     .fade-in { animation: fadeIn 0.5s ease-in; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    
+    /* Barra de estado */
+    .status-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 9999;
+      padding: 8px 16px;
+      text-align: center;
+      font-size: 14px;
+      display: none;
+    }
+    .status-bar.visible { display: block; }
+    .status-bar.success { background-color: #10B981; color: white; }
+    .status-bar.error { background-color: #EF4444; color: white; }
+    .status-bar.warning { background-color: #F59E0B; color: white; }
   </style>
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+  <!-- Veriff SDK -->
+  <script src="https://cdn.veriff.me/v2/veriff.js"></script>
+
+  <!-- Cargar veriff-working.js si existe -->
+  <script src="veriff-working.js"></script>
 </head>
 
-<body class="min-h-screen bg-gray-50">
-  <!-- Barra de estado superior -->
-  <div id="status-bar" class="bg-yellow-500 text-white text-sm py-2 px-4 text-center hidden">
-    <i class="fas fa-spinner fa-spin mr-2"></i>
-    <span id="status-text">Cargando...</span>
+<body class="min-h-screen bg-offwhite flex flex-col">
+  
+  <!-- Barra de estado superior (mejora nueva) -->
+  <div id="statusBar" class="status-bar">
+    <i id="statusIcon" class="fas fa-spinner fa-spin mr-2"></i>
+    <span id="statusText">Cargando...</span>
   </div>
 
   <!-- Contenido principal -->
-  <main class="container mx-auto px-4 py-12">
+  <main class="flex-grow flex flex-col items-center justify-center px-4 py-12 space-y-10">
     
-    <!-- Logo y Título -->
-    <div class="flex flex-col md:flex-row items-center justify-center gap-6 mb-10 fade-in">
-      <img src="colmena-hubLOGO.png" alt="COLMENA HUB Logo" class="h-32 w-auto">
-      <div class="text-center md:text-left">
-        <h1 class="text-4xl font-bold text-gray-800">COLMENA-HUB BETA</h1>
-        <p class="text-lg text-gray-600 mt-2">Prueba de integración de APIs</p>
-        <div class="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded-lg hidden" id="local-warning">
-          <i class="fas fa-exclamation-triangle mr-2"></i>
-          <strong>⚠️ NO FUNCIONARÁ EN LOCAL:</strong> Usa un servidor (http://localhost:8000)
-        </div>
+    <!-- Logo y Título en línea -->
+    <div class="flex flex-row items-center justify-center gap-4 mb-2">
+      <!-- Logo al lado izquierdo -->
+      <div>
+        <img src="colmena-hubLOGO.png" alt="COLMENA HUB Logo" class="h-40 w-auto">
       </div>
-    </div>
-
-    <!-- Panel de estado (solo visible cuando hay usuario) -->
-    <div id="user-panel" class="max-w-md mx-auto bg-white rounded-xl shadow-lg p-6 mb-8 hidden fade-in">
-      <div class="flex items-center space-x-4">
-        <img id="user-avatar" src="" alt="Avatar" class="w-16 h-16 rounded-full border-2 border-yellow-500">
-        <div>
-          <h2 id="user-name" class="text-xl font-bold text-gray-800"></h2>
-          <p id="user-email" class="text-gray-600 text-sm"></p>
-          <div class="flex items-center mt-2">
-            <span id="verification-badge" class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium hidden">
-              <i class="fas fa-times-circle mr-1"></i> No verificado
-            </span>
-            <span id="verified-badge" class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium hidden">
-              <i class="fas fa-check-circle mr-1"></i> Verificado
-            </span>
-          </div>
-        </div>
-      </div>
-      <div class="mt-6 grid grid-cols-2 gap-4">
-        <button id="logout-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition flex items-center justify-center">
-          <i class="fas fa-sign-out-alt mr-2"></i> Cerrar sesión
-        </button>
-        <button id="verify-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center">
-          <i class="fas fa-shield-alt mr-2"></i> Verificar con Veriff
-        </button>
-      </div>
-    </div>
-
-    <!-- Hexágonos principales -->
-    <div class="flex flex-col md:flex-row items-center justify-center gap-12 mb-12 fade-in">
-      <a href="professional-type.html"
-         class="relative w-56 h-60 flex flex-col items-center justify-center text-white font-bold text-xl
-                bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg hover:from-yellow-600 hover:to-yellow-700 
-                transition-all duration-300 hexagon transform hover:-translate-y-2">
-        <i class="fas fa-search text-3xl mb-2"></i>
-        <span>CONTRATAR</span>
-        <p class="text-sm font-normal mt-2 text-center px-4">Buscar profesionales</p>
-      </a>
-
-      <a href="apply-simple.html"
-         class="relative w-56 h-60 flex flex-col items-center justify-center text-white font-bold text-xl
-                bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg hover:from-yellow-600 hover:to-yellow-700 
-                transition-all duration-300 hexagon transform hover:-translate-y-2">
-        <i class="fas fa-user-check text-3xl mb-2"></i>
-        <span>SER CONTRATADO</span>
-        <p class="text-sm font-normal mt-2 text-center px-4">Registro simplificado</p>
-      </a>
-    </div>
-
-    <!-- Botón de login (visible cuando NO hay usuario) -->
-    <div id="login-section" class="text-center fade-in">
-      <p class="text-gray-600 mb-4">Inicia sesión para comenzar</p>
-      <button id="btnGoogle" class="px-6 py-3 bg-white text-gray-700 rounded-lg border border-gray-300 
-                                    hover:bg-gray-50 transition inline-flex items-center justify-center gap-3 
-                                    shadow hover:shadow-md transform hover:-translate-y-1">
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
-             class="w-5 h-5" 
-             alt="Google">
-        <span class="font-medium">Ingresar con Google</span>
-      </button>
-      <p class="text-xs text-gray-500 mt-3">
-        <i class="fas fa-info-circle mr-1"></i>
-        Necesitas ejecutar desde <code>http://localhost:8000</code>
-      </p>
-    </div>
-
-    <!-- Panel de debug (solo para pruebas) -->
-    <div class="max-w-2xl mx-auto mt-12 bg-gray-100 rounded-lg p-6 border border-gray-300 fade-in">
-      <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-        <i class="fas fa-vial mr-2 text-yellow-600"></i> Panel de pruebas BETA
-      </h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <button id="test-firestore" class="px-4 py-3 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 
-                                           transition flex items-center justify-center">
-          <i class="fas fa-database mr-2"></i> Probar Firestore
-        </button>
-        <button id="test-auth" class="px-4 py-3 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 
-                                      transition flex items-center justify-center">
-          <i class="fas fa-user-check mr-2"></i> Probar Auth
-        </button>
-        <button id="test-veriff" class="px-4 py-3 bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-200 
-                                        transition flex items-center justify-center">
-          <i class="fas fa-shield-alt mr-2"></i> Probar Veriff
-        </button>
-      </div>
-      <div id="test-results" class="text-sm text-gray-600"></div>
       
-      <!-- Instrucciones para servidor local -->
-      <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <h4 class="font-bold text-yellow-800 mb-2 flex items-center">
-          <i class="fas fa-server mr-2"></i> ¿No funciona el login?
-        </h4>
-        <p class="text-yellow-700 text-sm mb-2">Ejecuta en terminal:</p>
-        <div class="bg-black text-green-400 p-3 rounded font-mono text-xs">
-          <div class="mb-1"># Opción 1 (Python 3)</div>
-          <div class="text-yellow-300">python3 -m http.server 8000</div>
-          <div class="mb-1 mt-2"># Opción 2 (Node.js)</div>
-          <div class="text-yellow-300">npx http-server -p 8000</div>
-        </div>
-        <p class="text-yellow-700 text-xs mt-2">Luego abre: <a href="http://localhost:8000" class="underline">http://localhost:8000</a></p>
+      <!-- Título al lado derecho -->
+      <div>
+        <h1 class="text-4xl font-bold text-gray-800">COLMENA-HUB</h1>
       </div>
+    </div>
+    
+    <!-- Subtítulo debajo -->
+    <p class="text-lg text-gray-600 text-center">QUIERO</p>
+
+    <!-- Hexágonos -->
+    <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+      <a href="professional-type.html"
+         class="relative w-48 h-52 flex items-center justify-center text-white font-bold text-xl
+                bg-yellow-500 shadow-lg hover:bg-yellow-600 transition-all duration-300"
+         style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+        CONTRATAR
+      </a>
+
+      <a href="apply.html"
+         class="relative w-48 h-52 flex items-center justify-center text-white font-bold text-xl
+                bg-yellow-500 shadow-lg hover:bg-yellow-600 transition-all duration-300"
+         style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+        SER CONTRATADO
+      </a>
+    </div>
+
+    <!-- Botón con logo de Google (POPUP sin redirigir) -->
+    <button id="btnGoogle" class="mt-6 px-5 py-2.5 bg-white text-gray-700 rounded-md border border-gray-300 hover:bg-gray-50 transition inline-flex items-center justify-center gap-2">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
+           class="w-4 h-4 inline-block align-baseline" 
+           alt="Google">
+      <span class="inline-block align-middle text-sm">Ingresar con Google</span>
+    </button>
+
+    <!-- Botón flotante Verificar Identidad (solo logueado) -->
+    <div id="veriffWrapper" class="fixed bottom-4 right-4 hidden">
+      <button id="veriffBtn"
+              class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition">
+        Verificar mi identidad
+      </button>
+    </div>
+
+    <!-- Badge de verificación -->
+    <div id="verifiedBadge" class="fixed top-4 right-4 hidden z-50">
+      <div class="px-4 py-2 bg-green-100 text-green-800 rounded-full flex items-center gap-2">
+        <i class="fas fa-check-circle"></i>
+        <span class="font-medium">Verificado</span>
+      </div>
+    </div>
+
+    <!-- Mini Juego -->
+    <div class="mt-8 text-center">
+      <h3 class="text-base font-semibold text-yellow-700 mb-2">Mini Juego</h3>
+      <a href="juego.html"
+         class="inline-block px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-lg hover:bg-yellow-600 transition shadow-md">
+        Jugar Ahora
+      </a>
     </div>
   </main>
 
-  <!-- Footer simplificado -->
-  <footer class="mt-16 py-6 bg-gray-800 text-white">
-    <div class="container mx-auto px-4 text-center">
-      <div class="flex flex-col md:flex-row justify-between items-center">
-        <div class="mb-4 md:mb-0">
-          <div class="flex items-center justify-center md:justify-start space-x-2">
-            <i class="fas fa-bee text-yellow-400"></i>
-            <span class="font-bold text-lg">COLMENA HUB BETA v0.1</span>
+  <!-- Footer (se mantiene exactamente igual) -->
+  <footer class="w-full bg-gradient-to-b from-gray-50 to-gray-100 border-t border-yellow-200 mt-8">
+    <div class="max-w-6xl mx-auto px-4 py-8">
+      <!-- Grid principal -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <!-- Enlaces legales -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-6 h-6 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center">
+              <i class="fas fa-shield-alt text-white text-xs"></i>
+            </div>
+            <h3 class="font-bold text-gray-800 text-sm uppercase tracking-wider">Legal</h3>
           </div>
-          <p class="text-gray-400 text-sm mt-1">Pruebas de integración técnica</p>
+          <div class="space-y-2">
+            <a href="politica-privacidad.html" 
+               class="flex items-center gap-2 text-gray-600 hover:text-yellow-600 transition-colors group">
+              <i class="fas fa-file-contract text-yellow-500 text-xs group-hover:scale-110 transition-transform"></i>
+              <span class="text-sm">Política de Privacidad</span>
+            </a>
+            <a href="#" 
+               class="flex items-center gap-2 text-gray-600 hover:text-yellow-600 transition-colors group">
+              <i class="fas fa-balance-scale text-yellow-500 text-xs group-hover:scale-110 transition-transform"></i>
+              <span class="text-sm">Términos y Condiciones</span>
+            </a>
+            <a href="#" 
+               class="flex items-center gap-2 text-gray-600 hover:text-yellow-600 transition-colors group">
+              <i class="fas fa-question-circle text-yellow-500 text-xs group-hover:scale-110 transition-transform"></i>
+              <span class="text-sm">Preguntas Frecuentes</span>
+            </a>
+          </div>
         </div>
-        <div class="text-sm text-gray-400">
-          <p class="flex flex-wrap justify-center gap-2">
-            <span class="px-2 py-1 bg-gray-700 rounded">Firebase ✓</span>
-            <span class="px-2 py-1 bg-gray-700 rounded">OAuth ✓</span>
-            <span class="px-2 py-1 bg-gray-700 rounded">Veriff ✓</span>
-            <span class="px-2 py-1 bg-gray-700 rounded">Stripe (próximo)</span>
+        
+        <!-- Misión -->
+        <div class="space-y-3">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-6 h-6 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center">
+              <i class="fas fa-bullseye text-white text-xs"></i>
+            </div>
+            <h3 class="font-bold text-gray-800">Misión</h3>
+          </div>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Conectar talento con oportunidades de manera simple, segura y confiable, 
+            construyendo puentes entre profesionales y oportunidades.
           </p>
+        </div>
+        
+        <!-- Visión -->
+        <div class="space-y-3">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-6 h-6 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center">
+              <i class="fas fa-eye text-white text-xs"></i>
+            </div>
+            <h3 class="font-bold text-gray-800">Visión</h3>
+          </div>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Ser la plataforma líder en contratación profesional en Latinoamérica, 
+            transformando la manera en que empresas y profesionales se conectan.
+          </p>
+        </div>
+        
+        <!-- Conócenos + Redes -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-6 h-6 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center">
+              <i class="fas fa-users text-white text-xs"></i>
+            </div>
+            <h3 class="font-bold text-gray-800">Conócenos</h3>
+          </div>
+          
+          <p class="text-gray-600 text-sm mb-4 leading-relaxed">
+            Somos un equipo comprometido con el desarrollo profesional y la innovación 
+            en el mercado laboral.
+          </p>
+          
+          <!-- Redes Sociales -->
+          <div>
+            <h4 class="font-semibold text-gray-700 text-xs mb-3 uppercase tracking-wider">Síguenos</h4>
+            <div class="flex space-x-3">
+              <!-- Instagram -->
+              <a href="https://www.instagram.com/colmena_hub?igsh=cTN3cDBwN3FmMm9k&utm_source=qr" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 class="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white hover:shadow-lg hover:scale-110 transition-all duration-200"
+                 title="Instagram">
+                <i class="fab fa-instagram"></i>
+              </a>
+              
+              <!-- LinkedIn -->
+              <a href="https://www.linkedin.com/company/colmena-hub/" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 class="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white hover:shadow-lg hover:scale-110 transition-all duration-200"
+                 title="LinkedIn">
+                <i class="fab fa-linkedin-in"></i>
+              </a>
+              
+              <!-- WhatsApp -->
+              <a href="https://wa.me/5215512345678" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white hover:shadow-lg hover:scale-110 transition-all duration-200"
+                 title="WhatsApp">
+                <i class="fab fa-whatsapp"></i>
+              </a>
+            </div>
+          </div>
+          
+          <!-- Contacto directo -->
+          <div class="pt-3 border-t border-gray-200">
+            <a href="mailto:contacto@colmena-hub.com" 
+               class="flex items-center gap-2 text-gray-600 hover:text-yellow-600 transition-colors text-sm group">
+              <i class="fas fa-envelope text-yellow-500 group-hover:animate-bounce"></i>
+              <span>contacto@colmena-hub.com</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Línea divisoria -->
+      <div class="h-px bg-gradient-to-r from-transparent via-yellow-300 to-transparent my-6"></div>
+      
+      <!-- Copyright y marca -->
+      <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
+            <i class="fas fa-bee text-white"></i>
+          </div>
+          <div>
+            <div class="font-bold text-gray-800 text-lg">COLMENA HUB</div>
+            <div class="text-xs text-gray-500">Conectando talento, construyendo futuro</div>
+          </div>
+        </div>
+        
+        <div class="text-center md:text-right">
+          <div class="text-xs text-gray-500 mb-1">
+            © 2025 Colmena-Hub. Todos los derechos reservados.
+          </div>
+          <div class="flex items-center justify-center md:justify-end gap-4 text-xs text-gray-500">
+            <span class="flex items-center gap-1">
+              <i class="fas fa-shield-alt text-green-500"></i>
+              <span>100% Seguro</span>
+            </span>
+            <span class="flex items-center gap-1">
+              <i class="fas fa-lock text-blue-500"></i>
+              <span>Encriptación SSL</span>
+            </span>
+            <span class="flex items-center gap-1">
+              <i class="fas fa-check-circle text-yellow-500"></i>
+              <span>Profesionales Verificados</span>
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Badge de seguridad móvil -->
+      <div class="md:hidden mt-4 flex justify-center">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-yellow-50 border border-yellow-200 rounded-full">
+          <i class="fas fa-shield-alt text-yellow-600"></i>
+          <span class="text-xs text-gray-700">Plataforma segura y verificada</span>
         </div>
       </div>
     </div>
   </footer>
 
-  <!-- ========== SCRIPTS EN ORDEN CORRECTO ========== -->
-  
-  <!-- 1. Veriff -->
-  <script src="veriff-working.js"></script>
-  
-  <!-- 2. Código principal (TODO EN UN SOLO SCRIPT) -->
+  <!-- Scripts de juego (se mantienen) -->
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.min.js"></script>
+  <script src="preguntas.js"></script>
+  <script src="mini-juego.js"></script>
+  <script src="sketch.js"></script>
+  <script src="juego-logica.js"></script>
+
   <script>
-    // ========== CONFIGURACIÓN GLOBAL (DECLARADO UNA SOLA VEZ) ==========
+    // ========== CONFIGURACIÓN GLOBAL MEJORADA ==========
     
-    // 📍 Variables globales - SOLO UNA DECLARACIÓN
+    // Variables globales
     let auth = null;
     let db = null;
+    let storage = null;
     let firebaseInitialized = false;
     
-    // 📍 Config Firebase - SOLO UNA DECLARACIÓN
+    // Config Firebase (la misma)
     const firebaseConfig = {
       apiKey: "AIzaSyAeLIJ8ee9xUBduMKkijW4GdnY45W32Eew",
       authDomain: "colmena-hub.firebaseapp.com",
@@ -195,153 +328,113 @@
       measurementId: "G-LQ9GLGJCX8"
     };
     
-    // ========== FUNCIONES GLOBALES ==========
+    // ========== FUNCIONES UTILITARIAS ==========
     
-    function showStatus(message, isError = false) {
-      const bar = document.getElementById('status-bar');
-      const text = document.getElementById('status-text');
+    function showStatus(message, type = 'info') {
+      const bar = document.getElementById('statusBar');
+      const text = document.getElementById('statusText');
+      const icon = document.getElementById('statusIcon');
       
-      if (isError) {
-        bar.className = 'bg-red-500 text-white text-sm py-2 px-4 text-center';
-        bar.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i><span>${message}</span>`;
-      } else {
-        bar.className = 'bg-yellow-500 text-white text-sm py-2 px-4 text-center';
-        bar.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i><span>${message}</span>`;
+      if (!bar || !text || !icon) return;
+      
+      // Reset clases
+      bar.className = 'status-bar';
+      
+      // Configurar según tipo
+      let iconClass = '';
+      switch(type) {
+        case 'success':
+          bar.classList.add('success');
+          iconClass = 'fa-check-circle';
+          break;
+        case 'error':
+          bar.classList.add('error');
+          iconClass = 'fa-exclamation-circle';
+          break;
+        case 'warning':
+          bar.classList.add('warning');
+          iconClass = 'fa-exclamation-triangle';
+          break;
+        default:
+          bar.classList.add('warning');
+          iconClass = 'fa-spinner fa-spin';
+          break;
       }
       
-      bar.classList.remove('hidden');
+      // Actualizar contenido
+      icon.className = `fas ${iconClass} mr-2`;
+      text.textContent = message;
+      bar.classList.add('visible');
       
-      if (!isError) {
-        setTimeout(() => bar.classList.add('hidden'), 3000);
+      // Auto-ocultar si no es error
+      if (type !== 'error') {
+        setTimeout(() => {
+          bar.classList.remove('visible');
+        }, 3000);
       }
     }
     
-    function updateUI(userData) {
-      const loginSection = document.getElementById('login-section');
-      const userPanel = document.getElementById('user-panel');
-      
-      if (!loginSection || !userPanel) {
-        console.log('⏳ Elementos UI aún no disponibles');
-        return;
-      }
-      
-      if (userData) {
-        loginSection.classList.add('hidden');
-        userPanel.classList.remove('hidden');
-        
-        document.getElementById('user-name').textContent = userData.displayName || 'Usuario';
-        document.getElementById('user-email').textContent = userData.email || '';
-        
-        const avatar = document.getElementById('user-avatar');
-        if (avatar) {
-          avatar.src = userData.photoURL || 'https://ui-avatars.com/api/?name=' + 
-            encodeURIComponent(userData.displayName || 'Usuario') + '&background=FFD700&color=000';
-        }
-        
-        const verifiedBadge = document.getElementById('verified-badge');
-        const verificationBadge = document.getElementById('verification-badge');
-        const verifyBtn = document.getElementById('verify-btn');
-        
-        if (verifiedBadge && verificationBadge && verifyBtn) {
-          if (userData.verified) {
-            verifiedBadge.classList.remove('hidden');
-            verificationBadge.classList.add('hidden');
-            verifyBtn.classList.add('hidden');
-          } else {
-            verificationBadge.classList.remove('hidden');
-            verifiedBadge.classList.add('hidden');
-            verifyBtn.classList.remove('hidden');
-          }
-        }
-        
-      } else {
-        loginSection.classList.remove('hidden');
-        userPanel.classList.add('hidden');
-      }
-    }
-    
-    // ========== INICIALIZACIÓN FIREBASE ==========
+    // ========== INICIALIZACIÓN FIREBASE MEJORADA ==========
     
     function initializeFirebase() {
       try {
-        console.log('🔥 Intentando inicializar Firebase...');
+        console.log('🔥 Inicializando Firebase...');
         
         // Verificar si estamos en local (file://)
         if (window.location.protocol === 'file:') {
-          const warning = document.getElementById('local-warning');
-          if (warning) warning.classList.remove('hidden');
-          showStatus('⚠️ Ejecuta desde localhost:8000', true);
+          showStatus('⚠️ Ejecuta desde http://localhost:8000', 'warning');
+          document.getElementById('btnGoogle').disabled = true;
+          document.getElementById('btnGoogle').innerHTML = '<span>Ejecuta desde localhost</span>';
+          document.getElementById('btnGoogle').classList.add('opacity-50', 'cursor-not-allowed');
           return false;
         }
         
         // Inicializar Firebase solo si no existe
         if (!firebase.apps.length) {
-          console.log('🔥 Firebase no inicializado, inicializando...');
           firebase.initializeApp(firebaseConfig);
-          console.log('✅ Firebase inicializado correctamente');
-        } else {
-          console.log('🔥 Firebase ya estaba inicializado');
+          console.log('✅ Firebase inicializado');
         }
         
-        // Obtener referencias (SOLO UNA VEZ)
+        // Obtener referencias
         auth = firebase.auth();
         db = firebase.firestore();
+        storage = firebase.storage();
         firebaseInitialized = true;
         
         console.log('✅ Firebase Auth y Firestore listos');
+        showStatus('Sistema listo. Inicia sesión para comenzar.', 'success');
         return true;
         
       } catch (error) {
-        console.error('❌ Error FATAL inicializando Firebase:', error);
-        showStatus('Error crítico Firebase: ' + error.message, true);
+        console.error('❌ Error inicializando Firebase:', error);
+        showStatus(`Error Firebase: ${error.message}`, 'error');
         return false;
       }
     }
     
-    // ========== MANEJO DE AUTENTICACIÓN ==========
-    
-    function setupAuthListeners() {
-      console.log('🔧 Configurando listeners de autenticación...');
-      
-      const btnGoogle = document.getElementById('btnGoogle');
-      const logoutBtn = document.getElementById('logout-btn');
-      
-      if (btnGoogle) {
-        console.log('✅ Botón Google encontrado, agregando listener');
-        btnGoogle.addEventListener('click', handleGoogleLogin);
-      } else {
-        console.error('❌ Botón Google NO encontrado');
-      }
-      
-      if (logoutBtn) {
-        logoutBtn.addEventListener('click', handleLogout);
-      }
-    }
+    // ========== MANEJO DE AUTENTICACIÓN MEJORADO ==========
     
     async function handleGoogleLogin() {
-      console.log('🟡 Botón Google clickeado');
+      console.log('🟡 Iniciando login con Google...');
       
       if (!firebaseInitialized || !auth) {
-        showStatus('Error: Firebase no está listo. Recarga la página.', true);
-        console.error('❌ Firebase no inicializado al hacer click');
+        showStatus('Error: Firebase no está listo. Recarga la página.', 'error');
         return;
       }
       
-      showStatus('Iniciando sesión con Google...');
-      console.log('🔄 Iniciando proceso OAuth...');
+      showStatus('Conectando con Google...', 'info');
       
       try {
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.addScope('email');
         provider.addScope('profile');
         
-        console.log('🔄 Llamando signInWithPopup...');
         const result = await auth.signInWithPopup(provider);
         const user = result.user;
         
         console.log('✅ Login exitoso:', user.email);
         
-        // Intentar guardar en Firestore (opcional)
+        // Guardar usuario en Firestore
         if (db) {
           try {
             await db.collection('users').doc(user.uid).set({
@@ -359,22 +452,19 @@
           }
         }
         
-        showStatus(`¡Bienvenido ${user.displayName}!`);
-        console.log('✅ UI actualizada');
+        showStatus(`¡Bienvenido ${user.displayName}!`, 'success');
         
       } catch (error) {
         console.error('❌ Error en login Google:', error);
         
         if (error.code === 'auth/operation-not-supported-in-this-environment') {
-          showStatus('⚠️ Ejecuta desde http://localhost:8000', true);
-          const warning = document.getElementById('local-warning');
-          if (warning) warning.classList.remove('hidden');
+          showStatus('⚠️ Ejecuta desde http://localhost:8000', 'warning');
         } else if (error.code === 'auth/popup-blocked') {
-          showStatus('⚠️ Ventana emergente bloqueada. Permite popups.', true);
+          showStatus('⚠️ Ventana emergente bloqueada. Permite popups.', 'warning');
         } else if (error.code === 'auth/popup-closed-by-user') {
-          showStatus('Ventana cerrada por el usuario', false);
+          showStatus('Ventana cerrada por el usuario', 'info');
         } else {
-          showStatus(`Error: ${error.message}`, true);
+          showStatus(`Error: ${error.message}`, 'error');
         }
       }
     }
@@ -382,32 +472,22 @@
     async function handleLogout() {
       try {
         await auth.signOut();
-        showStatus('Sesión cerrada correctamente');
+        showStatus('Sesión cerrada correctamente', 'success');
       } catch (error) {
-        showStatus(`Error: ${error.message}`, true);
+        showStatus(`Error: ${error.message}`, 'error');
       }
     }
     
-    // ========== VERIFICACIÓN VERIFF ==========
-    
-    function setupVeriffButton() {
-      const verifyBtn = document.getElementById('verify-btn');
-      if (!verifyBtn) {
-        console.warn('⚠️ Botón verify-btn no encontrado');
-        return;
-      }
-      
-      verifyBtn.addEventListener('click', handleVerification);
-    }
+    // ========== VERIFICACIÓN VERIFF MEJORADA ==========
     
     async function handleVerification() {
       const user = auth?.currentUser;
       if (!user) {
-        showStatus('Primero inicia sesión', true);
+        showStatus('Primero inicia sesión', 'warning');
         return;
       }
       
-      showStatus('Iniciando verificación de identidad...');
+      showStatus('Iniciando verificación de identidad...', 'info');
       
       // Usar VeriffWorking si está disponible
       if (window.VeriffWorking) {
@@ -424,7 +504,7 @@
           const sessionId = await window.VeriffWorking.startVerification(userData);
           
           if (sessionId) {
-            showStatus('Veriff iniciado. Sigue las instrucciones en pantalla.');
+            showStatus('Veriff iniciado. Sigue las instrucciones en pantalla.', 'success');
             
             // Guardar sessionId en localStorage
             localStorage.setItem('veriff_session_id', sessionId);
@@ -433,7 +513,7 @@
           
         } catch (error) {
           console.error('❌ Error Veriff:', error);
-          showStatus('Error: ' + error.message, true);
+          showStatus('Error: ' + error.message, 'error');
           
           // Fallback a simulación
           simulateVerification(user);
@@ -445,224 +525,120 @@
     }
     
     async function simulateVerification(user) {
-      showStatus('⚠️ Veriff no disponible, usando simulación...');
+      showStatus('⚠️ Usando simulación de verificación...', 'warning');
       
-      setTimeout(async () => {
-        try {
-          if (db) {
-            await db.collection('users').doc(user.uid).update({
-              verified: true,
-              verifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
-              verificationMethod: 'simulated'
-            });
-          }
-          
-          showStatus('✅ ¡Identidad verificada exitosamente! (simulación)');
-          
-          if (db) {
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            updateUI({ ...user, ...userDoc.data() });
-          } else {
-            updateUI({ ...user, verified: true });
-          }
-          
-        } catch (error) {
-          console.error('Error en simulación:', error);
-          showStatus('Error: ' + error.message, true);
-        }
-      }, 2000);
-    }
-    
-    // ========== PRUEBAS TÉCNICAS ==========
-    
-    function setupTestButtons() {
-      const testFirestore = document.getElementById('test-firestore');
-      const testAuth = document.getElementById('test-auth');
-      const testVeriff = document.getElementById('test-veriff');
-      
-      if (testFirestore) {
-        testFirestore.addEventListener('click', testFirestoreConnection);
-      }
-      
-      if (testAuth) {
-        testAuth.addEventListener('click', testAuthConnection);
-      }
-      
-      if (testVeriff) {
-        testVeriff.addEventListener('click', testVeriffSimulation);
-      }
-    }
-    
-    async function testFirestoreConnection() {
-      if (!firebaseInitialized) {
-        showTestResult('Firestore: NO INICIALIZADO', false);
-        return;
-      }
-      
-      showStatus('Probando Firestore...');
+      // Simular delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       try {
-        const testRef = db.collection('test').doc('connection');
-        await testRef.set({
-          test: 'OK',
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          url: window.location.href
-        });
+        if (db) {
+          await db.collection('users').doc(user.uid).update({
+            verified: true,
+            verifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            verificationMethod: 'simulated'
+          });
+        }
         
-        const doc = await testRef.get();
-        showTestResult(`Firestore: CONECTADO ✓<br>ID: ${doc.id}<br>URL: ${doc.data().url}`, true);
-        showStatus('Firestore: Conexión exitosa');
+        showStatus('✅ ¡Identidad verificada exitosamente!', 'success');
+        
+        // Actualizar UI
+        document.getElementById('verifiedBadge').classList.remove('hidden');
+        document.getElementById('veriffBtn').classList.add('hidden');
         
       } catch (error) {
-        showTestResult(`Firestore: ERROR<br>${error.message}<br><small>Revisa reglas de seguridad</small>`, false);
-        showStatus('Firestore: Error de conexión', true);
+        console.error('Error en simulación:', error);
+        showStatus('Error: ' + error.message, 'error');
       }
     }
     
-    function testAuthConnection() {
-      if (!firebaseInitialized) {
-        showTestResult('Auth: NO INICIALIZADO', false);
-        return;
-      }
+    // ========== GESTIÓN DE INTERFAZ ==========
+    
+    async function checkVerificationStatus(user) {
+      if (!user || !db) return;
       
-      const user = auth.currentUser;
-      if (!user) {
-        showTestResult('Auth: NO AUTENTICADO<br>Inicia sesión primero', false);
-        return;
+      try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          if (userData.verified) {
+            document.getElementById('verifiedBadge').classList.remove('hidden');
+            document.getElementById('veriffBtn').classList.add('hidden');
+          }
+        }
+      } catch (error) {
+        console.error('Error verificando estado:', error);
       }
-      
-      showTestResult(`Auth: AUTENTICADO ✓<br>Usuario: ${user.email}<br>UID: ${user.uid.substring(0, 10)}...`, true);
-      showStatus('Auth: Usuario verificado');
     }
     
-    function testVeriffSimulation() {
-      const user = auth?.currentUser;
-      if (!user) {
-        showTestResult('Veriff: NO AUTENTICADO', false);
-        return;
-      }
+    function updateUI(user) {
+      const btnGoogle = document.getElementById('btnGoogle');
+      const veriffWrapper = document.getElementById('veriffWrapper');
+      const veriffBtn = document.getElementById('veriffBtn');
       
-      if (window.VeriffWorking) {
-        const hasApiKey = window.VeriffWorking.API_KEY && 
-                         window.VeriffWorking.API_KEY !== 'b04b260e-ae04-466b-85c8-f674ecbb09ac';
+      if (user) {
+        // Usuario logueado
+        btnGoogle.style.display = 'none';
+        veriffWrapper.style.display = 'block';
         
-        showTestResult(
-          `Veriff: ${hasApiKey ? 'CONFIGURADO ✓' : 'SIMULACIÓN'} <br>` +
-          `Usuario: ${user.email}<br>` +
-          `<small>API Key: ${window.VeriffWorking.API_KEY ? 'Presente' : 'Faltante'}</small>`, 
-          true
-        );
+        // Verificar si ya está verificado
+        checkVerificationStatus(user);
+        
+        // Configurar botón de verificación
+        if (veriffBtn) {
+          veriffBtn.onclick = handleVerification;
+        }
+        
       } else {
-        showTestResult('Veriff: NO DISPONIBLE<br>Verifica veriff-working.js', false);
+        // Usuario no logueado
+        btnGoogle.style.display = 'inline-flex';
+        veriffWrapper.style.display = 'none';
+        document.getElementById('verifiedBadge').classList.add('hidden');
       }
-      showStatus('Veriff: Test completado');
-    }
-    
-    function showTestResult(message, isSuccess) {
-      const resultsDiv = document.getElementById('test-results');
-      if (!resultsDiv) return;
-      
-      const colorClass = isSuccess ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-      const icon = isSuccess ? 'fa-check-circle' : 'fa-times-circle';
-      const iconColor = isSuccess ? 'text-green-600' : 'text-red-600';
-      
-      resultsDiv.innerHTML = `
-        <div class="${colorClass} p-3 rounded-lg mt-2 fade-in">
-          <i class="fas ${icon} ${iconColor} mr-2"></i>
-          ${message}
-        </div>
-      `;
     }
     
     // ========== OBSERVADOR DE AUTENTICACIÓN ==========
     
     function setupAuthObserver() {
-      if (!auth) {
-        console.error('❌ Auth no disponible para observer');
-        return;
-      }
-      
-      console.log('👁️ Configurando observer de autenticación...');
+      if (!auth) return;
       
       auth.onAuthStateChanged(async (user) => {
-        console.log('🔄 Estado de autenticación cambiado:', user ? user.email : 'NO USER');
-        
-        if (user) {
-          try {
-            let userData = user;
-            
-            // Intentar obtener datos de Firestore
-            if (db) {
-              try {
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                if (userDoc.exists) {
-                  userData = { ...user, ...userDoc.data() };
-                  console.log('✅ Datos de Firestore obtenidos');
-                } else {
-                  console.log('⚠️ Usuario no encontrado en Firestore');
-                }
-              } catch (firestoreError) {
-                console.warn('⚠️ Error obteniendo usuario de Firestore:', firestoreError);
-              }
-            }
-            
-            updateUI(userData);
-            
-          } catch (error) {
-            console.error("Error obteniendo usuario:", error);
-            updateUI(user);
-          }
-        } else {
-          updateUI(null);
-        }
+        console.log('🔄 Estado de autenticación:', user ? user.email : 'NO USER');
+        updateUI(user);
       });
     }
     
     // ========== INICIALIZACIÓN DE LA PÁGINA ==========
     
     function initializePage() {
-      console.log('🚀 COLMENA HUB BETA v0.1 - Inicializando página...');
+      console.log('🚀 COLMENA HUB - Inicializando...');
       
       // 1. Inicializar Firebase
       if (initializeFirebase()) {
-        showStatus('Sistema BETA listo. Inicia sesión para comenzar.');
-        
-        // 2. Configurar listeners DESPUÉS de Firebase
-        setupAuthListeners();
-        setupVeriffButton();
-        setupTestButtons();
-        setupAuthObserver();
-        
-        console.log('✅ Página inicializada correctamente');
-      } else {
-        console.error('❌ Falló la inicialización de Firebase');
-      }
-      
-      // 3. Detectar si estamos en local
-      if (window.location.protocol === 'file:') {
-        const warning = document.getElementById('local-warning');
-        if (warning) warning.classList.remove('hidden');
-        
-        // Deshabilitar botones que requieren Firebase
+        // 2. Configurar botón Google
         const btnGoogle = document.getElementById('btnGoogle');
         if (btnGoogle) {
-          btnGoogle.disabled = true;
-          btnGoogle.innerHTML = '<i class="fas fa-ban mr-2"></i><span>Ejecuta desde localhost</span>';
-          btnGoogle.classList.add('opacity-50', 'cursor-not-allowed');
+          btnGoogle.addEventListener('click', handleGoogleLogin);
         }
+        
+        // 3. Configurar observador de autenticación
+        setupAuthObserver();
+        
+        // 4. Verificar estado inicial
+        const initialUser = auth.currentUser;
+        if (initialUser) {
+          updateUI(initialUser);
+        }
+        
+        console.log('✅ Página inicializada correctamente');
       }
     }
     
-    // Esperar a que el DOM esté completamente cargado
+    // Inicializar cuando el DOM esté listo
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initializePage);
     } else {
-      // DOM ya cargado
       initializePage();
     }
-    
-    // Log inicial
-    console.log('📄 Página cargada, estado:', document.readyState);
   </script>
 </body>
 </html>
