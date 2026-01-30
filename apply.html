@@ -73,7 +73,7 @@
         <div class="flex items-center space-x-3 mb-4 md:mb-0">
           <i class="fas fa-bee text-3xl"></i>
           <div>
-            <h1 class="text-2xl font-bold">COLMENA HUB</h1>
+            <h1 class="text-2xl font-bold">COLMENA-HUB</h1>
             <p class="text-yellow-100 text-sm">Verificación de Profesionales</p>
           </div>
         </div>
@@ -705,28 +705,117 @@
     function validateCurrentStep() {
       if (currentStep === 1) {
         // Validar nombre (mínimo 2 palabras)
-        const name = document.getElementById('fullName').value.trim();
-        if (name.split(/\s+/).filter(w => w.length > 0).length < 2) {
-          showStatus('Escribe tu nombre completo (mínimo nombre y apellido)', 'error');
-          document.getElementById('fullName-error').style.display = 'block';
-          return false;
-        }
+          // 1. Formatear nombre: "emilio perez jarquin" → "Emilio Perez Jarquin"
+          function formatName(input) {
+          let value = input.value.trim();
+       // Convertir a formato capitalizado (primera letra mayúscula, resto minúscula)
+          value = value.toLowerCase().split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+    
+          input.value = value;
+    
+    // Validar que tenga al menos nombre y apellido
+    const words = value.split(/\s+/).filter(w => w.length > 0);
+    const errorEl = document.getElementById('fullName-error');
+    
+    if (words.length < 2) {
+      errorEl.style.display = 'block';
+      input.classList.add('error-input');
+      input.classList.remove('success-input');
+    } else {
+      errorEl.style.display = 'none';
+      input.classList.remove('error-input');
+      input.classList.add('success-input');
+    }
+  }
+
         
         // Validar email (solo Gmail)
-        const email = document.getElementById('email').value.trim();
-        if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/i.test(email)) {
-          showStatus('Solo se aceptan correos de Gmail (@gmail.com)', 'error');
-          document.getElementById('email-error').style.display = 'block';
-          return false;
-        }
+        function validateGmail(input) {
+    const email = input.value.trim();
+    const errorEl = document.getElementById('email-error');
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
+    
+    if (!gmailRegex.test(email)) {
+      errorEl.style.display = 'block';
+      input.classList.add('error-input');
+      input.classList.remove('success-input');
+    } else {
+      errorEl.style.display = 'none';
+      input.classList.remove('error-input');
+      input.classList.add('success-input');
+    }
+  }
         
-        // Validar teléfono (10 dígitos)
-        const phone = document.getElementById('phone').value.replace(/\D/g, '');
-        if (phone.length !== 10) {
-          showStatus('Teléfono inválido. Debe tener 10 dígitos', 'error');
-          document.getElementById('phone-error').style.display = 'block';
-          return false;
+        function formatPhone(input) {
+    const raw = input.value.replace(/\D/g, '');
+    const errorEl = document.getElementById('phone-error');
+    const indicator = document.getElementById('country-indicator');
+    
+    let formatted = '';
+    let isValid = false;
+    
+    if (currentCountry === "mx") {
+      // México: 10 dígitos (55 1234 5678)
+      if (raw.length <= 10) {
+        if (raw.length === 10) {
+          formatted = `${raw.substring(0, 2)} ${raw.substring(2, 6)} ${raw.substring(6, 10)}`;
+          indicator.textContent = `(${raw.substring(0, 2)}) ${raw.substring(2, 6)}-${raw.substring(6, 10)}`;
+          isValid = true;
+        } else if (raw.length > 0) {
+          indicator.textContent = raw.substring(0, Math.min(10, raw.length));
         }
+      }
+    } else {
+      // Colombia: 10 dígitos (300 123 4567)
+      if (raw.length <= 10) {
+        if (raw.length === 10) {
+          formatted = `${raw.substring(0, 3)} ${raw.substring(3, 6)} ${raw.substring(6, 10)}`;
+          indicator.textContent = `${raw.substring(0, 3)} ${raw.substring(3, 6)}-${raw.substring(6, 10)}`;
+          isValid = true;
+        } else if (raw.length > 0) {
+          indicator.textContent = raw.substring(0, Math.min(10, raw.length));
+        }
+      }
+    }
+    
+    input.value = formatted || raw;
+    
+    if (raw.length > 0 && !isValid && raw.length !== 10) {
+      errorEl.style.display = 'block';
+      input.classList.add('error-input');
+      input.classList.remove('success-input');
+    } else {
+      errorEl.style.display = 'none';
+      input.classList.remove('error-input');
+      if (isValid) input.classList.add('success-input');
+    }
+  }
+
+  // 4. Cambiar entre México y Colombia CON EMOJIS
+  function toggleCountry() {
+    const emoji = document.getElementById('current-emoji');
+    const countryText = document.getElementById('current-country');
+    const countryCode = document.getElementById('country-code');
+    const phoneInput = document.getElementById('phone');
+    
+    currentCountry = currentCountry === "mx" ? "co" : "mx";
+    
+    if (currentCountry === "mx") {
+      emoji.textContent = '🇲🇽';
+      countryText.textContent = '+52';
+      countryCode.value = '52';
+    } else {
+      emoji.textContent = '🇨🇴';
+      countryText.textContent = '+57';
+      countryCode.value = '57';
+    }
+    
+    // Limpiar y revalidar teléfono
+    phoneInput.value = '';
+    phoneInput.dispatchEvent(new Event('input'));
+  }
         
         // Validar profesión seleccionada
         const profession = document.getElementById('profession').value;
