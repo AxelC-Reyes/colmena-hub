@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Dashboard - COLMENA-HUB</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        /* Estilos personalizados */
+        .fc-event {
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+        }
+        .sidebar-item {
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        .sidebar-item:hover {
+            background-color: #f3f4f6;
+            border-left-color: #3b82f6;
+        }
+        .sidebar-item.active {
+            background-color: #eff6ff;
+            border-left-color: #3b82f6;
+            color: #1d4ed8;
+        }
+        .availability-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .stat-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Barra de navegación -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center space-x-2">
+                        <img src="colmena-hubLOGO" alt="COLMENA-HUB Logo" class="h-10 w-auto">
+                        <span class="font-bold text-xl text-gray-800">COLMENA-HUB</span>
+                    </a>
+                </div>
+
+                <!-- Menú usuario -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative group">
+                        <button id="userMenuButton" class="flex items-center space-x-2 focus:outline-none">
+                            <div class="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center text-white">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span id="userName" class="hidden md:inline font-medium"></span>
+                            <i class="fas fa-chevron-down text-sm"></i>
+                        </button>
+                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden group-hover:block z-10">
+                            <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-user-circle mr-2"></i> Mi perfil
+                            </a>
+                            <a href="#" id="logoutButton" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-sign-out-alt mr-2"></i> Cerrar sesión
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Sidebar -->
+            <div class="lg:w-1/4">
+                <div class="bg-white rounded-lg shadow p-4 mb-6">
+                    <h3 class="font-bold text-lg mb-4 text-gray-800">Panel de Control</h3>
+                    
+                    <div class="space-y-1">
+                        <a href="#" id="tabDashboard" class="sidebar-item active flex items-center p-3 rounded">
+                            <i class="fas fa-calendar-alt mr-3 text-blue-500"></i>
+                            <span>Mi Calendario</span>
+                        </a>
+                        <a href="#" id="tabRequests" class="sidebar-item flex items-center p-3 rounded">
+                            <i class="fas fa-bell mr-3 text-yellow-500"></i>
+                            <span>Solicitudes
+                                <span id="pendingCount" class="bg-red-500 text-white text-xs px-2 py-1 rounded-full ml-2">0</span>
+                            </span>
+                        </a>
+                        <a href="#" id="tabAvailability" class="sidebar-item flex items-center p-3 rounded">
+                            <i class="fas fa-clock mr-3 text-green-500"></i>
+                            <span>Disponibilidad</span>
+                        </a>
+                        <a href="#" id="tabStats" class="sidebar-item flex items-center p-3 rounded">
+                            <i class="fas fa-chart-line mr-3 text-purple-500"></i>
+                            <span>Estadísticas</span>
+                        </a>
+                        <a href="#" id="tabSync" class="sidebar-item flex items-center p-3 rounded">
+                            <i class="fas fa-sync-alt mr-3 text-indigo-500"></i>
+                            <span>Sincronizar Calendarios</span>
+                        </a>
+                        <a href="oficiadores.html" class="sidebar-item flex items-center p-3 rounded">
+                            <i class="fas fa-search mr-3 text-gray-500"></i>
+                            <span>Buscar Trabajo</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Tarjeta de Ranking -->
+                <div class="bg-white rounded-lg shadow p-4">
+                    <h4 class="font-bold mb-3 text-gray-800">Mi Reputación COLMENA</h4>
+                    <div class="flex items-center mb-4">
+                        <div class="text-3xl font-bold text-yellow-500 mr-2" id="ratingScore">4.8</div>
+                        <div class="text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">Puntualidad</span>
+                                <span class="text-sm font-bold" id="punctualityScore">95%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: 95%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">Finalización</span>
+                                <span class="text-sm font-bold" id="completionScore">98%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-500 h-2 rounded-full" style="width: 98%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">Respuesta</span>
+                                <span class="text-sm font-bold" id="responseScore">89%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-purple-500 h-2 rounded-full" style="width: 89%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 pt-4 border-t">
+                        <p class="text-sm text-gray-600">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Tu ranking determina tu posición en los listados
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenido principal -->
+            <div class="lg:w-3/4">
+                <!-- Encabezado y estadísticas -->
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold text-gray-800 mb-2">Mi Dashboard</h1>
+                    <p class="text-gray-600">Gestiona tus citas, disponibilidad y reputación profesional</p>
+                    
+                    <!-- Tarjetas de estadísticas -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+                        <div class="stat-card bg-white rounded-lg shadow p-4">
+                            <div class="flex items-center">
+                                <div class="bg-blue-100 p-3 rounded-full mr-3">
+                                    <i class="fas fa-calendar-check text-blue-500"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Citas esta semana</p>
+                                    <p class="text-2xl font-bold" id="weeklyAppointments">5</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card bg-white rounded-lg shadow p-4">
+                            <div class="flex items-center">
+                                <div class="bg-green-100 p-3 rounded-full mr-3">
+                                    <i class="fas fa-clock text-green-500"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Horas programadas</p>
+                                    <p class="text-2xl font-bold" id="scheduledHours">14</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card bg-white rounded-lg shadow p-4">
+                            <div class="flex items-center">
+                                <div class="bg-yellow-100 p-3 rounded-full mr-3">
+                                    <i class="fas fa-star text-yellow-500"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Ranking actual</p>
+                                    <p class="text-2xl font-bold">#<span id="currentRanking">12</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card bg-white rounded-lg shadow p-4">
+                            <div class="flex items-center">
+                                <div class="bg-purple-100 p-3 rounded-full mr-3">
+                                    <i class="fas fa-dollar-sign text-purple-500"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Ingresos del mes</p>
+                                    <p class="text-2xl font-bold">$<span id="monthlyIncome">2,850</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Secciones de contenido (se muestran según la pestaña seleccionada) -->
+                
+                <!-- CALENDARIO (pestaña activa por defecto) -->
+                <div id="calendarSection" class="content-section">
+                    <div class="bg-white rounded-lg shadow p-4 mb-6">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between mb-4">
+                            <h2 class="text-xl font-bold text-gray-800">Mi Calendario COLMENA</h2>
+                            <div class="mt-2 md:mt-0">
+                                <button id="addEventButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium">
+                                    <i class="fas fa-plus mr-2"></i> Agregar evento manual
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Contenedor del calendario -->
+                        <div id="calendar" class="mb-4"></div>
+                        
+                        <!-- Leyenda del calendario -->
+                        <div class="flex flex-wrap gap-4 text-sm">
+                            <div class="flex items-center">
+                                <div class="availability-dot bg-blue-500"></div>
+                                <span class="text-gray-700">Disponible</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="availability-dot bg-green-500"></div>
+                                <span class="text-gray-700">Cita confirmada</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="availability-dot bg-red-500"></div>
+                                <span class="text-gray-700">No disponible</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="availability-dot bg-yellow-500"></div>
+                                <span class="text-gray-700">Solicitud pendiente</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Próximas citas -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h3 class="font-bold text-lg mb-4 text-gray-800">Próximas Citas</h3>
+                        <div id="upcomingAppointments" class="space-y-3">
+                            <!-- Las citas se cargan dinámicamente aquí -->
+                            <div class="text-center py-8 text-gray-500">
+                                <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                                <p>Cargando citas...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SOLICITUDES -->
+                <div id="requestsSection" class="content-section hidden">
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4">Solicitudes de Cita</h2>
+                        
+                        <div class="mb-4">
+                            <div class="flex space-x-2">
+                                <button class="filter-btn active bg-blue-100 text-blue-700 px-4 py-2 rounded-md font-medium" data-filter="all">
+                                    Todas <span id="countAll" class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full ml-1">0</span>
+                                </button>
+                                <button class="filter-btn bg-yellow-100 text-yellow-700 px-4 py-2 rounded-md font-medium" data-filter="pending">
+                                    Pendientes <span id="countPending" class="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full ml-1">0</span>
+                                </button>
+                                <button class="filter-btn bg-green-100 text-green-700 px-4 py-2 rounded-md font-medium" data-filter="accepted">
+                                    Aceptadas <span id="countAccepted" class="bg-green-500 text-white text-xs px-2 py-1 rounded-full ml-1">0</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="requestsList" class="space-y-4">
+                            <!-- Las solicitudes se cargan dinámicamente aquí -->
+                            <div class="text-center py-8 text-gray-500">
+                                <i class="fas fa-envelope-open-text text-3xl mb-3"></i>
+                                <p class="text-lg">No tienes solicitudes pendientes</p>
+                                <p class="text-sm mt-1">Las solicitudes de clientes aparecerán aquí</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DISPONIBILIDAD -->
+                <div id="availabilitySection" class="content-section hidden">
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4">Configurar Disponibilidad</h2>
+                        <p class="text-gray-600 mb-6">Establece tus horarios de trabajo para que los clientes solo puedan agendar en esos horarios.</p>
+                        
+                        <!-- Horarios por defecto -->
+                        <div class="mb-6">
+                            <h3 class="font-bold mb-3 text-gray-800">Horario semanal predeterminado</h3>
+                            <div id="weeklySchedule" class="space-y-3">
+                                <!-- Los horarios se generan dinámicamente -->
+                            </div>
+                        </div>
+                        
+                        <!-- Excepciones de fecha -->
+                        <div class="mb-6">
+                            <h3 class="font-bold mb-3 text-gray-800">Excepciones (vacaciones, días no laborables)</h3>
+                            <div class="flex flex-col md:flex-row md:items-end gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+                                    <input type="date" id="exceptionDate" class="w-full md:w-48 p-2 border border-gray-300 rounded-md">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                                    <select id="exceptionType" class="w-full md:w-48 p-2 border border-gray-300 rounded-md">
+                                        <option value="full-day">Día completo libre</option>
+                                        <option value="custom">Horario personalizado</option>
+                                    </select>
+                                </div>
+                                <button id="addExceptionBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md h-fit">
+                                    <i class="fas fa-plus mr-2"></i> Agregar excepción
+                                </button>
+                            </div>
+                            
+                            <!-- Lista de excepciones -->
+                            <div id="exceptionsList" class="mt-4 space-y-2">
+                                <div class="text-sm text-gray-500 italic">No hay excepciones configuradas</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-end">
+                            <button id="saveAvailabilityBtn" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md font-medium">
+                                <i class="fas fa-save mr-2"></i> Guardar disponibilidad
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ESTADÍSTICAS -->
+                <div id="statsSection" class="content-section hidden">
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4">Mis Estadísticas</h2>
+                        
+                        <!-- Gráfico de actividad (simulado) -->
+                        <div class="mb-8">
+                            <h3 class="font-bold mb-3 text-gray-800">Actividad mensual</h3>
+                            <div class="h-64 flex items-end space-x-2 border-b border-l p-4">
+                                <!-- Barras del gráfico se generan dinámicamente -->
+                                <div class="text-center">
+                                    <div class="bg-blue-500 w-10 mx-auto rounded-t-md" style="height: 150px;"></div>
+                                    <div class="text-xs mt-1">Ene</div>
+                                </div>
+                                <!-- Más meses... -->
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Métricas de rendimiento -->
+                            <div>
+                                <h3 class="font-bold mb-3 text-gray-800">Métricas de rendimiento</h3>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                                        <span>Tiempo promedio de respuesta</span>
+                                        <span class="font-bold">2.3 horas</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                                        <span>Tasa de aceptación</span>
+                                        <span class="font-bold">87%</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                                        <span>Clientes recurrentes</span>
+                                        <span class="font-bold">42%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Mejores clientes -->
+                            <div>
+                                <h3 class="font-bold mb-3 text-gray-800">Mejores clientes</h3>
+                                <div class="space-y-3">
+                                    <div class="flex items-center p-3 bg-gray-50 rounded">
+                                        <div class="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                            <i class="fas fa-user text-blue-500"></i>
+                                        </div>
+                                        <div class="flex-grow">
+                                            <p class="font-medium">María González</p>
+                                            <p class="text-sm text-gray-500">5 contratos</p>
+                                        </div>
+                                        <div class="text-green-600 font-bold">$1,250</div>
+                                    </div>
+                                    <!-- Más clientes... -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SINCRONIZAR CALENDARIOS -->
+                <div id="syncSection" class="content-section hidden">
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4">Sincronizar con Calendarios Externos</h2>
+                        <p class="text-gray-600 mb-6">Conecta tu calendario de Google o Apple para evitar conflictos de horario y automatizar tu agenda.</p>
+                        
+                        <!-- Opciones de sincronización -->
+                        <div class="space-y-6">
+                            <!-- Google Calendar -->
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="h-12 w-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                                            <i class="fab fa-google text-red-500 text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-gray-800">Google Calendar</h3>
+                                            <p class="text-sm text-gray-600">Sincroniza con tu cuenta de Google</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button id="syncGoogleBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-medium">
+                                            <i class="fas fa-link mr-2"></i> Conectar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="googleSyncStatus" class="mt-3 text-sm text-gray-600 hidden">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                    <span>Conectado: <span id="googleEmail"></span></span>
+                                    <button id="disconnectGoogleBtn" class="ml-4 text-red-500 hover:text-red-700 text-sm">
+                                        <i class="fas fa-unlink mr-1"></i> Desconectar
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Apple Calendar -->
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="h-12 w-12 bg-gray-100 rounded-full flex items-center justify-center mr-4">
+                                            <i class="fab fa-apple text-gray-800 text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-gray-800">Apple Calendar</h3>
+                                            <p class="text-sm text-gray-600">Sincroniza con tu calendario de Apple</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button id="syncAppleBtn" class="bg-gray-800 hover:bg-black text-white px-6 py-2 rounded-md font-medium">
+                                            <i class="fas fa-link mr-2"></i> Conectar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="appleSyncStatus" class="mt-3 text-sm text-gray-600 hidden">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                    <span>Conectado a Apple Calendar</span>
+                                    <button id="disconnectAppleBtn" class="ml-4 text-red-500 hover:text-red-700 text-sm">
+                                        <i class="fas fa-unlink mr-1"></i> Desconectar
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Outlook Calendar -->
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                                            <i class="fas fa-envelope text-blue-500 text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-gray-800">Outlook Calendar</h3>
+                                            <p class="text-sm text-gray-600">Sincroniza con tu cuenta de Microsoft</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button id="syncOutlookBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium">
+                                            <i class="fas fa-link mr-2"></i> Conectar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Configuración de sincronización -->
+                        <div class="mt-8 border-t pt-6">
+                            <h3 class="font-bold mb-3 text-gray-800">Opciones de sincronización</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="syncTwoWay" class="h-4 w-4 text-blue-500 rounded">
+                                    <label for="syncTwoWay" class="ml-2 text-gray-700">Sincronización bidireccional (cambios en COLMENA se reflejan en tu calendario y viceversa)</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="autoDecline" class="h-4 w-4 text-blue-500 rounded" checked>
+                                    <label for="autoDecline" class="ml-2 text-gray-700">Declinar automáticamente citas que choquen con eventos en tu calendario personal</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="showPersonalEvents" class="h-4 w-4 text-blue-500 rounded">
+                                    <label for="showPersonalEvents" class="ml-2 text-gray-700">Mostrar eventos personales como "No disponible" en COLMENA</label>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6">
+                                <button id="saveSyncSettingsBtn" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md font-medium">
+                                    <i class="fas fa-save mr-2"></i> Guardar configuración
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para detalles de evento -->
+    <div id="eventModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg max-w-md w-full">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="font-bold text-lg text-gray-800" id="modalTitle">Detalles de la cita</h3>
+                <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <div id="modalContent">
+                    <!-- Contenido dinámico del modal -->
+                </div>
+            </div>
+            <div class="flex justify-end p-4 border-t space-x-2">
+                <button id="modalCancelBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                    Cancelar
+                </button>
+                <button id="modalActionBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                    Aceptar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FullCalendar JS -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/es.js'></script>
+    
+    <!-- Firebase Config -->
+    <script>
+        // Configuración de Firebase (usa tu configuración real)
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            authDomain: "TU_AUTH_DOMAIN",
+            projectId: "TU_PROJECT_ID",
+            storageBucket: "TU_STORAGE_BUCKET",
+            messagingSenderId: "TU_SENDER_ID",
+            appId: "TU_APP_ID"
+        };
+        
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+    
+    <!-- Script principal del dashboard -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Variables globales
+            let calendar;
+            let currentUser = null;
+            let currentSection = 'calendarSection';
+            
+            // Inicializar Firebase Auth state listener
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    currentUser = user;
+                    document.getElementById('userName').textContent = user.displayName || user.email;
+                    loadUserData();
+                    initializeCalendar();
+                    loadAppointments();
+                    loadRequests();
+                    loadWeeklySchedule();
+                } else {
+                    // Redirigir a login si no hay usuario autenticado
+                    window.location.href = 'index.html';
+                }
+            });
+            
+            // Inicializar FullCalendar
+            function initializeCalendar() {
+                const calendarEl = document.getElementById('calendar');
+                
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'timeGridWeek',
+                    locale: 'es',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    slotMinTime: '08:00:00',
+                    slotMaxTime: '22:00:00',
+                    events: [
+                        // Eventos se cargarán dinámicamente desde Firebase
+                        {
+                            title: 'Sesión de fotos - María González',
+                            start: new Date(new Date().setHours(10, 0, 0)),
+                            end: new Date(new Date().setHours(12, 0, 0)),
+                            color: '#10B981',
+                            extendedProps: {
+                                type: 'appointment',
+                                status: 'confirmed',
+                                client: 'María González',
+                                service: 'Sesión de fotos profesional'
+                            }
+                        },
+                        // Más eventos...
+                    ],
+                    eventClick: function(info) {
+                        showEventDetails(info.event);
+                    },
+                    dateClick: function(info) {
+                        // Aquí podrías abrir un modal para agregar disponibilidad manual
+                        console.log('Fecha clickeada:', info.dateStr);
+                    }
+                });
+                
+                calendar.render();
+            }
+            
+            // Cargar datos del usuario desde Firestore
+            async function loadUserData() {
+                if (!currentUser) return;
+                
+                try {
+                    const userDoc = await db.collection('users').doc(currentUser.uid).get();
+                    
+                    if (userDoc.exists) {
+                        const userData = userDoc.data();
+                        
+                        // Actualizar UI con datos del usuario
+                        document.getElementById('ratingScore').textContent = userData.rating || '4.5';
+                        document.getElementById('punctualityScore').textContent = (userData.punctuality || '95') + '%';
+                        document.getElementById('completionScore').textContent = (userData.completionRate || '98') + '%';
+                        document.getElementById('responseScore').textContent = (userData.responseRate || '89') + '%';
+                        document.getElementById('currentRanking').textContent = userData.ranking || '12';
+                        document.getElementById('monthlyIncome').textContent = userData.monthlyIncome || '2,850';
+                    }
+                } catch (error) {
+                    console.error('Error cargando datos del usuario:', error);
+                }
+            }
+            
+            // Cargar citas desde Firebase
+            async function loadAppointments() {
+                if (!currentUser) return;
+                
+                try {
+                    // Simulación de carga de citas
+                    const appointments = [
+                        {
+                            id: '1',
+                            client: 'María González',
+                            service: 'Sesión de fotos profesional',
+                            date: new Date(new Date().setDate(new Date().getDate() + 1)),
+                            time: '10:00 - 12:00',
+                            status: 'confirmed'
+                        },
+                        {
+                            id: '2',
+                            client: 'Carlos Ruiz',
+                            service: 'Diseño de logotipo',
+                            date: new Date(new Date().setDate(new Date().getDate() + 2)),
+                            time: '14:00 - 16:00',
+                            status: 'pending'
+                        }
+                    ];
+                    
+                    displayAppointments(appointments);
+                } catch (error) {
+                    console.error('Error cargando citas:', error);
+                }
+            }
+            
+            // Mostrar citas en la UI
+            function displayAppointments(appointments) {
+                const container = document.getElementById('upcomingAppointments');
+                
+                if (appointments.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-calendar-times text-3xl mb-3"></i>
+                            <p class="text-lg">No tienes citas programadas</p>
+                            <p class="text-sm mt-1">¡Comienza a promocionar tus servicios!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = '';
+                
+                appointments.forEach(appointment => {
+                    const statusColor = appointment.status === 'confirmed' ? 'bg-green-100 text-green-800' : 
+                                       appointment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                       'bg-gray-100 text-gray-800';
+                    const statusText = appointment.status === 'confirmed' ? 'Confirmada' : 
+                                      appointment.status === 'pending' ? 'Pendiente' : 'Cancelada';
+                    
+                    html += `
+                        <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-gray-800">${appointment.service}</h4>
+                                    <p class="text-gray-600 mt-1">
+                                        <i class="fas fa-user mr-2"></i>${appointment.client}
+                                    </p>
+                                    <p class="text-gray-600 mt-1">
+                                        <i class="fas fa-calendar mr-2"></i>
+                                        ${appointment.date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                    </p>
+                                    <p class="text-gray-600 mt-1">
+                                        <i class="fas fa-clock mr-2"></i>${appointment.time}
+                                    </p>
+                                </div>
+                                <div>
+                                    <span class="status-badge ${statusColor}">${statusText}</span>
+                                </div>
+                            </div>
+                            <div class="flex justify-end mt-3 space-x-2">
+                                <button class="text-blue-500 hover:text-blue-700 text-sm font-medium">
+                                    <i class="fas fa-info-circle mr-1"></i> Detalles
+                                </button>
+                                ${appointment.status === 'pending' ? `
+                                    <button class="text-green-500 hover:text-green-700 text-sm font-medium">
+                                        <i class="fas fa-check mr-1"></i> Aceptar
+                                    </button>
+                                    <button class="text-red-500 hover:text-red-700 text-sm font-medium">
+                                        <i class="fas fa-times mr-1"></i> Rechazar
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+                
+                // Actualizar contador de citas semanales
+                const weeklyCount = appointments.filter(a => {
+                    const now = new Date();
+                    const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+                    return a.date >= now && a.date <= nextWeek && a.status === 'confirmed';
+                }).length;
+                
+                document.getElementById('weeklyAppointments').textContent = weeklyCount;
+            }
+            
+            // Cargar solicitudes desde Firebase
+            async function loadRequests() {
+                if (!currentUser) return;
+                
+                // Simulación de solicitudes
+                const requests = [
+                    {
+                        id: '1',
+                        client: 'Ana Martínez',
+                        service: 'Clases de guitarra',
+                        date: '2024-02-15',
+                        time: '16:00 - 18:00',
+                        message: 'Hola, me gustaría tomar clases los jueves por la tarde',
+                        status: 'pending',
+                        timestamp: new Date()
+                    },
+                    {
+                        id: '2',
+                        client: 'Roberto Sánchez',
+                        service: 'Reparación de computadora',
+                        date: '2024-02-16',
+                        time: '11:00 - 13:00',
+                        message: 'Mi laptop no enciende, necesito ayuda urgente',
+                        status: 'pending',
+                        timestamp: new Date(Date.now() - 3600000)
+                    }
+                ];
+                
+                displayRequests(requests);
+            }
+            
+            // Mostrar solicitudes en la UI
+            function displayRequests(requests) {
+                const container = document.getElementById('requestsList');
+                const pendingCount = requests.filter(r => r.status === 'pending').length;
+                
+                // Actualizar contadores
+                document.getElementById('pendingCount').textContent = pendingCount;
+                document.getElementById('countAll').textContent = requests.length;
+                document.getElementById('countPending').textContent = pendingCount;
+                document.getElementById('countAccepted').textContent = requests.filter(r => r.status === 'accepted').length;
+                
+                if (requests.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-envelope-open-text text-3xl mb-3"></i>
+                            <p class="text-lg">No tienes solicitudes pendientes</p>
+                            <p class="text-sm mt-1">Las solicitudes de clientes aparecerán aquí</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = '';
+                
+                requests.forEach(request => {
+                    const statusColor = request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                       request.status === 'accepted' ? 'bg-green-100 text-green-800' : 
+                                       'bg-red-100 text-red-800';
+                    const statusText = request.status === 'pending' ? 'Pendiente' : 
+                                      request.status === 'accepted' ? 'Aceptada' : 'Rechazada';
+                    
+                    html += `
+                        <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors request-item" data-status="${request.status}">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-grow">
+                                    <h4 class="font-bold text-gray-800">${request.service}</h4>
+                                    <p class="text-gray-600 mt-1">
+                                        <i class="fas fa-user mr-2"></i>${request.client}
+                                    </p>
+                                    <p class="text-gray-600 mt-1">
+                                        <i class="fas fa-calendar mr-2"></i>${request.date} • ${request.time}
+                                    </p>
+                                    <p class="text-gray-600 mt-2">
+                                        <i class="fas fa-comment mr-2"></i>${request.message}
+                                    </p>
+                                </div>
+                                <div class="ml-4">
+                                    <span class="status-badge ${statusColor}">${statusText}</span>
+                                </div>
+                            </div>
+                            ${request.status === 'pending' ? `
+                                <div class="flex justify-end mt-3 space-x-2">
+                                    <button class="accept-request-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium" data-id="${request.id}">
+                                        <i class="fas fa-check mr-1"></i> Aceptar
+                                    </button>
+                                    <button class="reject-request-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium" data-id="${request.id}">
+                                        <i class="fas fa-times mr-1"></i> Rechazar
+                                    </button>
+                                    <button class="view-details-btn border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md text-sm font-medium" data-id="${request.id}">
+                                        <i class="fas fa-info-circle mr-1"></i> Ver detalles
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+                
+                // Añadir event listeners a los botones de solicitud
+                document.querySelectorAll('.accept-request-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const requestId = this.getAttribute('data-id');
+                        acceptRequest(requestId);
+                    });
+                });
+                
+                document.querySelectorAll('.reject-request-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const requestId = this.getAttribute('data-id');
+                        rejectRequest(requestId);
+                    });
+                });
+            }
+            
+            // Cargar horario semanal
+            function loadWeeklySchedule() {
+                const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+                const container = document.getElementById('weeklySchedule');
+                
+                let html = '';
+                
+                days.forEach(day => {
+                    html += `
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3 bg-gray-50 rounded">
+                            <div class="font-medium text-gray-800 mb-2 md:mb-0 md:w-1/4">${day}</div>
+                            <div class="flex-grow md:mx-4">
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="available-${day}" class="h-4 w-4 text-blue-500 rounded" checked>
+                                        <label for="available-${day}" class="ml-2 text-sm text-gray-700">Disponible</label>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="time" value="09:00" class="p-1 border border-gray-300 rounded text-sm">
+                                        <span class="text-gray-500">a</span>
+                                        <input type="time" value="18:00" class="p-1 border border-gray-300 rounded text-sm">
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="mt-2 md:mt-0 text-blue-500 hover:text-blue-700 text-sm">
+                                <i class="fas fa-plus mr-1"></i> Agregar horario
+                            </button>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+            }
+            
+            // Mostrar detalles de evento en modal
+            function showEventDetails(event) {
+                const eventData = event.extendedProps;
+                
+                document.getElementById('modalTitle').textContent = event.title;
+                
+                let modalContent = `
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-sm text-gray-500">Cliente</p>
+                            <p class="font-medium">${eventData.client || 'No especificado'}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Servicio</p>
+                            <p class="font-medium">${eventData.service || 'No especificado'}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Fecha y hora</p>
+                            <p class="font-medium">${event.start.toLocaleString('es-ES', { 
+                                weekday: 'long', 
+                                day: 'numeric', 
+                                month: 'long',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Estado</p>
+                            <span class="status-badge ${eventData.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                                ${eventData.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
+                            </span>
+                        </div>
+                        ${eventData.notes ? `
+                            <div>
+                                <p class="text-sm text-gray-500">Notas</p>
+                                <p class="font-medium">${eventData.notes}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                document.getElementById('modalContent').innerHTML = modalContent;
+                document.getElementById('modalActionBtn').textContent = 'Cerrar';
+                
+                // Configurar botones del modal
+                document.getElementById('modalActionBtn').onclick = function() {
+                    document.getElementById('eventModal').classList.add('hidden');
+                };
+                
+                document.getElementById('modalCancelBtn').classList.add('hidden');
+                
+                // Mostrar modal
+                document.getElementById('eventModal').classList.remove('hidden');
+            }
+            
+            // Aceptar solicitud
+            async function acceptRequest(requestId) {
+                // Aquí iría la lógica para aceptar la solicitud en Firebase
+                showNotification('Solicitud aceptada correctamente', 'success');
+                // Recargar solicitudes
+                loadRequests();
+            }
+            
+            // Rechazar solicitud
+            async function rejectRequest(requestId) {
+                // Aquí iría la lógica para rechazar la solicitud en Firebase
+                showNotification('Solicitud rechazada', 'info');
+                // Recargar solicitudes
+                loadRequests();
+            }
+            
+            // Mostrar notificación
+            function showNotification(message, type) {
+                // Crear elemento de notificación
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 p-4 rounded-md shadow-lg z-50 ${
+                    type === 'success' ? 'bg-green-500 text-white' : 
+                    type === 'error' ? 'bg-red-500 text-white' : 
+                    'bg-blue-500 text-white'
+                }`;
+                notification.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} mr-2"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Remover después de 3 segundos
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
+            
+            // ========== EVENT LISTENERS ==========
+            
+            // Navegación entre pestañas del sidebar
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remover clase active de todos
+                    document.querySelectorAll('.sidebar-item').forEach(i => {
+                        i.classList.remove('active');
+                    });
+                    
+                    // Añadir clase active al elemento clickeado
+                    this.classList.add('active');
+                    
+                    // Ocultar todas las secciones
+                    document.querySelectorAll('.content-section').forEach(section => {
+                        section.classList.add('hidden');
+                    });
+                    
+                    // Mostrar la sección correspondiente
+                    const sectionMap = {
+                        'tabDashboard': 'calendarSection',
+                        'tabRequests': 'requestsSection',
+                        'tabAvailability': 'availabilitySection',
+                        'tabStats': 'statsSection',
+                        'tabSync': 'syncSection'
+                    };
+                    
+                    const sectionId = sectionMap[this.id];
+                    if (sectionId) {
+                        document.getElementById(sectionId).classList.remove('hidden');
+                        currentSection = sectionId;
+                    }
+                });
+            });
+            
+            // Filtros de solicitudes
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remover active de todos
+                    document.querySelectorAll('.filter-btn').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    
+                    // Añadir active al clickeado
+                    this.classList.add('active');
+                    
+                    const filter = this.getAttribute('data-filter');
+                    
+                    // Mostrar/ocultar solicitudes según filtro
+                    document.querySelectorAll('.request-item').forEach(item => {
+                        if (filter === 'all') {
+                            item.classList.remove('hidden');
+                        } else {
+                            if (item.getAttribute('data-status') === filter) {
+                                item.classList.remove('hidden');
+                            } else {
+                                item.classList.add('hidden');
+                            }
+                        }
+                    });
+                });
+            });
+            
+            // Botón de cerrar sesión
+            document.getElementById('logoutButton').addEventListener('click', function(e) {
+                e.preventDefault();
+                auth.signOut().then(() => {
+                    window.location.href = 'index.html';
+                });
+            });
+            
+            // Botón de cerrar modal
+            document.getElementById('closeModalBtn').addEventListener('click', function() {
+                document.getElementById('eventModal').classList.add('hidden');
+            });
+            
+            // Botón para agregar excepción
+            document.getElementById('addExceptionBtn').addEventListener('click', function() {
+                const date = document.getElementById('exceptionDate').value;
+                const type = document.getElementById('exceptionType').value;
+                
+                if (!date) {
+                    showNotification('Por favor selecciona una fecha', 'error');
+                    return;
+                }
+                
+                const exceptionsList = document.getElementById('exceptionsList');
+                
+                // Crear elemento de excepción
+                const exceptionItem = document.createElement('div');
+                exceptionItem.className = 'flex justify-between items-center p-2 bg-gray-50 rounded';
+                exceptionItem.innerHTML = `
+                    <div>
+                        <span class="font-medium">${new Date(date).toLocaleDateString('es-ES')}</span>
+                        <span class="text-sm text-gray-500 ml-2">${type === 'full-day' ? 'Día completo libre' : 'Horario personalizado'}</span>
+                    </div>
+                    <button class="text-red-500 hover:text-red-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                // Añadir event listener al botón de eliminar
+                exceptionItem.querySelector('button').addEventListener('click', function() {
+                    exceptionItem.remove();
+                });
+                
+                exceptionsList.appendChild(exceptionItem);
+                
+                // Limpiar inputs
+                document.getElementById('exceptionDate').value = '';
+                
+                showNotification('Excepción agregada', 'success');
+            });
+            
+            // Botón para guardar disponibilidad
+            document.getElementById('saveAvailabilityBtn').addEventListener('click', function() {
+                // Aquí iría la lógica para guardar la disponibilidad en Firebase
+                showNotification('Disponibilidad guardada correctamente', 'success');
+            });
+            
+            // Botones de sincronización de calendarios (simulación)
+            document.getElementById('syncGoogleBtn').addEventListener('click', function() {
+                // Simulación de conexión con Google Calendar
+                showNotification('Conectando con Google Calendar...', 'info');
+                
+                setTimeout(() => {
+                    document.getElementById('googleSyncStatus').classList.remove('hidden');
+                    document.getElementById('googleEmail').textContent = currentUser.email;
+                    showNotification('Google Calendar conectado exitosamente', 'success');
+                }, 1500);
+            });
+            
+            document.getElementById('disconnectGoogleBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('googleSyncStatus').classList.add('hidden');
+                showNotification('Google Calendar desconectado', 'info');
+            });
+            
+            document.getElementById('syncAppleBtn').addEventListener('click', function() {
+                showNotification('Redirigiendo a Apple para autorización...', 'info');
+                
+                // En un caso real, aquí redirigirías a la página de autorización de Apple
+                setTimeout(() => {
+                    document.getElementById('appleSyncStatus').classList.remove('hidden');
+                    showNotification('Apple Calendar conectado exitosamente', 'success');
+                }, 2000);
+            });
+            
+            document.getElementById('saveSyncSettingsBtn').addEventListener('click', function() {
+                showNotification('Configuración de sincronización guardada', 'success');
+            });
+            
+            // Botón para agregar evento manual
+            document.getElementById('addEventButton').addEventListener('click', function() {
+                // Aquí podrías abrir un modal para agregar un evento manualmente
+                showNotification('Funcionalidad en desarrollo', 'info');
+            });
+        });
+    </script>
+</body>
+</html>
