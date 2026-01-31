@@ -123,8 +123,7 @@
               </label>
               <input type="text" id="fullName" required 
                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"
-                     placeholder="Ej: Maria Guadalupe Garfias Sotelo"
-                     oninput="autoCapitalize(this)"/>
+                     placeholder="Ej: Maria Guadalupe Garfias Sotelo"/>
               <div id="fullName-error" class="error-message">
                 <i class="fas fa-exclamation-circle mr-1"></i> Escribe tu nombre exactamente como en tu INE
               </div>
@@ -139,8 +138,7 @@
               <div class="relative">
                 <input type="email" id="email" required 
                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition pr-10"
-                       placeholder="tucorreo@gmail.com"
-                       onblur="validateGmail(this)"/>
+                       placeholder="tucorreo@gmail.com"/>
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                   <i class="fas fa-at text-gray-400"></i>
                 </div>
@@ -161,13 +159,12 @@
                   <input type="tel" id="phone" required 
                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"
                          placeholder="Ej: 5523456789"
-                         oninput="formatPhone(this)"
                          maxlength="15"/>
                   <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                     <span id="country-indicator" class="text-sm font-medium text-gray-500"></span>
                   </div>
                 </div>
-                <button type="button" onclick="toggleCountry()" 
+                <button type="button" id="toggle-country-btn" 
                         class="ml-2 px-3 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center min-w-[100px]">
                   <span id="current-emoji" class="country-emoji">🇲🇽</span>
                   <span id="current-country" class="text-sm">+52</span>
@@ -189,8 +186,6 @@
                 <input type="text" id="profession-search" 
                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"
                        placeholder="Busca o selecciona..."
-                       onkeyup="filterProfessions()"
-                       onclick="toggleProfessionDropdown()"
                        autocomplete="off"/>
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                   <i class="fas fa-chevron-down text-gray-400"></i>
@@ -407,17 +402,18 @@
     </div>
   </footer>
 
-  <!-- ====== JAVASCRIPT MEJORADO ====== -->
+  <!-- ====== JAVASCRIPT CORREGIDO ====== -->
   <script>
-    // ========== CONFIGURACIÓN GLOBAL (MEJORADA) ==========
+    // ========== CONFIGURACIÓN GLOBAL ==========
     
     // Variables globales
     let auth = null;
     let db = null;
     let storage = null;
     let firebaseInitialized = false;
+    let currentCountry = "mx"; // "mx" o "co"
     
-    // Config Firebase (la misma)
+    // Config Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAeLIJ8ee9xUBduMKkijW4GdnY45W32Eew",
       authDomain: "colmena-hub.firebaseapp.com",
@@ -428,7 +424,213 @@
       measurementId: "G-LQ9GLGJCX8"
     };
     
-    // DATOS DE PROFESIONES (se mantienen)
+    // ========== FUNCIONES UTILITARIAS ==========
+    
+    function showStatus(message, type = 'info') {
+      const bar = document.getElementById('statusBar');
+      const text = document.getElementById('statusText');
+      const icon = document.getElementById('statusIcon');
+      
+      if (!bar || !text || !icon) return;
+      
+      // Reset clases
+      bar.className = 'status-bar';
+      
+      // Configurar según tipo
+      let iconClass = '';
+      switch(type) {
+        case 'success':
+          bar.classList.add('success');
+          iconClass = 'fa-check-circle';
+          break;
+        case 'error':
+          bar.classList.add('error');
+          iconClass = 'fa-exclamation-circle';
+          break;
+        case 'warning':
+          bar.classList.add('warning');
+          iconClass = 'fa-exclamation-triangle';
+          break;
+        default:
+          bar.classList.add('warning');
+          iconClass = 'fa-spinner fa-spin';
+          break;
+      }
+      
+      // Actualizar contenido
+      icon.className = `fas ${iconClass} mr-2`;
+      text.textContent = message;
+      bar.classList.add('visible');
+      
+      // Auto-ocultar si no es error
+      if (type !== 'error') {
+        setTimeout(() => {
+          bar.classList.remove('visible');
+        }, 3000);
+      }
+    }
+    
+    // ========== FUNCIONES DE VALIDACIÓN CORREGIDAS ==========
+    
+    // 1. Formatear nombre: "emilio perez jarquin" → "Emilio Perez Jarquin"
+    function formatName(input) {
+      // Obtener valor actual
+      let value = input.value;
+      let cursorPosition = input.selectionStart;
+      
+      // Guardar posición del cursor
+      const originalLength = value.length;
+      
+      // Aplicar formato de capitalización
+      value = value.toLowerCase()
+        .replace(/\b\w/g, char => char.toUpperCase())
+        .replace(/\s+/g, ' ')
+        .trim();
+      
+      // Actualizar valor
+      input.value = value;
+      
+      // Restaurar posición del cursor (ajustada por posibles cambios de longitud)
+      const newLength = value.length;
+      const cursorAdjustment = newLength - originalLength;
+      input.setSelectionRange(cursorPosition + cursorAdjustment, cursorPosition + cursorAdjustment);
+      
+      // Validar que tenga al menos nombre y apellido
+      const words = value.split(/\s+/).filter(w => w.length > 0);
+      const errorEl = document.getElementById('fullName-error');
+      
+      if (words.length < 2) {
+        errorEl.style.display = 'block';
+        input.classList.add('error-input');
+        input.classList.remove('success-input');
+      } else {
+        errorEl.style.display = 'none';
+        input.classList.remove('error-input');
+        input.classList.add('success-input');
+      }
+    }
+    
+    // 2. Validar solo Gmail
+    function validateGmail(input) {
+      const email = input.value.trim();
+      const errorEl = document.getElementById('email-error');
+      const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
+      
+      if (!gmailRegex.test(email)) {
+        errorEl.style.display = 'block';
+        input.classList.add('error-input');
+        input.classList.remove('success-input');
+        return false;
+      } else {
+        errorEl.style.display = 'none';
+        input.classList.remove('error-input');
+        input.classList.add('success-input');
+        return true;
+      }
+    }
+    
+    // 3. Formato de teléfono para México y Colombia
+    function formatPhone(input) {
+      // Obtener solo dígitos
+      const raw = input.value.replace(/\D/g, '');
+      const errorEl = document.getElementById('phone-error');
+      const indicator = document.getElementById('country-indicator');
+      
+      let formatted = '';
+      let isValid = false;
+      let maxDigits = 10;
+      
+      // Limitar a 10 dígitos
+      const digits = raw.substring(0, maxDigits);
+      
+      if (currentCountry === "mx") {
+        // México: 10 dígitos (55 1234 5678)
+        if (digits.length === 10) {
+          formatted = `${digits.substring(0, 2)} ${digits.substring(2, 6)} ${digits.substring(6, 10)}`;
+          indicator.textContent = `(${digits.substring(0, 2)}) ${digits.substring(2, 6)}-${digits.substring(6, 10)}`;
+          isValid = true;
+        } else if (digits.length > 0) {
+          // Mostrar progresivamente mientras se escribe
+          if (digits.length <= 2) {
+            indicator.textContent = `(${digits}`;
+          } else if (digits.length <= 6) {
+            indicator.textContent = `(${digits.substring(0, 2)}) ${digits.substring(2)}`;
+          } else {
+            indicator.textContent = `(${digits.substring(0, 2)}) ${digits.substring(2, 6)}-${digits.substring(6)}`;
+          }
+        } else {
+          indicator.textContent = '';
+        }
+      } else {
+        // Colombia: 10 dígitos (300 123 4567)
+        if (digits.length === 10) {
+          formatted = `${digits.substring(0, 3)} ${digits.substring(3, 6)} ${digits.substring(6, 10)}`;
+          indicator.textContent = `${digits.substring(0, 3)} ${digits.substring(3, 6)}-${digits.substring(6, 10)}`;
+          isValid = true;
+        } else if (digits.length > 0) {
+          // Mostrar progresivamente mientras se escribe
+          if (digits.length <= 3) {
+            indicator.textContent = digits;
+          } else if (digits.length <= 6) {
+            indicator.textContent = `${digits.substring(0, 3)} ${digits.substring(3)}`;
+          } else {
+            indicator.textContent = `${digits.substring(0, 3)} ${digits.substring(3, 6)}-${digits.substring(6)}`;
+          }
+        } else {
+          indicator.textContent = '';
+        }
+      }
+      
+      // Actualizar valor del input
+      input.value = formatted || digits;
+      
+      // Validar y mostrar error si aplica
+      if (digits.length > 0 && digits.length !== 10) {
+        errorEl.style.display = 'block';
+        input.classList.add('error-input');
+        input.classList.remove('success-input');
+      } else {
+        errorEl.style.display = 'none';
+        input.classList.remove('error-input');
+        if (isValid) input.classList.add('success-input');
+      }
+    }
+    
+    // 4. Cambiar entre México y Colombia
+    function toggleCountry() {
+      const emoji = document.getElementById('current-emoji');
+      const countryText = document.getElementById('current-country');
+      const countryCode = document.getElementById('country-code');
+      const phoneInput = document.getElementById('phone');
+      
+      // Cambiar país
+      currentCountry = currentCountry === "mx" ? "co" : "mx";
+      
+      if (currentCountry === "mx") {
+        emoji.textContent = '🇲🇽';
+        countryText.textContent = '+52';
+        countryCode.value = '52';
+        phoneInput.placeholder = 'Ej: 5523456789';
+      } else {
+        emoji.textContent = '🇨🇴';
+        countryText.textContent = '+57';
+        countryCode.value = '57';
+        phoneInput.placeholder = 'Ej: 3001234567';
+      }
+      
+      // Limpiar y revalidar teléfono
+      phoneInput.value = '';
+      document.getElementById('country-indicator').textContent = '';
+      document.getElementById('phone-error').style.display = 'none';
+      phoneInput.classList.remove('error-input', 'success-input');
+      
+      // Actualizar validación
+      phoneInput.dispatchEvent(new Event('input'));
+    }
+    
+    // ========== FUNCIONES DE PROFESIONES ==========
+    
+    // Cargar profesiones (datos del apply.html original)
     const PROFESSION_CATEGORIES = {
       "🧹 Limpieza, Mantenimiento y Servicios Generales": [
         "Afinador de pianos", "Afilador de cuchillos", "Ama de llaves", "Boleador", "Cargador",
@@ -484,131 +686,6 @@
         "Guía de turistas", "Mayordomo", "Organizador de eventos", "Sustituto de filas", "Ufólogo"
       ]
     };
-    
-    // ========== FUNCIONES UTILITARIAS (MEJORADAS) ==========
-    
-    function showStatus(message, type = 'info') {
-      const bar = document.getElementById('statusBar');
-      const text = document.getElementById('statusText');
-      const icon = document.getElementById('statusIcon');
-      
-      if (!bar || !text || !icon) return;
-      
-      // Reset clases
-      bar.className = 'status-bar';
-      
-      // Configurar según tipo
-      let iconClass = '';
-      switch(type) {
-        case 'success':
-          bar.classList.add('success');
-          iconClass = 'fa-check-circle';
-          break;
-        case 'error':
-          bar.classList.add('error');
-          iconClass = 'fa-exclamation-circle';
-          break;
-        case 'warning':
-          bar.classList.add('warning');
-          iconClass = 'fa-exclamation-triangle';
-          break;
-        default:
-          bar.classList.add('warning');
-          iconClass = 'fa-spinner fa-spin';
-          break;
-      }
-      
-      // Actualizar contenido
-      icon.className = `fas ${iconClass} mr-2`;
-      text.textContent = message;
-      bar.classList.add('visible');
-      
-      // Auto-ocultar si no es error
-      if (type !== 'error') {
-        setTimeout(() => {
-          bar.classList.remove('visible');
-        }, 3000);
-      }
-    }
-    
-    // ========== INICIALIZACIÓN FIREBASE MEJORADA ==========
-    
-    function initializeFirebase() {
-      try {
-        console.log('🔥 Inicializando Firebase...');
-        
-        // Inicializar Firebase solo si no existe
-        if (!firebase.apps.length) {
-          firebase.initializeApp(firebaseConfig);
-          console.log('✅ Firebase inicializado');
-        }
-        
-        // Obtener referencias
-        auth = firebase.auth();
-        db = firebase.firestore();
-        storage = firebase.storage();
-        firebaseInitialized = true;
-        
-        console.log('✅ Firebase Auth y Firestore listos');
-        showStatus('Sistema listo. Completa el formulario para registrarte.', 'success');
-        return true;
-        
-      } catch (error) {
-        console.error('❌ Error inicializando Firebase:', error);
-        showStatus(`Error Firebase: ${error.message}`, 'error');
-        return false;
-      }
-    }
-    
-    // ========== FUNCIONES DE VALIDACIÓN ==========
-    
-    function autoCapitalize(input) {
-      let value = input.value.trim();
-      value = value.toLowerCase().split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-      input.value = value;
-    }
-    
-    function validateGmail(input) {
-      const email = input.value.trim();
-      const errorEl = document.getElementById('email-error');
-      const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
-      
-      if (!gmailRegex.test(email)) {
-        errorEl.style.display = 'block';
-        input.classList.add('error-input');
-        input.classList.remove('success-input');
-        return false;
-      } else {
-        errorEl.style.display = 'none';
-        input.classList.remove('error-input');
-        input.classList.add('success-input');
-        return true;
-      }
-    }
-    
-    function formatPhone(input) {
-      let value = input.value.replace(/\D/g, '');
-      if (value.length > 10) value = value.substring(0, 10);
-      input.value = value;
-    }
-    
-    function toggleCountry() {
-      const current = document.getElementById('country-code').value;
-      const newCountry = current === '52' ? '57' : '52';
-      const emoji = newCountry === '52' ? '🇲🇽' : '🇨🇴';
-      const code = newCountry === '52' ? '+52' : '+57';
-      
-      document.getElementById('country-code').value = newCountry;
-      document.getElementById('current-emoji').textContent = emoji;
-      document.getElementById('current-country').textContent = code;
-      
-      // Limpiar teléfono al cambiar país
-      document.getElementById('phone').value = '';
-    }
-    
-    // ========== FUNCIONES DE PROFESIONES (SIMPLIFICADAS) ==========
     
     function loadProfessions() {
       const dropdown = document.getElementById('profession-dropdown');
@@ -700,122 +777,33 @@
       }
     }
     
-    // ========== VALIDACIÓN DE PASO 1 (MEJORADA) ==========
+    // ========== VALIDACIÓN DE PASO 1 ==========
     
     function validateCurrentStep() {
       if (currentStep === 1) {
         // Validar nombre (mínimo 2 palabras)
-          // 1. Formatear nombre: "emilio perez jarquin" → "Emilio Perez Jarquin"
-          function formatName(input) {
-          let value = input.value.trim();
-       // Convertir a formato capitalizado (primera letra mayúscula, resto minúscula)
-          value = value.toLowerCase().split(' ')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ');
-    
-          input.value = value;
-    
-    // Validar que tenga al menos nombre y apellido
-    const words = value.split(/\s+/).filter(w => w.length > 0);
-    const errorEl = document.getElementById('fullName-error');
-    
-    if (words.length < 2) {
-      errorEl.style.display = 'block';
-      input.classList.add('error-input');
-      input.classList.remove('success-input');
-    } else {
-      errorEl.style.display = 'none';
-      input.classList.remove('error-input');
-      input.classList.add('success-input');
-    }
-  }
-
+        const name = document.getElementById('fullName').value.trim();
+        if (name.split(/\s+/).filter(w => w.length > 0).length < 2) {
+          showStatus('Escribe tu nombre completo (mínimo nombre y apellido)', 'error');
+          document.getElementById('fullName-error').style.display = 'block';
+          return false;
+        }
         
         // Validar email (solo Gmail)
-        function validateGmail(input) {
-    const email = input.value.trim();
-    const errorEl = document.getElementById('email-error');
-    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
-    
-    if (!gmailRegex.test(email)) {
-      errorEl.style.display = 'block';
-      input.classList.add('error-input');
-      input.classList.remove('success-input');
-    } else {
-      errorEl.style.display = 'none';
-      input.classList.remove('error-input');
-      input.classList.add('success-input');
-    }
-  }
+        const email = document.getElementById('email').value.trim();
+        if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/i.test(email)) {
+          showStatus('Solo se aceptan correos de Gmail (@gmail.com)', 'error');
+          document.getElementById('email-error').style.display = 'block';
+          return false;
+        }
         
-        function formatPhone(input) {
-    const raw = input.value.replace(/\D/g, '');
-    const errorEl = document.getElementById('phone-error');
-    const indicator = document.getElementById('country-indicator');
-    
-    let formatted = '';
-    let isValid = false;
-    
-    if (currentCountry === "mx") {
-      // México: 10 dígitos (55 1234 5678)
-      if (raw.length <= 10) {
-        if (raw.length === 10) {
-          formatted = `${raw.substring(0, 2)} ${raw.substring(2, 6)} ${raw.substring(6, 10)}`;
-          indicator.textContent = `(${raw.substring(0, 2)}) ${raw.substring(2, 6)}-${raw.substring(6, 10)}`;
-          isValid = true;
-        } else if (raw.length > 0) {
-          indicator.textContent = raw.substring(0, Math.min(10, raw.length));
+        // Validar teléfono (10 dígitos)
+        const phone = document.getElementById('phone').value.replace(/\D/g, '');
+        if (phone.length !== 10) {
+          showStatus('Teléfono inválido. Debe tener 10 dígitos', 'error');
+          document.getElementById('phone-error').style.display = 'block';
+          return false;
         }
-      }
-    } else {
-      // Colombia: 10 dígitos (300 123 4567)
-      if (raw.length <= 10) {
-        if (raw.length === 10) {
-          formatted = `${raw.substring(0, 3)} ${raw.substring(3, 6)} ${raw.substring(6, 10)}`;
-          indicator.textContent = `${raw.substring(0, 3)} ${raw.substring(3, 6)}-${raw.substring(6, 10)}`;
-          isValid = true;
-        } else if (raw.length > 0) {
-          indicator.textContent = raw.substring(0, Math.min(10, raw.length));
-        }
-      }
-    }
-    
-    input.value = formatted || raw;
-    
-    if (raw.length > 0 && !isValid && raw.length !== 10) {
-      errorEl.style.display = 'block';
-      input.classList.add('error-input');
-      input.classList.remove('success-input');
-    } else {
-      errorEl.style.display = 'none';
-      input.classList.remove('error-input');
-      if (isValid) input.classList.add('success-input');
-    }
-  }
-
-  // 4. Cambiar entre México y Colombia CON EMOJIS
-  function toggleCountry() {
-    const emoji = document.getElementById('current-emoji');
-    const countryText = document.getElementById('current-country');
-    const countryCode = document.getElementById('country-code');
-    const phoneInput = document.getElementById('phone');
-    
-    currentCountry = currentCountry === "mx" ? "co" : "mx";
-    
-    if (currentCountry === "mx") {
-      emoji.textContent = '🇲🇽';
-      countryText.textContent = '+52';
-      countryCode.value = '52';
-    } else {
-      emoji.textContent = '🇨🇴';
-      countryText.textContent = '+57';
-      countryCode.value = '57';
-    }
-    
-    // Limpiar y revalidar teléfono
-    phoneInput.value = '';
-    phoneInput.dispatchEvent(new Event('input'));
-  }
         
         // Validar profesión seleccionada
         const profession = document.getElementById('profession').value;
@@ -848,7 +836,7 @@
       return true;
     }
     
-    // ========== VERIFF MEJORADO (con fallback a simulación) ==========
+    // ========== VERIFF MEJORADO ==========
     
     let verificationCompleted = false;
     let veriffSessionId = null;
@@ -982,11 +970,6 @@
       document.querySelector(`#step-${currentStep}`).classList.remove('hidden');
       updateNav(); 
       updateProgress();
-      
-      // Si llegamos al paso 2, preparamos Veriff
-      if (currentStep === 2) {
-        // Nada especial, el usuario hará clic en el botón
-      }
     }
     
     function prevStep() {
@@ -1050,6 +1033,33 @@
     
     // ========== INICIALIZACIÓN DE LA PÁGINA ==========
     
+    function initializeFirebase() {
+      try {
+        console.log('🔥 Inicializando Firebase...');
+        
+        // Inicializar Firebase solo si no existe
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+          console.log('✅ Firebase inicializado');
+        }
+        
+        // Obtener referencias
+        auth = firebase.auth();
+        db = firebase.firestore();
+        storage = firebase.storage();
+        firebaseInitialized = true;
+        
+        console.log('✅ Firebase Auth y Firestore listos');
+        showStatus('Sistema listo. Completa el formulario para registrarte.', 'success');
+        return true;
+        
+      } catch (error) {
+        console.error('❌ Error inicializando Firebase:', error);
+        showStatus(`Error Firebase: ${error.message}`, 'error');
+        return false;
+      }
+    }
+    
     document.addEventListener('DOMContentLoaded', () => {
       console.log('🚀 COLMENA HUB Apply - Inicializando...');
       
@@ -1084,6 +1094,32 @@
       updateProgress(); 
       updateNav();
       
+      // Event Listeners para nombre (CORREGIDO)
+      const fullNameInput = document.getElementById('fullName');
+      fullNameInput.addEventListener('input', function() {
+        formatName(this);
+      });
+      
+      // Event Listeners para email
+      const emailInput = document.getElementById('email');
+      emailInput.addEventListener('blur', function() {
+        validateGmail(this);
+      });
+      
+      // Event Listeners para teléfono (CORREGIDO)
+      const phoneInput = document.getElementById('phone');
+      phoneInput.addEventListener('input', function() {
+        formatPhone(this);
+      });
+      
+      // Botón para cambiar país
+      document.getElementById('toggle-country-btn').addEventListener('click', toggleCountry);
+      
+      // Event Listeners para profesiones
+      const professionSearch = document.getElementById('profession-search');
+      professionSearch.addEventListener('keyup', filterProfessions);
+      professionSearch.addEventListener('click', toggleProfessionDropdown);
+      
       // Botón para iniciar Veriff
       document.getElementById('start-veriff-btn').addEventListener('click', startVeriffVerification);
       
@@ -1098,17 +1134,6 @@
         
         if (!dropdown.contains(e.target) && e.target !== searchInput) {
           dropdown.classList.add('hidden');
-        }
-      });
-      
-      // Inicializar indicador de país
-      document.getElementById('country-indicator').textContent = '';
-      
-      // Cargar profesiones al hacer clic en el input
-      document.getElementById('profession-search').addEventListener('click', function() {
-        const dropdown = document.getElementById('profession-dropdown');
-        if (dropdown.classList.contains('hidden')) {
-          toggleProfessionDropdown();
         }
       });
       
