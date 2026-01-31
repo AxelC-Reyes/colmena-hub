@@ -122,8 +122,9 @@
                 <span class="text-xs text-gray-500">(Escribe exactamente como aparece en tu INE)</span>
               </label>
               <input type="text" id="fullName" required 
-                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"
-                     placeholder="Ej: Maria Guadalupe Garfias Sotelo"/>
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"
+                 placeholder="Ej: Maria Guadalupe Garfias Sotelo"
+                 oninput="formatName(this)"/>
               <div id="fullName-error" class="error-message">
                 <i class="fas fa-exclamation-circle mr-1"></i> Escribe tu nombre exactamente como en tu INE
               </div>
@@ -473,42 +474,36 @@
     // ========== FUNCIONES DE VALIDACIÓN CORREGIDAS ==========
     
     // 1. Formatear nombre: "emilio perez jarquin" → "Emilio Perez Jarquin"
-    function formatName(input) {
-      // Obtener valor actual
-      let value = input.value;
-      let cursorPosition = input.selectionStart;
-      
-      // Guardar posición del cursor
-      const originalLength = value.length;
-      
-      // Aplicar formato de capitalización
-      value = value.toLowerCase()
-        .replace(/\b\w/g, char => char.toUpperCase())
-        .replace(/\s+/g, ' ')
-        .trim();
-      
-      // Actualizar valor
-      input.value = value;
-      
-      // Restaurar posición del cursor (ajustada por posibles cambios de longitud)
-      const newLength = value.length;
-      const cursorAdjustment = newLength - originalLength;
-      input.setSelectionRange(cursorPosition + cursorAdjustment, cursorPosition + cursorAdjustment);
-      
-      // Validar que tenga al menos nombre y apellido
-      const words = value.split(/\s+/).filter(w => w.length > 0);
-      const errorEl = document.getElementById('fullName-error');
-      
-      if (words.length < 2) {
-        errorEl.style.display = 'block';
-        input.classList.add('error-input');
-        input.classList.remove('success-input');
-      } else {
-        errorEl.style.display = 'none';
-        input.classList.remove('error-input');
-        input.classList.add('success-input');
-      }
-    }
+    // 1. Formatear nombre: "emilio perez jarquin" → "Emilio Perez Jarquin"
+function formatName(input) {
+  // Guardar posición del cursor
+  const cursorPos = input.selectionStart;
+  const oldLen = input.value.length;
+
+  // Capitalizar cada palabra
+  input.value = input.value
+    .toLowerCase()
+    .replace(/\b\w/g, c => c.toUpperCase())
+    .replace(/\s{2,}/g, ' ')   // evitar dobles espacios
+    .trim();
+
+  // Restaurar cursor (ajustado por cambios de longitud)
+  const newLen = input.value.length;
+  input.setSelectionRange(cursorPos + (newLen - oldLen), cursorPos + (newLen - oldLen));
+
+  // Validar mínimo 2 palabras
+  const words = input.value.split(/\s+/).filter(w => w.length > 0);
+  const errorEl = document.getElementById('fullName-error');
+  if (words.length < 2) {
+    errorEl.style.display = 'block';
+    input.classList.add('error-input');
+    input.classList.remove('success-input');
+  } else {
+    errorEl.style.display = 'none';
+    input.classList.remove('error-input');
+    input.classList.add('success-input');
+  }
+}
     
     // 2. Validar solo Gmail
     function validateGmail(input) {
