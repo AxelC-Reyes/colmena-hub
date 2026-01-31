@@ -496,19 +496,22 @@
       input.setSelectionRange(cursorPosition + cursorAdjustment, cursorPosition + cursorAdjustment);
       
       // Validar que tenga al menos nombre y apellido
-      const words = value.split(/\s+/).filter(w => w.length > 0);
-      const errorEl = document.getElementById('fullName-error');
-      
-      if (words.length < 2) {
-        errorEl.style.display = 'block';
-        input.classList.add('error-input');
-        input.classList.remove('success-input');
-      } else {
-        errorEl.style.display = 'none';
-        input.classList.remove('error-input');
-        input.classList.add('success-input');
-      }
-    }
+      const fullNameInput = document.getElementById('fullName');
+
+fullNameInput.addEventListener('blur', function() {
+  const value = this.value.trim();
+  const errorEl = document.getElementById('fullName-error');
+  
+  if (value.split(/\s+/).filter(w => w.length > 0).length < 2) {
+    errorEl.style.display = 'block';
+    this.classList.add('error-input');
+    this.classList.remove('success-input');
+  } else {
+    errorEl.style.display = 'none';
+    this.classList.remove('error-input');
+    this.classList.add('success-input');
+  }
+});
     
     // 2. Validar solo Gmail
     function validateGmail(input) {
