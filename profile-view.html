@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil Profesional – COLMENA HUB</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="stripe-payment.js"></script>
+  <style>
+    body { background:#F9FAFB; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; }
+    .avatar { width:100px;height:100px;border-radius:50%;object-fit:cover;border:4px solid #FDE68A; }
+    .avatar-placeholder { width:100px;height:100px;border-radius:50%;background:#FDE68A;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:700;color:#92400E;border:4px solid #FDE68A; }
+    .star { color:#FBBF24; }
+    .badge-verified { background:#D1FAE5;color:#065F46;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px; }
+  </style>
+</head>
+<body>
+ 
+  <!-- Header -->
+  <header class="bg-white shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
+      <a href="javascript:history.back()" class="text-gray-500 hover:text-amber-600">
+        <i class="fas fa-arrow-left mr-2"></i>Volver
+      </a>
+      <a href="index.html" class="font-bold text-gray-800">COLMENA HUB</a>
+    </div>
+  </header>
+ 
+  <!-- Skeleton de carga -->
+  <div id="skeleton" class="max-w-4xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-2xl p-8 shadow-sm animate-pulse">
+      <div class="flex items-center gap-6 mb-6">
+        <div class="w-24 h-24 rounded-full bg-gray-200"></div>
+        <div class="space-y-3 flex-1">
+          <div class="h-6 bg-gray-200 rounded w-48"></div>
+          <div class="h-4 bg-gray-200 rounded w-32"></div>
+        </div>
+      </div>
+      <div class="space-y-2">
+        <div class="h-4 bg-gray-200 rounded w-full"></div>
+        <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- Perfil real -->
+  <div id="profile-content" class="hidden max-w-4xl mx-auto px-4 py-8 space-y-6">
+ 
+    <!-- Tarjeta principal -->
+    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+      <!-- Banner -->
+      <div class="h-24 bg-gradient-to-r from-amber-400 to-yellow-300"></div>
+ 
+      <div class="px-8 pb-8">
+        <div class="flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-12 mb-6">
+          <div id="avatar-container"></div>
+          <div class="flex-1">
+            <h1 id="prof-name" class="text-2xl font-bold text-gray-900"></h1>
+            <p id="prof-profession" class="text-gray-500 text-base mt-1"></p>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <span class="badge-verified"><i class="fas fa-check-circle"></i> Verificado</span>
+              <span id="prof-availability" class="px-3 py-1 rounded-full text-xs font-semibold"></span>
+            </div>
+          </div>
+          <div class="sm:text-right">
+            <div id="prof-rate" class="text-2xl font-bold text-amber-600"></div>
+            <div class="text-xs text-gray-400">por hora</div>
+          </div>
+        </div>
+ 
+        <!-- Descripción -->
+        <div class="mb-6">
+          <h3 class="font-semibold text-gray-700 mb-2">Acerca de</h3>
+          <p id="prof-description" class="text-gray-600 leading-relaxed"></p>
+        </div>
+ 
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-4 py-6 border-t border-b border-gray-100 mb-6">
+          <div class="text-center">
+            <div id="prof-rating" class="text-2xl font-bold text-amber-500"></div>
+            <div id="prof-stars" class="text-amber-400 text-sm my-1"></div>
+            <div class="text-xs text-gray-500">Calificación</div>
+          </div>
+          <div class="text-center">
+            <div id="prof-jobs" class="text-2xl font-bold text-gray-800"></div>
+            <div class="text-xs text-gray-500 mt-1">Trabajos</div>
+          </div>
+          <div class="text-center">
+            <div id="prof-years" class="text-2xl font-bold text-gray-800"></div>
+            <div class="text-xs text-gray-500 mt-1">Años exp.</div>
+          </div>
+        </div>
+ 
+        <!-- Botones de acción -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button id="btn-contact"
+                  class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-xl transition flex items-center justify-center gap-2">
+            <i class="fas fa-envelope"></i> Contactar
+          </button>
+          <button id="btn-book"
+                  class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl transition flex items-center justify-center gap-2">
+            <i class="fas fa-calendar-check"></i> Agendar y pagar
+          </button>
+        </div>
+        <p class="text-xs text-gray-400 mt-3 text-center">
+          <i class="fas fa-lock mr-1"></i>El contacto directo (WhatsApp/teléfono) se revela 2h antes de tu cita confirmada y pagada.
+        </p>
+      </div>
+    </div>
+ 
+    <!-- Reseñas -->
+    <div class="bg-white rounded-2xl shadow-sm p-8">
+      <h3 class="font-bold text-lg text-gray-800 mb-4">Reseñas</h3>
+      <div id="reviews-list">
+        <p class="text-gray-400 text-sm italic">Aún no hay reseñas para este profesional.</p>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- Error -->
+  <div id="error-state" class="hidden max-w-4xl mx-auto px-4 py-16 text-center">
+    <i class="fas fa-user-slash text-5xl text-gray-300 mb-4"></i>
+    <h2 class="text-xl font-bold text-gray-600 mb-2">Perfil no encontrado</h2>
+    <p class="text-gray-500 mb-6">Este profesional no existe o su perfil no está disponible.</p>
+    <a href="oficiadores.html" class="inline-block bg-amber-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-amber-600 transition">
+      Ver otros profesionales
+    </a>
+  </div>
+ 
+  <!-- Modal de agendar cita -->
+  <div id="booking-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-8">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">Agendar cita</h3>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
+        <input type="date" id="booking-date" class="w-full p-3 border border-gray-300 rounded-xl text-sm">
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Hora</label>
+        <input type="time" id="booking-time" class="w-full p-3 border border-gray-300 rounded-xl text-sm">
+      </div>
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Duración (horas)</label>
+        <input type="number" id="booking-duration" min="1" max="8" value="1" class="w-full p-3 border border-gray-300 rounded-xl text-sm">
+      </div>
+      <p id="booking-error" class="text-red-500 text-sm mb-4 hidden"></p>
+      <div class="flex gap-3">
+        <button onclick="document.getElementById('booking-modal').classList.add('hidden')"
+                class="flex-1 border border-gray-300 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-50 transition">
+          Cancelar
+        </button>
+        <button onclick="confirmBooking()"
+                class="flex-1 bg-amber-500 text-white py-3 rounded-xl font-bold hover:bg-amber-600 transition">
+          Continuar a pago
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de contacto -->
+  <div id="contact-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-8">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">Contactar profesional</h3>
+      <p class="text-gray-500 text-sm mb-6">
+        Describe brevemente qué necesitas y el profesional te responderá a tu correo.
+      </p>
+      <textarea id="contact-message" rows="4" placeholder="Ej: Necesito asesoría legal para..."
+                class="w-full p-3 border border-gray-300 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-amber-300 mb-4"></textarea>
+      <div class="flex gap-3">
+        <button onclick="document.getElementById('contact-modal').classList.add('hidden')"
+                class="flex-1 border border-gray-300 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-50 transition">
+          Cancelar
+        </button>
+        <button onclick="sendContactMessage()"
+                class="flex-1 bg-amber-500 text-white py-3 rounded-xl font-bold hover:bg-amber-600 transition">
+          Enviar mensaje
+        </button>
+      </div>
+    </div>
+  </div>
+ 
+  <script>
+    const params   = new URLSearchParams(window.location.search);
+    const profId   = params.get('id');
+    const type     = params.get('type') === 'intern' ? 'intern' : 'professional';
+    const collectionName = type === 'intern' ? 'interns' : 'professionals';
+    let   profData = null;
+ 
+    async function loadProfile() {
+      if (!profId) { showError(); return; }
+ 
+      try {
+        const doc = await DB.collection(collectionName).doc(profId).get();
+        if (!doc.exists || !doc.data().verified) { showError(); return; }
+ 
+        profData = { id: doc.id, ...doc.data() };
+        renderProfile(profData);
+        loadReviews(profId);
+      } catch (e) {
+        console.error(e);
+        showError();
+      }
+    }
+ 
+    function renderProfile(p) {
+      document.title = `${p.fullName} – COLMENA HUB`;
+ 
+      // Avatar
+      const avatarEl = document.getElementById('avatar-container');
+      if (p.photoURL) {
+        avatarEl.innerHTML = `<img src="${p.photoURL}" alt="${p.fullName}" class="avatar">`;
+      } else {
+        const initials = p.fullName.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+        avatarEl.innerHTML = `<div class="avatar-placeholder">${initials}</div>`;
+      }
+ 
+      document.getElementById('prof-name').textContent       = p.fullName;
+      document.getElementById('prof-profession').textContent = p.profession;
+      document.getElementById('prof-description').textContent = p.description || `Profesional especializado en ${p.profession}.`;
+      document.getElementById('prof-rate').textContent       = p.hourlyRate ? `$${p.hourlyRate} MXN` : 'Consultar';
+      document.getElementById('prof-jobs').textContent       = p.completedJobs || 0;
+      document.getElementById('prof-years').textContent      = p.experienceYears || '—';
+ 
+      // Rating
+      const rating = p.rating || 0;
+      document.getElementById('prof-rating').textContent = rating ? rating.toFixed(1) : 'Nuevo';
+      document.getElementById('prof-stars').innerHTML = rating
+        ? '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating))
+        : '☆☆☆☆☆';
+ 
+      // Disponibilidad
+      const avEl = document.getElementById('prof-availability');
+      if (p.availableNow) {
+        avEl.textContent = 'Disponible ahora';
+        avEl.className += ' bg-green-100 text-green-800';
+      } else {
+        avEl.textContent = 'Ocupado';
+        avEl.className += ' bg-gray-100 text-gray-500';
+      }
+ 
+      // WhatsApp ya no se muestra directo — se revela vía revealContact()
+      // solo cuando la cita está pagada y confirmada, 2h antes.
+ 
+      // Mostrar perfil, ocultar skeleton
+      document.getElementById('skeleton').classList.add('hidden');
+      document.getElementById('profile-content').classList.remove('hidden');
+    }
+ 
+    async function loadReviews(id) {
+      try {
+        const snap = await DB.collection('reviews')
+          .where('professionalId','==', id)
+          .orderBy('createdAt','desc')
+          .limit(5)
+          .get();
+ 
+        if (snap.empty) return;
+ 
+        const list = document.getElementById('reviews-list');
+        list.innerHTML = '';
+        snap.forEach(doc => {
+          const r = doc.data();
+          const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+          list.innerHTML += `
+            <div class="border-b border-gray-100 pb-4 mb-4 last:border-0 last:mb-0">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-semibold text-gray-800 text-sm">${r.authorName || 'Cliente verificado'}</span>
+                <span class="text-amber-400 text-xs">${stars}</span>
+              </div>
+              <p class="text-gray-600 text-sm">${r.comment || ''}</p>
+            </div>`;
+        });
+      } catch (e) { /* sin reseñas aún */ }
+    }
+ 
+    function showError() {
+      document.getElementById('skeleton').classList.add('hidden');
+      document.getElementById('error-state').classList.remove('hidden');
+    }
+ 
+    document.getElementById('btn-book').addEventListener('click', () => {
+      const user = Auth.currentUser;
+      if (!user) {
+        if (confirm('Necesitas iniciar sesión para agendar. ¿Ir al inicio?')) {
+          window.location.href = 'index.html';
+        }
+        return;
+      }
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('booking-date').min = today;
+      document.getElementById('booking-modal').classList.remove('hidden');
+    });
+
+    async function confirmBooking() {
+      const errEl = document.getElementById('booking-error');
+      errEl.classList.add('hidden');
+
+      const date     = document.getElementById('booking-date').value;
+      const time     = document.getElementById('booking-time').value;
+      const duration = parseInt(document.getElementById('booking-duration').value) || 1;
+
+      if (!date || !time) {
+        errEl.textContent = 'Selecciona fecha y hora.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      const startTime = new Date(`${date}T${time}`);
+      if (startTime <= new Date()) {
+        errEl.textContent = 'Elige una fecha y hora futura.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      const user   = Auth.currentUser;
+      const amount = (profData.hourlyRate || 250) * duration;
+
+      try {
+        const apptRef = await DB.collection('appointments').add({
+          professionalId: profData.id,
+          professionalName: profData.fullName,
+          clientId:       user.uid,
+          clientName:     user.displayName || user.email,
+          clientEmail:    user.email,
+          startTime:      firebase.firestore.Timestamp.fromDate(startTime),
+          durationHours:  duration,
+          amount:         amount,
+          status:         'pending',
+          paymentStatus:  'unpaid',
+          reminderSent:   false,
+          createdAt:      firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        document.getElementById('booking-modal').classList.add('hidden');
+
+        // Abrir modal de pago de Stripe con este appointmentId
+        ColmenaStripe.openModal({
+          appointmentId:     apptRef.id,
+          professionalId:    profData.id,
+          professionalName:  profData.fullName,
+          amount:             amount,
+          providerType:       type
+        });
+      } catch (e) {
+        console.error(e);
+        errEl.textContent = 'Error al agendar. Intenta de nuevo.';
+        errEl.classList.remove('hidden');
+      }
+    }
+
+    document.getElementById('btn-contact').addEventListener('click', () => {
+      const user = Auth.currentUser;
+      if (!user) {
+        if (confirm('Necesitas iniciar sesión para contactar a este profesional. ¿Ir al inicio?')) {
+          window.location.href = 'index.html';
+        }
+        return;
+      }
+      document.getElementById('contact-modal').classList.remove('hidden');
+    });
+ 
+    async function sendContactMessage() {
+      const msg   = document.getElementById('contact-message').value.trim();
+      const user  = Auth.currentUser;
+      if (!msg || !user || !profData) return;
+ 
+      try {
+        await DB.collection('appointments').add({
+          professionalId: profData.id,
+          clientId:       user.uid,
+          clientName:     user.displayName || user.email,
+          clientEmail:    user.email,
+          message:        msg,
+          status:         'pending',
+          createdAt:      firebase.firestore.FieldValue.serverTimestamp()
+        });
+        document.getElementById('contact-modal').classList.add('hidden');
+        showStatus('¡Mensaje enviado! El profesional te contactará pronto.', 'success');
+      } catch (e) {
+        showStatus('Error al enviar el mensaje. Intenta de nuevo.', 'error');
+      }
+    }
+ 
+    loadProfile();
+  </script>
+
+  <!-- Modal de pago Stripe (antes solo existía como referencia, nunca insertado) -->
+  <div id="colmena-payment-modal"
+       style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+              z-index:10000;align-items:center;justify-content:center;padding:16px">
+    <div style="background:#fff;border-radius:20px;width:100%;max-width:480px;
+                overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+      <div style="background:linear-gradient(135deg,#F59E0B,#D97706);
+                  padding:20px 24px;color:#fff">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:18px;font-weight:700">Pagar con tarjeta</div>
+            <div style="font-size:13px;opacity:.85;margin-top:2px" id="pay-professional-name"></div>
+          </div>
+          <button onclick="ColmenaStripe.closeModal()"
+                  style="background:rgba(255,255,255,.2);border:none;color:#fff;
+                         font-size:22px;cursor:pointer;border-radius:8px;
+                         width:32px;height:32px;line-height:1">×</button>
+        </div>
+      </div>
+      <div style="padding:20px 24px;border-bottom:1px solid #F3F4F6">
+        <div style="display:flex;justify-content:space-between;align-items:center;
+                    background:#FFFBEB;border-radius:12px;padding:14px 16px">
+          <div>
+            <div style="font-size:13px;color:#6B7280">Total a pagar</div>
+            <div style="font-size:28px;font-weight:700;color:#D97706" id="pay-amount-display"></div>
+            <div style="font-size:11px;color:#9CA3AF;margin-top:2px">MXN · incluye IVA</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:11px;color:#9CA3AF">Comisión de plataforma</div>
+            <div style="font-size:13px;color:#6B7280" id="pay-fee-display"></div>
+            <div style="font-size:11px;color:#10B981;margin-top:4px">🔒 Pago seguro SSL</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:20px 24px">
+        <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:8px">
+          Datos de tu tarjeta
+        </div>
+        <div id="stripe-card-element"
+             style="border:1px solid #D1D5DB;border-radius:10px;padding:14px;
+                    font-size:16px;background:#FAFAFA;min-height:44px"></div>
+        <div id="stripe-card-error"
+             style="color:#EF4444;font-size:13px;margin-top:8px;min-height:20px"></div>
+        <button id="pay-submit-btn"
+                onclick="ColmenaStripe.submitPayment()"
+                style="width:100%;margin-top:20px;padding:16px;
+                       background:linear-gradient(135deg,#F59E0B,#D97706);
+                       color:#fff;font-size:16px;font-weight:700;
+                       border:none;border-radius:12px;cursor:pointer;
+                       display:flex;align-items:center;justify-content:center;gap:10px">
+          <span>🔒</span>
+          <span id="pay-btn-text">Pagar ahora</span>
+        </button>
+        <p style="text-align:center;font-size:11px;color:#9CA3AF;margin-top:12px">
+          Procesado por Stripe · Tu tarjeta está protegida con encriptación de nivel bancario
+        </p>
+      </div>
+      <div id="pay-success-state" style="display:none;padding:32px 24px;text-align:center">
+        <div style="font-size:64px;margin-bottom:16px">✅</div>
+        <h3 style="font-size:20px;font-weight:700;color:#065F46;margin:0 0 8px">¡Pago exitoso!</h3>
+        <p style="color:#6B7280;font-size:14px;margin:0 0 24px">
+          Tu cita ha sido confirmada. El profesional recibirá una notificación.
+        </p>
+        <button onclick="ColmenaStripe.closeModal();location.reload()"
+                style="padding:12px 28px;background:#10B981;color:#fff;
+                       font-weight:700;border:none;border-radius:10px;cursor:pointer;
+                       font-size:15px">
+          Continuar
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

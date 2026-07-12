@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplicación para Pasantes – COLMENA HUB</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+  
+  <style>
+    :root {
+      --primary-blue: #3B82F6;
+      --secondary-blue: #1D4ED8;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+    }
+    
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
+    }
+    
+    .btn-pasante {
+      background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+      color: white;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-pasante:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-pasante:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .progress-bar {
+      height: 8px;
+      background: linear-gradient(90deg, #3B82F6 0%, #60A5FA 100%);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    
+    .file-upload-area {
+      border: 2px dashed #CBD5E1;
+      transition: all 0.3s ease;
+    }
+    
+    .file-upload-area:hover {
+      border-color: var(--primary-blue);
+      background-color: #EFF6FF;
+    }
+    
+    .file-upload-area.dragover {
+      border-color: var(--primary-blue);
+      background-color: #DBEAFE;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Header -->
+  <header class="glass-card sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+            <i class="fas fa-graduation-cap text-white text-xl"></i>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-gray-900">COLMENA HUB</h1>
+            <p class="text-xs text-blue-700 font-medium">Aplicación para Pasantes</p>
+          </div>
+        </div>
+        <a href="pasantes.html" class="text-blue-600 hover:text-blue-800">
+          <i class="fas fa-arrow-left mr-1"></i>Volver
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido Principal -->
+  <main class="container mx-auto px-4 py-8 max-w-4xl">
+    <!-- Barra de progreso -->
+    <div class="glass-card rounded-xl p-6 mb-8">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h2 class="text-xl font-bold text-gray-800">Aplicación para Pasantes</h2>
+          <p class="text-gray-600">Completa todos los pasos (4/4 para ser aprobado)</p>
+        </div>
+        <span id="progress-text" class="font-bold text-blue-600 text-lg">1/4</span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-2.5">
+        <div id="progress-bar" class="progress-bar h-2.5 rounded-full" style="width: 25%"></div>
+      </div>
+      <div class="grid grid-cols-4 gap-4 mt-4">
+        <div class="text-center">
+          <div class="w-8 h-8 mx-auto bg-blue-500 text-white rounded-full flex items-center justify-center mb-2">1</div>
+          <p class="text-xs font-medium">Datos Personales</p>
+        </div>
+        <div class="text-center">
+          <div class="w-8 h-8 mx-auto bg-gray-300 text-gray-600 rounded-full flex items-center justify-center mb-2">2</div>
+          <p class="text-xs text-gray-500">Información Académica</p>
+        </div>
+        <div class="text-center">
+          <div class="w-8 h-8 mx-auto bg-gray-300 text-gray-600 rounded-full flex items-center justify-center mb-2">3</div>
+          <p class="text-xs text-gray-500">Documentos</p>
+        </div>
+        <div class="text-center">
+          <div class="w-8 h-8 mx-auto bg-gray-300 text-gray-600 rounded-full flex items-center justify-center mb-2">4</div>
+          <p class="text-xs text-gray-500">Revisión</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <div class="glass-card rounded-xl p-8">
+      <form id="intern-application-form" class="space-y-8">
+        <!-- Paso 1: Datos Personales -->
+        <section id="step-1" class="step">
+          <h3 class="text-2xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-user-graduate text-blue-500 mr-3"></i>
+            Datos Personales
+          </h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-user mr-2"></i>Nombre Completo *
+              </label>
+              <input type="text" id="fullName" required 
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                     placeholder="Como aparece en tu credencial escolar">
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-envelope mr-2"></i>Correo Institucional *
+              </label>
+              <input type="email" id="email" required 
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                     placeholder="ejemplo@universidad.edu.mx">
+              <p class="text-xs text-gray-500 mt-1">Usa tu correo institucional preferentemente</p>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-phone mr-2"></i>Teléfono *
+              </label>
+              <input type="tel" id="phone" required 
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                     placeholder="10 dígitos">
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-id-card mr-2"></i>CURP *
+              </label>
+              <input type="text" id="curp" required 
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 uppercase"
+                     placeholder="AAAA000000AAAAAA00"
+                     maxlength="18">
+            </div>
+          </div>
+        </section>
+        
+        <!-- Paso 2: Información Académica (OCULTO) -->
+        <section id="step-2" class="step hidden">
+          <h3 class="text-2xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-university text-blue-500 mr-3"></i>
+            Información Académica
+          </h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-school mr-2"></i>Institución Educativa *
+              </label>
+              <input type="text" id="institution" required 
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                     placeholder="Nombre de tu universidad">
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-graduation-cap mr-2"></i>Carrera *
+              </label>
+              <input type="text" id="major" required 
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                     placeholder="Tu carrera de estudio">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-briefcase mr-2"></i>¿Qué servicio ofreces? *
+              </label>
+              <input type="text" id="offered-profession" required
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                     placeholder="Ej: Diseñador gráfico, Asistente contable...">
+              <p class="text-xs text-gray-500 mt-1">Así te van a encontrar los clientes en el buscador</p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-dollar-sign mr-2"></i>Precio por hora (MXN) *
+              </label>
+              <input type="number" id="hourly-rate" required min="50" max="5000"
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                     placeholder="150">
+              <p class="text-xs text-gray-500 mt-1">Como pasante, tu comisión con COLMENA es la mitad (5% en vez de 10%)</p>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-calendar-alt mr-2"></i>Año de Ingreso *
+              </label>
+              <input type="number" id="year-of-entry" required 
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                     min="2010" max="2024"
+                     placeholder="Ej: 2020">
+              <p id="year-warning" class="text-xs text-red-600 mt-1 hidden">
+                Límite: 7 años desde ingreso. Fecha límite: <span id="deadline-year"></span>
+              </p>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-percentage mr-2"></i>Porcentaje de Avance *
+              </label>
+              <div class="flex items-center space-x-4">
+                <input type="range" id="progress" required 
+                       class="flex-grow h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                       min="0" max="100" value="75">
+                <span id="progress-display" class="font-bold text-blue-600 w-16">75%</span>
+              </div>
+              <p id="progress-warning" class="text-xs text-red-600 mt-1 hidden">
+                Mínimo requerido: 75%
+              </p>
+            </div>
+            
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-clock mr-2"></i>¿Has estado inactivo en tus estudios?
+              </label>
+              <div class="flex items-center space-x-4">
+                <label class="flex items-center">
+                  <input type="radio" name="inactive" value="no" class="mr-2" checked>
+                  <span>No, he sido estudiante activo</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="radio" name="inactive" value="yes" class="mr-2">
+                  <span>Sí, he tenido periodos de inactividad</span>
+                </label>
+              </div>
+              
+              <div id="inactive-details" class="mt-4 hidden">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Meses totales de inactividad *
+                </label>
+                <input type="number" id="inactive-months" 
+                       class="w-32 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                       min="1" max="120"
+                       placeholder="Meses">
+                <p class="text-xs text-red-600 mt-1">
+                  Máximo permitido: 12 meses (1 año)
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Verificación de elegibilidad en tiempo real -->
+          <div id="eligibility-check" class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="flex items-center mb-2">
+              <i class="fas fa-search text-blue-500 mr-3"></i>
+              <h4 class="font-bold text-blue-800">Verificación de Elegibilidad</h4>
+            </div>
+            <div id="eligibility-result" class="text-sm text-blue-700">
+              Completa los campos para verificar tu elegibilidad
+            </div>
+          </div>
+        </section>
+        
+        <!-- Paso 3: Documentos (OCULTO) -->
+        <section id="step-3" class="step hidden">
+          <h3 class="text-2xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-file-upload text-blue-500 mr-3"></i>
+            Documentos Requeridos
+          </h3>
+          
+          <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div class="flex items-start">
+              <i class="fas fa-exclamation-triangle text-yellow-500 mr-3 mt-1"></i>
+              <div>
+                <h4 class="font-bold text-yellow-800 mb-2">Documentación obligatoria</h4>
+                <p class="text-yellow-700 text-sm">Sube archivos PDF o JPG (máx. 5MB cada uno)</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Kardex -->
+          <div class="mb-8">
+            <label class="block text-sm font-medium text-gray-700 mb-4">
+              <i class="fas fa-file-alt mr-2"></i>Kardex o Historial Académico *
+            </label>
+            <div id="kardex-upload" class="file-upload-area rounded-xl p-8 text-center cursor-pointer">
+              <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+              <p class="text-gray-600 mb-2">Arrastra tu kardex o haz clic para subir</p>
+              <p class="text-sm text-gray-500">Debe mostrar porcentaje de avance y materias cursadas</p>
+              <input type="file" id="kardex-file" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
+              <div id="kardex-preview" class="mt-4 hidden">
+                <div class="inline-flex items-center px-3 py-2 bg-green-100 text-green-800 rounded-lg">
+                  <i class="fas fa-check-circle mr-2"></i>
+                  <span id="kardex-filename">Documento subido</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Identificación -->
+          <div class="mb-8">
+            <label class="block text-sm font-medium text-gray-700 mb-4">
+              <i class="fas fa-id-badge mr-2"></i>Identificación Oficial *
+            </label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div id="ine-upload" class="file-upload-area rounded-xl p-6 text-center cursor-pointer">
+                <i class="fas fa-address-card text-3xl text-gray-400 mb-3"></i>
+                <p class="text-gray-600 text-sm mb-1">INE/IFE (anverso y reverso)</p>
+                <p class="text-xs text-gray-500">O pasaporte vigente</p>
+                <input type="file" id="ine-file" class="hidden" accept=".jpg,.jpeg,.png">
+              </div>
+              
+              <div id="student-id-upload" class="file-upload-area rounded-xl p-6 text-center cursor-pointer">
+                <i class="fas fa-user-graduate text-3xl text-gray-400 mb-3"></i>
+                <p class="text-gray-600 text-sm mb-1">Credencial de Estudiante</p>
+                <p class="text-xs text-gray-500">Vigente o último periodo</p>
+                <input type="file" id="student-id-file" class="hidden" accept=".jpg,.jpeg,.png">
+              </div>
+            </div>
+            
+            <div id="id-preview" class="mt-4 grid grid-cols-2 gap-4 hidden">
+              <div class="inline-flex items-center px-3 py-2 bg-green-100 text-green-800 rounded-lg">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span>INE subida</span>
+              </div>
+              <div class="inline-flex items-center px-3 py-2 bg-green-100 text-green-800 rounded-lg">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span>Credencial subida</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Documentos opcionales -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-4">
+              <i class="fas fa-file-medical mr-2"></i>Documentos Opcionales
+            </label>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div>
+                  <h4 class="font-medium text-gray-900">Constancia de estudios</h4>
+                  <p class="text-sm text-gray-600">Vigente del semestre actual</p>
+                </div>
+                <input type="file" id="study-certificate" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
+                <button type="button" onclick="document.getElementById('study-certificate').click()" 
+                        class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                  Subir
+                </button>
+              </div>
+              
+              <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div>
+                  <h4 class="font-medium text-gray-900">Carta de pasante</h4>
+                  <p class="text-sm text-gray-600">Si ya la tienes</p>
+                </div>
+                <input type="file" id="intern-letter" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
+                <button type="button" onclick="document.getElementById('intern-letter').click()" 
+                        class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                  Subir
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Paso 4: Revisión (OCULTO) -->
+        <section id="step-4" class="step hidden">
+          <h3 class="text-2xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-clipboard-check text-blue-500 mr-3"></i>
+            Revisión Final
+          </h3>
+          
+          <div class="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-xl">
+            <div class="flex items-start">
+              <i class="fas fa-info-circle text-blue-500 text-xl mr-3 mt-1"></i>
+              <div>
+                <h4 class="font-bold text-blue-800 mb-2">Términos del Programa de Pasantes</h4>
+                <ul class="text-blue-700 space-y-2 text-sm">
+                  <li class="flex items-center">
+                    <i class="fas fa-calendar-times mr-3"></i>
+                    <span>Máximo 7 años desde ingreso a la carrera</span>
+                  </li>
+                  <li class="flex items-center">
+                    <i class="fas fa-percentage mr-3"></i>
+                    <span>Mínimo 75% de avance académico</span>
+                  </li>
+                  <li class="flex items-center">
+                    <i class="fas fa-clock mr-3"></i>
+                    <span>Máximo 1 año (12 meses) de inactividad académica</span>
+                  </li>
+                  <li class="flex items-center">
+                    <i class="fas fa-graduation-cap mr-3"></i>
+                    <span>Al año 7 debes presentar título profesional</span>
+                  </li>
+                  <li class="flex items-center">
+                    <i class="fas fa-sync-alt mr-3"></i>
+                    <span>Actualización anual de avance académico requerida</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Resumen -->
+          <div class="mb-8">
+            <h4 class="font-bold text-gray-800 mb-4">Resumen de tu aplicación</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div><span class="text-gray-600">Nombre:</span> <span id="review-name" class="font-medium">-</span></div>
+              <div><span class="text-gray-600">Institución:</span> <span id="review-institution" class="font-medium">-</span></div>
+              <div><span class="text-gray-600">Carrera:</span> <span id="review-major" class="font-medium">-</span></div>
+              <div><span class="text-gray-600">Año de ingreso:</span> <span id="review-year" class="font-medium">-</span></div>
+              <div><span class="text-gray-600">Avance:</span> <span id="review-progress" class="font-medium">-</span></div>
+              <div><span class="text-gray-600">Estado:</span> <span id="review-status" class="font-medium">Pendiente</span></div>
+            </div>
+          </div>
+          
+          <!-- Aceptación de términos -->
+          <div class="mb-8">
+            <div class="flex items-start">
+              <input type="checkbox" id="terms-accept" required 
+                     class="w-5 h-5 mt-1 text-blue-600 rounded focus:ring-blue-500">
+              <label for="terms-accept" class="ml-2 text-gray-700">
+                Acepto los términos del programa de pasantes, comprendo que:
+                <ul class="list-disc pl-5 mt-2 text-sm text-gray-600">
+                  <li>Debo mantener actualizado mi avance académico anual</li>
+                  <li>Al cumplir 7 años desde mi ingreso, debo presentar título profesional</li>
+                  <li>Puedo ser dado de baja si no cumplo con los requisitos</li>
+                  <li>Los datos proporcionados serán verificados</li>
+                </ul>
+              </label>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Navegación -->
+        <div class="flex justify-between pt-8 border-t border-gray-200">
+          <button type="button" id="prev-btn" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hidden">
+            <i class="fas fa-arrow-left mr-2"></i>Anterior
+          </button>
+          <button type="button" id="next-btn" class="ml-auto btn-pasante px-8 py-3 rounded-lg">
+            Siguiente <i class="fas fa-arrow-right ml-2"></i>
+          </button>
+          <button type="submit" id="submit-btn" class="btn-pasante px-8 py-3 rounded-lg hidden">
+            <i class="fas fa-paper-plane mr-2"></i>Enviar Aplicación
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Modal de éxito -->
+  <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="glass-card rounded-xl p-8 max-w-md w-full mx-4">
+      <div class="text-center">
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <i class="fas fa-check text-4xl text-green-500"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">¡Aplicación Enviada!</h3>
+        <p class="text-gray-600 mb-6">Tu solicitud ha sido recibida. La revisaremos en un plazo de 3-5 días hábiles.</p>
+        
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-left">
+          <h4 class="font-bold text-blue-800 mb-2">📋 Próximos pasos:</h4>
+          <ul class="text-blue-700 space-y-2 text-sm">
+            <li class="flex items-center"><i class="fas fa-search text-blue-600 mr-3"></i><span>Verificación de documentos (3-5 días)</span></li>
+            <li class="flex items-center"><i class="fas fa-envelope text-blue-600 mr-3"></i><span>Notificación vía email</span></li>
+            <li class="flex items-center"><i class="fas fa-user-check text-blue-600 mr-3"></i><span>Activación de perfil de pasante</span></li>
+          </ul>
+        </div>
+        
+        <div class="flex flex-col gap-3">
+          <button onclick="window.location.href='pasantes.html'" class="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900">
+            <i class="fas fa-home mr-2"></i>Volver a Pasantes
+          </button>
+          <button id="track-application-btn" class="px-6 py-3 btn-pasante rounded-lg">
+            <i class="fas fa-chart-line mr-2"></i>Seguir mi aplicación
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase y JavaScript -->
+  <script>
+    // Configuración de Firebase (usa tu configuración)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeLIJ8ee9xUBduMKkijW4GdnY45W32Eew",
+      authDomain: "colmena-hub.firebaseapp.com",
+      projectId: "colmena-hub",
+      storageBucket: "colmena-hub.firebasestorage.app",
+      messagingSenderId: "806697924814",
+      appId: "1:806697924814:web:b11c9b057bc6d1dd71789f"
+    };
+    
+    // Inicializar Firebase
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+    
+    // Variables globales
+    let currentStep = 1;
+    const totalSteps = 4;
+    let isEligible = false;
+    let uploadedFiles = {
+      kardex: null,
+      ine: null,
+      studentId: null,
+      certificate: null,
+      letter: null
+    };
+    
+    // ========== FUNCIONES DE NAVEGACIÓN ==========
+    
+    function updateProgress() {
+      const percentage = (currentStep / totalSteps) * 100;
+      document.getElementById('progress-bar').style.width = percentage + '%';
+      document.getElementById('progress-text').textContent = `${currentStep}/${totalSteps}`;
+      
+      // Actualizar números de paso
+      document.querySelectorAll('.text-center .w-8').forEach((circle, index) => {
+        if (index < currentStep - 1) {
+          circle.className = 'w-8 h-8 mx-auto bg-blue-500 text-white rounded-full flex items-center justify-center mb-2';
+        } else if (index === currentStep - 1) {
+          circle.className = 'w-8 h-8 mx-auto bg-blue-600 text-white rounded-full flex items-center justify-center mb-2';
+        } else {
+          circle.className = 'w-8 h-8 mx-auto bg-gray-300 text-gray-600 rounded-full flex items-center justify-center mb-2';
+        }
+      });
+      
+      // Actualizar textos de paso
+      document.querySelectorAll('.text-center .text-xs').forEach((text, index) => {
+        if (index === currentStep - 1) {
+          text.className = 'text-xs font-medium';
+        } else {
+          text.className = 'text-xs text-gray-500';
+        }
+      });
+    }
+    
+    function updateNavigation() {
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+      const submitBtn = document.getElementById('submit-btn');
+      
+      // Mostrar/ocultar botones según el paso
+      prevBtn.classList.toggle('hidden', currentStep === 1);
+      nextBtn.classList.toggle('hidden', currentStep === totalSteps);
+      submitBtn.classList.toggle('hidden', currentStep !== totalSteps);
+    }
+    
+    function nextStep() {
+      // Validar paso actual antes de avanzar
+      if (!validateCurrentStep()) {
+        showStatus('Completa correctamente los campos requeridos', 'error');
+        return;
+      }
+      
+      // Ocultar paso actual
+      document.getElementById(`step-${currentStep}`).classList.add('hidden');
+      
+      // Avanzar
+      currentStep++;
+      
+      // Mostrar nuevo paso
+      document.getElementById(`step-${currentStep}`).classList.remove('hidden');
+      
+      // Actualizar UI
+      updateProgress();
+      updateNavigation();
+      
+      // Acciones específicas por paso
+      if (currentStep === 2) {
+        setupAcademicValidation();
+      } else if (currentStep === 4) {
+        updateReviewSection();
+      }
+      
+      showStatus(`Paso ${currentStep} de ${totalSteps}`, 'info');
+    }
+    
+    function prevStep() {
+      // Ocultar paso actual
+      document.getElementById(`step-${currentStep}`).classList.add('hidden');
+      
+      // Retroceder
+      currentStep--;
+      
+      // Mostrar paso anterior
+      document.getElementById(`step-${currentStep}`).classList.remove('hidden');
+      
+      // Actualizar UI
+      updateProgress();
+      updateNavigation();
+      
+      showStatus(`Paso ${currentStep} de ${totalSteps}`, 'info');
+    }
+    
+    // ========== VALIDACIÓN POR PASOS ==========
+    
+    function validateCurrentStep() {
+      switch(currentStep) {
+        case 1:
+          return validateStep1();
+        case 2:
+          return validateStep2();
+        case 3:
+          return validateStep3();
+        case 4:
+          return validateStep4();
+        default:
+          return true;
+      }
+    }
+    
+    function validateStep1() {
+      const fullName = document.getElementById('fullName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const curp = document.getElementById('curp').value.trim();
+      
+      if (!fullName || fullName.split(/\s+/).length < 2) {
+        showStatus('Escribe nombre y apellido completos', 'error');
+        return false;
+      }
+      
+      if (!email || !email.includes('@')) {
+        showStatus('Correo electrónico inválido', 'error');
+        return false;
+      }
+      
+      if (!phone || phone.replace(/\D/g, '').length !== 10) {
+        showStatus('Teléfono debe tener 10 dígitos', 'error');
+        return false;
+      }
+      
+      if (!curp || curp.length !== 18) {
+        showStatus('CURP debe tener 18 caracteres', 'error');
+        return false;
+      }
+      
+      return true;
+    }
+    
+    function validateStep2() {
+      const institution = document.getElementById('institution').value.trim();
+      const major = document.getElementById('major').value.trim();
+      const yearOfEntry = parseInt(document.getElementById('year-of-entry').value);
+      const progress = parseInt(document.getElementById('progress').value);
+      
+      if (!institution) {
+        showStatus('Institución educativa requerida', 'error');
+        return false;
+      }
+      
+      if (!major) {
+        showStatus('Carrera de estudio requerida', 'error');
+        return false;
+      }
+
+      const offeredProfession = document.getElementById('offered-profession').value.trim();
+      if (!offeredProfession) {
+        showStatus('Indica qué servicio ofreces', 'error');
+        return false;
+      }
+
+      const hourlyRate = parseInt(document.getElementById('hourly-rate').value);
+      if (!hourlyRate || hourlyRate < 50 || hourlyRate > 5000) {
+        showStatus('Precio por hora entre $50 y $5,000 MXN', 'error');
+        return false;
+      }
+      
+      if (!yearOfEntry || yearOfEntry < 2010 || yearOfEntry > 2024) {
+        showStatus('Año de ingreso inválido', 'error');
+        return false;
+      }
+      
+      // Verificar límite de 7 años
+      const currentYear = new Date().getFullYear();
+      if (currentYear - yearOfEntry > 7) {
+        showStatus('Superaste el límite de 7 años desde ingreso', 'error');
+        return false;
+      }
+      
+      if (!progress || progress < 75) {
+        showStatus('Avance mínimo requerido: 75%', 'error');
+        return false;
+      }
+      
+      // Verificar inactividad si aplica
+      const isInactive = document.querySelector('input[name="inactive"]:checked').value === 'yes';
+      if (isInactive) {
+        const inactiveMonths = parseInt(document.getElementById('inactive-months').value);
+        if (!inactiveMonths || inactiveMonths > 12) {
+          showStatus('Máximo 12 meses de inactividad permitidos', 'error');
+          return false;
+        }
+      }
+      
+      return true;
+    }
+    
+    function validateStep3() {
+      // Verificar documentos obligatorios
+      if (!uploadedFiles.kardex) {
+        showStatus('Kardex o historial académico requerido', 'error');
+        return false;
+      }
+      
+      if (!uploadedFiles.ine) {
+        showStatus('Identificación oficial (INE) requerida', 'error');
+        return false;
+      }
+      
+      if (!uploadedFiles.studentId) {
+        showStatus('Credencial de estudiante requerida', 'error');
+        return false;
+      }
+      
+      return true;
+    }
+    
+    function validateStep4() {
+      if (!document.getElementById('terms-accept').checked) {
+        showStatus('Debes aceptar los términos del programa', 'error');
+        return false;
+      }
+      
+      if (!isEligible) {
+        showStatus('No cumples con los requisitos de elegibilidad', 'error');
+        return false;
+      }
+      
+      return true;
+    }
+    
+    // ========== VALIDACIÓN ACADÉMICA EN TIEMPO REAL ==========
+    
+    function setupAcademicValidation() {
+      const yearInput = document.getElementById('year-of-entry');
+      const progressInput = document.getElementById('progress');
+      const progressDisplay = document.getElementById('progress-display');
+      const yearWarning = document.getElementById('year-warning');
+      const progressWarning = document.getElementById('progress-warning');
+      const inactiveRadios = document.querySelectorAll('input[name="inactive"]');
+      const inactiveDetails = document.getElementById('inactive-details');
+      
+      // Actualizar display del progress
+      progressInput.addEventListener('input', function() {
+        progressDisplay.textContent = this.value + '%';
+        checkEligibility();
+      });
+      
+      // Validar año de ingreso
+      yearInput.addEventListener('input', function() {
+        const year = parseInt(this.value);
+        const currentYear = new Date().getFullYear();
+        
+        if (year) {
+          const yearsSinceEntry = currentYear - year;
+          const deadlineYear = year + 7;
+          
+          if (yearsSinceEntry > 7) {
+            yearWarning.classList.remove('hidden');
+            document.getElementById('deadline-year').textContent = deadlineYear;
+          } else {
+            yearWarning.classList.add('hidden');
+          }
+          
+          checkEligibility();
+        }
+      });
+      
+      // Mostrar/ocultar detalles de inactividad
+      inactiveRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+          if (this.value === 'yes') {
+            inactiveDetails.classList.remove('hidden');
+          } else {
+            inactiveDetails.classList.add('hidden');
+          }
+          checkEligibility();
+        });
+      });
+      
+      // Validar meses de inactividad
+      document.getElementById('inactive-months').addEventListener('input', checkEligibility);
+    }
+    
+    function checkEligibility() {
+      const yearOfEntry = parseInt(document.getElementById('year-of-entry').value);
+      const progress = parseInt(document.getElementById('progress').value);
+      const isInactive = document.querySelector('input[name="inactive"]:checked')?.value === 'yes';
+      const inactiveMonths = parseInt(document.getElementById('inactive-months')?.value) || 0;
+      
+      let requirements = [];
+      let passedCount = 0;
+      
+      // 1. Verificar años desde ingreso
+      if (yearOfEntry) {
+        const currentYear = new Date().getFullYear();
+        const yearsSinceEntry = currentYear - yearOfEntry;
+        
+        if (yearsSinceEntry <= 7) {
+          requirements.push('✅ Años desde ingreso: OK (límite: 7 años)');
+          passedCount++;
+        } else {
+          requirements.push(`❌ Años desde ingreso: ${yearsSinceEntry} años (supera límite de 7)`);
+        }
+      } else {
+        requirements.push('⏳ Años desde ingreso: No especificado');
+      }
+      
+      // 2. Verificar avance académico
+      if (progress) {
+        if (progress >= 75) {
+          requirements.push(`✅ Avance académico: ${progress}% (mínimo: 75%)`);
+          passedCount++;
+        } else {
+          requirements.push(`❌ Avance académico: ${progress}% (requiere mínimo 75%)`);
+        }
+      } else {
+        requirements.push('⏳ Avance académico: No especificado');
+      }
+      
+      // 3. Verificar inactividad
+      if (isInactive) {
+        if (inactiveMonths <= 12) {
+          requirements.push(`✅ Inactividad: ${inactiveMonths} meses (límite: 12 meses)`);
+          passedCount++;
+        } else if (inactiveMonths > 0) {
+          requirements.push(`❌ Inactividad: ${inactiveMonths} meses (supera límite de 12 meses)`);
+        } else {
+          requirements.push('⏳ Inactividad: Especifica meses');
+        }
+      } else {
+        requirements.push('✅ Inactividad: Estudiante activo');
+        passedCount++;
+      }
+      
+      // Actualizar UI
+      const resultElement = document.getElementById('eligibility-result');
+      resultElement.innerHTML = requirements.map(req => `
+        <div class="mb-1">${req}</div>
+      `).join('');
+      
+      // Determinar elegibilidad
+      isEligible = passedCount === 3;
+      
+      // Actualizar botón siguiente
+      const nextBtn = document.getElementById('next-btn');
+      nextBtn.disabled = !isEligible;
+      
+      return isEligible;
+    }
+    
+    // ========== MANEJO DE ARCHIVOS ==========
+    
+    function setupFileUploads() {
+      // Kardex
+      const kardexUpload = document.getElementById('kardex-upload');
+      const kardexFile = document.getElementById('kardex-file');
+      const kardexPreview = document.getElementById('kardex-preview');
+      const kardexFilename = document.getElementById('kardex-filename');
+      
+      kardexUpload.addEventListener('click', () => kardexFile.click());
+      kardexUpload.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        kardexUpload.classList.add('dragover');
+      });
+      kardexUpload.addEventListener('dragleave', () => {
+        kardexUpload.classList.remove('dragover');
+      });
+      kardexUpload.addEventListener('drop', (e) => {
+        e.preventDefault();
+        kardexUpload.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        handleKardexUpload(file);
+      });
+      
+      kardexFile.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        handleKardexUpload(file);
+      });
+      
+      function handleKardexUpload(file) {
+        if (file && file.size <= 5 * 1024 * 1024) { // 5MB
+          uploadedFiles.kardex = file;
+          kardexFilename.textContent = file.name;
+          kardexPreview.classList.remove('hidden');
+          showStatus('Kardex subido correctamente', 'success');
+        } else {
+          showStatus('Archivo demasiado grande (máx. 5MB)', 'error');
+        }
+      }
+      
+      // INE y Credencial (similar a kardex, implementar según necesidad)
+      // ...
+    }
+    
+    // ========== ACTUALIZAR SECCIÓN DE REVISIÓN ==========
+    
+    function updateReviewSection() {
+      // Datos personales
+      document.getElementById('review-name').textContent = document.getElementById('fullName').value;
+      document.getElementById('review-institution').textContent = document.getElementById('institution').value;
+      document.getElementById('review-major').textContent = document.getElementById('major').value;
+      document.getElementById('review-year').textContent = document.getElementById('year-of-entry').value;
+      document.getElementById('review-progress').textContent = document.getElementById('progress').value + '%';
+      
+      // Estado de elegibilidad
+      const statusElement = document.getElementById('review-status');
+      if (isEligible) {
+        statusElement.textContent = '✅ Elegible';
+        statusElement.className = 'font-medium text-green-600';
+      } else {
+        statusElement.textContent = '❌ No elegible';
+        statusElement.className = 'font-medium text-red-600';
+      }
+    }
+    
+    // ========== ENVÍO DEL FORMULARIO ==========
+    
+    async function submitApplication() {
+      if (!validateStep4()) return;
+      
+      const user = auth.currentUser;
+      if (!user) {
+        showStatus('Debes iniciar sesión primero', 'error');
+        setTimeout(() => window.location.href = 'index.html', 2000);
+        return;
+      }
+      
+      showStatus('Enviando aplicación...', 'info');
+      
+      try {
+        // Crear objeto con datos del pasante
+        const internData = {
+          userId: user.uid,
+          userEmail: user.email,
+          
+          // Datos personales
+          fullName: document.getElementById('fullName').value,
+          personalEmail: document.getElementById('email').value,
+          phone: document.getElementById('phone').value,
+          curp: document.getElementById('curp').value.toUpperCase(),
+          
+          // Datos académicos
+          institution: document.getElementById('institution').value,
+          major: document.getElementById('major').value,
+          yearOfEntry: parseInt(document.getElementById('year-of-entry').value),
+          progress: parseInt(document.getElementById('progress').value),
+          isInactive: document.querySelector('input[name="inactive"]:checked').value === 'yes',
+          inactiveMonths: parseInt(document.getElementById('inactive-months')?.value) || 0,
+
+          // Datos para aparecer en el buscador (igual que professionals)
+          profession: document.getElementById('offered-profession').value.trim(),
+          hourlyRate: parseInt(document.getElementById('hourly-rate').value) || 150,
+          availableNow: true,
+          // ⚠️ verified queda en false: solo el admin (o un webhook,
+          // igual que con professionals) debe poder aprobarlo. No se
+          // hace público hasta esa aprobación.
+          verified: false,
+          
+          // Estado y fechas
+          status: 'pending_review',
+          applicationDate: firebase.firestore.FieldValue.serverTimestamp(),
+          yearsSinceEntry: new Date().getFullYear() - parseInt(document.getElementById('year-of-entry').value),
+          isEligible: isEligible,
+          
+          // Metadata
+          type: 'intern',
+          program: 'pasantes',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        // Guardar en Firestore
+        await db.collection('interns').doc(user.uid).set(internData);
+        
+        // Subir archivos (esto sería asíncrono en producción)
+        // await uploadFiles(user.uid);
+        
+        // Mostrar modal de éxito
+        document.getElementById('success-modal').classList.remove('hidden');
+        showStatus('¡Aplicación enviada exitosamente!', 'success');
+        
+        // Registrar en analytics
+        console.log('✅ Aplicación de pasante guardada:', user.uid);
+        
+      } catch (error) {
+        console.error('❌ Error al enviar aplicación:', error);
+        showStatus(`Error: ${error.message}`, 'error');
+      }
+    }
+    
+    // ========== INICIALIZACIÓN ==========
+    
+    function initializePage() {
+      // Configurar navegación
+      document.getElementById('next-btn').addEventListener('click', nextStep);
+      document.getElementById('prev-btn').addEventListener('click', prevStep);
+      document.getElementById('submit-btn').addEventListener('click', submitApplication);
+      
+      // Configurar validación académica
+      setupAcademicValidation();
+      
+      // Configurar subida de archivos
+      setupFileUploads();
+      
+      // Configurar botón de seguimiento
+      document.getElementById('track-application-btn').addEventListener('click', () => {
+        showStatus('Esta función estará disponible pronto', 'info');
+      });
+      
+      // Verificar autenticación
+      auth.onAuthStateChanged((user) => {
+        if (!user) {
+          // Redirigir a login
+          setTimeout(() => {
+            window.location.href = 'index.html?redirect=pasantes';
+          }, 2000);
+        }
+      });
+      
+      // Inicializar UI
+      updateProgress();
+      updateNavigation();
+      
+      showStatus('Formulario de pasantes listo', 'success');
+    }
+    
+    // Función para mostrar estados
+    function showStatus(message, type = 'info') {
+      const bar = document.getElementById('statusBar');
+      const text = document.getElementById('statusText');
+      const icon = document.getElementById('statusIcon');
+      
+      // Reset classes
+      bar.className = 'fixed top-0 left-0 right-0 py-3 px-4 text-center z-50';
+      
+      // Configurar según tipo
+      let iconClass = '';
+      switch(type) {
+        case 'success':
+          bar.classList.add('bg-green-600', 'text-white');
+          iconClass = 'fa-check-circle';
+          break;
+        case 'error':
+          bar.classList.add('bg-red-600', 'text-white');
+          iconClass = 'fa-exclamation-circle';
+          break;
+        case 'warning':
+          bar.classList.add('bg-yellow-600', 'text-white');
+          iconClass = 'fa-exclamation-triangle';
+          break;
+        default:
+          bar.classList.add('bg-blue-600', 'text-white');
+          iconClass = 'fa-spinner fa-spin';
+          break;
+      }
+      
+      icon.className = `fas ${iconClass} mr-2`;
+      text.textContent = message;
+      bar.classList.remove('hidden');
+      
+      if (type !== 'error') {
+        setTimeout(() => bar.classList.add('hidden'), 3000);
+      }
+    }
+    
+    // Iniciar cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', initializePage);
+  </script>
+</body>
+</html>

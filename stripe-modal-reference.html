@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Stripe Payment - Referencia visual</title>
+  <!-- Solo para previsualizar el modal. En producción usa stripe-payment.js -->
+</head>
+<body>
+ 
+<!-- ── Modal de pago (pégalo en el <body> de profile-view.html) ── -->
+<div id="colmena-payment-modal"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+            z-index:10000;align-items:center;justify-content:center;padding:16px">
+  <div style="background:#fff;border-radius:20px;width:100%;max-width:480px;
+              overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+ 
+    <!-- Encabezado -->
+    <div style="background:linear-gradient(135deg,#F59E0B,#D97706);
+                padding:20px 24px;color:#fff">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:18px;font-weight:700">Pagar con tarjeta</div>
+          <div style="font-size:13px;opacity:.85;margin-top:2px" id="pay-professional-name"></div>
+        </div>
+        <button onclick="ColmenaStripe.closeModal()"
+                style="background:rgba(255,255,255,.2);border:none;color:#fff;
+                       font-size:22px;cursor:pointer;border-radius:8px;
+                       width:32px;height:32px;line-height:1">×</button>
+      </div>
+    </div>
+ 
+    <!-- Resumen del pago -->
+    <div style="padding:20px 24px;border-bottom:1px solid #F3F4F6">
+      <div style="display:flex;justify-content:space-between;align-items:center;
+                  background:#FFFBEB;border-radius:12px;padding:14px 16px">
+        <div>
+          <div style="font-size:13px;color:#6B7280">Total a pagar</div>
+          <div style="font-size:28px;font-weight:700;color:#D97706" id="pay-amount-display"></div>
+          <div style="font-size:11px;color:#9CA3AF;margin-top:2px">MXN · incluye IVA</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;color:#9CA3AF">Comisión de plataforma</div>
+          <div style="font-size:13px;color:#6B7280" id="pay-fee-display"></div>
+          <div style="font-size:11px;color:#10B981;margin-top:4px">
+            <span style="display:inline-flex;align-items:center;gap:4px">
+              🔒 Pago seguro SSL
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- Formulario de Stripe -->
+    <div style="padding:20px 24px">
+      <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:8px">
+        Datos de tu tarjeta
+      </div>
+ 
+      <!-- Stripe Elements se monta aquí -->
+      <div id="stripe-card-element"
+           style="border:1px solid #D1D5DB;border-radius:10px;padding:14px;
+                  font-size:16px;background:#FAFAFA;min-height:44px"></div>
+ 
+      <!-- Errores -->
+      <div id="stripe-card-error"
+           style="color:#EF4444;font-size:13px;margin-top:8px;min-height:20px"></div>
+ 
+      <!-- Botón de pago -->
+      <button id="pay-submit-btn"
+              onclick="ColmenaStripe.submitPayment()"
+              style="width:100%;margin-top:20px;padding:16px;
+                     background:linear-gradient(135deg,#F59E0B,#D97706);
+                     color:#fff;font-size:16px;font-weight:700;
+                     border:none;border-radius:12px;cursor:pointer;
+                     transition:opacity .2s;display:flex;align-items:center;
+                     justify-content:center;gap:10px">
+        <span>🔒</span>
+        <span id="pay-btn-text">Pagar ahora</span>
+      </button>
+ 
+      <p style="text-align:center;font-size:11px;color:#9CA3AF;margin-top:12px">
+        Procesado por Stripe · Tu tarjeta está protegida con encriptación de nivel bancario
+      </p>
+    </div>
+ 
+    <!-- Estado de éxito (oculto hasta que se complete el pago) -->
+    <div id="pay-success-state"
+         style="display:none;padding:32px 24px;text-align:center">
+      <div style="font-size:64px;margin-bottom:16px">✅</div>
+      <h3 style="font-size:20px;font-weight:700;color:#065F46;margin:0 0 8px">
+        ¡Pago exitoso!
+      </h3>
+      <p style="color:#6B7280;font-size:14px;margin:0 0 24px">
+        Tu cita ha sido confirmada. El profesional recibirá una notificación.
+      </p>
+      <button onclick="ColmenaStripe.closeModal();location.reload()"
+              style="padding:12px 28px;background:#10B981;color:#fff;
+                     font-weight:700;border:none;border-radius:10px;cursor:pointer;
+                     font-size:15px">
+        Continuar
+      </button>
+    </div>
+ 
+  </div>
+</div>
+</body>
+</html>
+ 

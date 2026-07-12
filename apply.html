@@ -910,9 +910,12 @@ function formatName(input) {
       try {
         const user = auth.currentUser;
         if (user && db) {
+          // ⚠️ IMPORTANTE: ya NO escribimos verified:true aquí.
+          // El campo verified solo lo puede escribir el backend
+          // (functions/veriff-webhook.js), nunca el cliente.
           await db.collection('professionals').doc(user.uid).update({
-            verified: true,
-            verifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            verificationStatus: 'pending',
+            veriffSubmittedAt: firebase.firestore.FieldValue.serverTimestamp(),
             verificationMethod: 'simulated'
           });
         }
@@ -922,10 +925,10 @@ function formatName(input) {
         // Actualizar UI
         document.getElementById('veriff-loading-icon').classList.add('hidden');
         document.getElementById('veriff-success-icon').classList.remove('hidden');
-        document.getElementById('veriff-status').textContent = '✅ Verificación completada';
-        document.getElementById('veriff-details').textContent = 'Identidad verificada exitosamente';
+        document.getElementById('veriff-status').textContent = '✅ Documentos enviados';
+        document.getElementById('veriff-details').textContent = 'Tu verificación está en revisión';
         
-        showStatus('✅ ¡Identidad verificada exitosamente! (simulación)', 'success');
+        showStatus('✅ Documentos enviados. Tu verificación está en revisión.', 'success');
         
       } catch (error) {
         console.error('Error en simulación:', error);
@@ -948,7 +951,7 @@ function formatName(input) {
         document.getElementById('review-name').textContent = document.getElementById('fullName').value;
         document.getElementById('review-profession').textContent = document.getElementById('profession').value;
         document.getElementById('review-rate').textContent = '$' + (document.getElementById('hourly-rate').value || '250') + ' MXN/hora';
-        document.getElementById('review-verification').textContent = verificationCompleted ? '✅ Verificado' : '❌ Pendiente';
+        document.getElementById('review-verification').textContent = verificationCompleted ? '⏳ Documentos enviados (en revisión)' : '❌ Pendiente';
       }
     }
     
@@ -1005,7 +1008,10 @@ function formatName(input) {
           hourlyRate: parseInt(document.getElementById('hourly-rate').value) || 250,
           veriffSessionId: veriffSessionId,
           verificationDate: new Date().toISOString(),
-          verified: true,
+          // ⚠️ verified queda en false. El único que puede ponerlo
+          // en true es functions/veriff-webhook.js (backend).
+          verified: false,
+          verificationStatus: 'pending',
           status: 'pending',
           stripeConnected: false,
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),

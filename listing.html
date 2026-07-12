@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profesionales – COLMENA HUB</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <style>
+    .professional-card { transition: all 0.3s ease; border-left: 4px solid transparent; }
+    .professional-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+    .verified-badge::before { content: '✓'; position: absolute; left: 0; top: 0; width: 16px; height: 16px; background: #10B981; color: white; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+    .verified-badge { position: relative; padding-left: 20px; }
+    .filter-pill { transition: all 0.2s; cursor: pointer; }
+    .filter-pill.active { background: #FBBF24; color: white; }
+    .status-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; padding: 10px 20px; text-align: center; font-size: 14px; display: none; }
+    .status-bar.visible { display: block; }
+    .status-bar.success { background: #10B981; color: white; }
+    .status-bar.error { background: #EF4444; color: white; }
+    .status-bar.warning { background: #F59E0B; color: white; }
+  </style>
+</head>
+<body>
+  <div id="statusBar" class="status-bar"><span id="statusText"></span></div>
+
+  <header class="bg-white shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <a href="index.html" class="flex items-center space-x-3"><div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center"><i class="fas fa-bee text-white"></i></div><span class="text-lg font-bold">COLMENA HUB</span></a>
+      <a href="apply.html" class="text-sm text-amber-600 hover:text-amber-700"><i class="fas fa-user-plus mr-1"></i>Regístrate</a>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    <div class="mb-8">
+      <h1 id="category-header" class="text-3xl font-bold text-gray-900 mb-2">Cargando...</h1>
+      <p id="category-description" class="text-gray-600">Buscando profesionales verificados...</p>
+      <div class="mt-6 bg-white rounded-xl p-4 shadow-sm"><div class="relative"><i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i><input type="text" id="search" placeholder="Buscar por nombre..." class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:border-amber-300 focus:ring-2 focus:ring-amber-200 outline-none"></div></div>
+    </div>
+
+    <div id="professionals-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+    <div id="no-results" class="hidden text-center py-12"><i class="fas fa-search text-4xl text-gray-300 mb-4"></i><h3 class="text-xl font-bold text-gray-600">No hay profesionales verificados</h3><p class="text-gray-500 mt-2">Sé el primero en registrarte</p><a href="apply.html" class="inline-block mt-6 bg-amber-500 text-white px-6 py-3 rounded-lg font-medium">Regístrate ahora</a></div>
+  </main>
+
+  <footer class="bg-gray-50 border-t mt-12"><div class="max-w-7xl mx-auto px-4 py-8 text-center"><p class="text-gray-400 text-sm">© 2025 COLMENA HUB</p></div></footer>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const category = urlParams.get('category') || '';
+    const type     = urlParams.get('type') === 'intern' ? 'intern' : 'professional';
+    const collectionName = type === 'intern' ? 'interns' : 'professionals';
+    let allProfessionals = [];
+    let currentSearch = '';
+
+    function showStatus(message, type = 'info') {
+      const bar = document.getElementById('statusBar');
+      const text = document.getElementById('statusText');
+      if (!bar) return;
+      bar.className = `status-bar ${type === 'success' ? 'success' : type === 'error' ? 'error' : 'warning'} visible`;
+      text.textContent = message;
+      setTimeout(() => bar.classList.remove('visible'), 3000);
+    }
+
+    document.getElementById('category-header').textContent = category || 'Profesionales';
+
+    async function loadProfessionals() {
+      if (!category) { document.getElementById('professionals-list').innerHTML = '<div class="col-span-full text-center py-12 text-gray-500">Categoría no especificada</div>'; return; }
+      try {
+        const snap = await DB.collection(collectionName).where('profession', '==', category).where('verified', '==', true).get();
+        allProfessionals = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderProfessionals();
+      } catch (e) { showStatus('Error al cargar profesionales', 'error'); console.error(e); }
+    }
+
+    function renderProfessionals() {
+      const container = document.getElementById('professionals-list');
+      const noResults = document.getElementById('no-results');
+      let filtered = allProfessionals;
+      if (currentSearch) filtered = allProfessionals.filter(p => p.fullName?.toLowerCase().includes(currentSearch));
+      if (filtered.length === 0) { container.innerHTML = ''; noResults.classList.remove('hidden'); return; }
+      noResults.classList.add('hidden');
+      container.innerHTML = filtered.map(p => `
+        <div class="professional-card bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+          <div class="flex items-start mb-4">
+            <div class="w-16 h-16 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 flex items-center justify-center text-white text-2xl font-bold">${(p.fullName?.[0] || 'U').toUpperCase()}</div>
+            <div class="ml-4 flex-1"><h3 class="font-bold text-gray-900 text-lg">${p.fullName || 'Sin nombre'}</h3><p class="text-sm text-gray-600">${p.profession}</p><div class="flex items-center mt-2"><span class="verified-badge text-xs text-green-600">${type === 'intern' ? 'Becario Verificado' : 'Verificado'}</span></div></div>
+          </div>
+          <div class="mb-4"><p class="text-gray-700 text-sm">${p.description || `Profesional especializado en ${p.profession}`}</p></div>
+          <div class="flex flex-wrap gap-2 mb-4"><span class="inline-flex items-center text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full"><i class="fas fa-dollar-sign mr-1"></i>$${p.hourlyRate || 250}/hora</span></div>
+          <div class="flex space-x-3"><a href="profile-view.html?id=${p.id}&type=${type}" class="flex-1 bg-amber-500 text-white text-center py-2 rounded-lg font-medium hover:bg-amber-600">Ver Perfil</a><button onclick="contactProfessional('${p.id}', '${(p.fullName || '').replace(/'/g, "\\'")}')" class="flex-1 border border-amber-500 text-amber-600 py-2 rounded-lg font-medium hover:bg-amber-50">Contactar</button></div>
+        </div>`).join('');
+    }
+
+    function contactProfessional(id, name) { if (!Auth.currentUser) { if(confirm('Inicia sesión para contactar profesionales')) window.location.href='index.html'; return; } alert(`📧 Mensaje enviado a ${name}. Te contactarán pronto.`); }
+
+    document.getElementById('search').addEventListener('input', e => { currentSearch = e.target.value.toLowerCase().trim(); renderProfessionals(); });
+    document.addEventListener('DOMContentLoaded', loadProfessionals);
+  </script>
+</body>
+</html>

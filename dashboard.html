@@ -62,7 +62,7 @@
                 <!-- Logo -->
                 <div class="flex items-center">
                     <a href="index.html" class="flex items-center space-x-2">
-                        <img src="colmena-hubLOGO" alt="COLMENA-HUB Logo" class="h-10 w-auto">
+                        <img src="colmena-hubLOGO.png" alt="COLMENA-HUB Logo" class="h-10 w-auto">
                         <span class="font-bold text-xl text-gray-800">COLMENA-HUB</span>
                     </a>
                 </div>
@@ -235,7 +235,7 @@
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500">Ingresos del mes</p>
-                                    <p class="text-2xl font-bold">$<span id="monthlyIncome">2,850</span></p>
+                                    <p class="text-2xl font-bold">$<span id="monthlyIncome">0</span></p>
                                 </div>
                             </div>
                         </div>
@@ -373,57 +373,69 @@
 
                 <!-- ESTADÍSTICAS -->
                 <div id="statsSection" class="content-section hidden">
-                    <div class="bg-white rounded-lg shadow p-4">
+                    <div class="bg-white rounded-lg shadow p-4 mb-6">
                         <h2 class="text-xl font-bold text-gray-800 mb-4">Mis Estadísticas</h2>
-                        
-                        <!-- Gráfico de actividad (simulado) -->
-                        <div class="mb-8">
-                            <h3 class="font-bold mb-3 text-gray-800">Actividad mensual</h3>
-                            <div class="h-64 flex items-end space-x-2 border-b border-l p-4">
-                                <!-- Barras del gráfico se generan dinámicamente -->
-                                <div class="text-center">
-                                    <div class="bg-blue-500 w-10 mx-auto rounded-t-md" style="height: 150px;"></div>
-                                    <div class="text-xs mt-1">Ene</div>
-                                </div>
-                                <!-- Más meses... -->
+
+                        <!-- Tarjetas resumen -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+                            <div class="bg-blue-50 rounded-xl p-4 text-center">
+                                <div class="text-2xl font-bold text-blue-700" id="stat-total-jobs">—</div>
+                                <div class="text-xs text-blue-500 mt-1">Trabajos totales</div>
+                            </div>
+                            <div class="bg-green-50 rounded-xl p-4 text-center">
+                                <div class="text-2xl font-bold text-green-700" id="stat-total-earnings">—</div>
+                                <div class="text-xs text-green-500 mt-1">Ingresos totales MXN</div>
+                            </div>
+                            <div class="bg-yellow-50 rounded-xl p-4 text-center">
+                                <div class="text-2xl font-bold text-yellow-700" id="stat-acceptance">—</div>
+                                <div class="text-xs text-yellow-500 mt-1">Tasa de aceptación</div>
+                            </div>
+                            <div class="bg-purple-50 rounded-xl p-4 text-center">
+                                <div class="text-2xl font-bold text-purple-700" id="stat-recurring">—</div>
+                                <div class="text-xs text-purple-500 mt-1">Clientes recurrentes</div>
                             </div>
                         </div>
-                        
+
+                        <!-- Gráfico de citas por mes (últimos 6 meses) -->
+                        <div class="mb-8">
+                            <h3 class="font-bold mb-3 text-gray-800">Citas por mes — últimos 6 meses</h3>
+                            <div id="monthly-chart"
+                                 class="h-48 flex items-end gap-2 border-b border-l border-gray-200 px-2 pb-0">
+                                <div class="text-center text-gray-400 text-sm m-auto">
+                                    <i class="fas fa-spinner fa-spin"></i> Cargando...
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Métricas de rendimiento -->
                             <div>
                                 <h3 class="font-bold mb-3 text-gray-800">Métricas de rendimiento</h3>
-                                <div class="space-y-4">
+                                <div class="space-y-3" id="performance-metrics">
                                     <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
-                                        <span>Tiempo promedio de respuesta</span>
-                                        <span class="font-bold">2.3 horas</span>
+                                        <span class="text-sm">Tasa de aceptación</span>
+                                        <span class="font-bold" id="metric-acceptance">—</span>
                                     </div>
                                     <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
-                                        <span>Tasa de aceptación</span>
-                                        <span class="font-bold">87%</span>
+                                        <span class="text-sm">Trabajos completados</span>
+                                        <span class="font-bold" id="metric-completed">—</span>
                                     </div>
                                     <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
-                                        <span>Clientes recurrentes</span>
-                                        <span class="font-bold">42%</span>
+                                        <span class="text-sm">Clientes únicos</span>
+                                        <span class="font-bold" id="metric-unique-clients">—</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                                        <span class="text-sm">Ingreso promedio por cita</span>
+                                        <span class="font-bold" id="metric-avg-income">—</span>
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <!-- Mejores clientes -->
                             <div>
                                 <h3 class="font-bold mb-3 text-gray-800">Mejores clientes</h3>
-                                <div class="space-y-3">
-                                    <div class="flex items-center p-3 bg-gray-50 rounded">
-                                        <div class="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                                            <i class="fas fa-user text-blue-500"></i>
-                                        </div>
-                                        <div class="flex-grow">
-                                            <p class="font-medium">María González</p>
-                                            <p class="text-sm text-gray-500">5 contratos</p>
-                                        </div>
-                                        <div class="text-green-600 font-bold">$1,250</div>
-                                    </div>
-                                    <!-- Más clientes... -->
+                                <div id="top-clients-list" class="space-y-2">
+                                    <p class="text-gray-400 text-sm italic">Cargando...</p>
                                 </div>
                             </div>
                         </div>
@@ -572,22 +584,11 @@
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/es.js'></script>
     
-    <!-- Firebase Config -->
+    <!-- Firebase Config centralizada -->
+    <script src="firebase-config.js"></script>
     <script>
-        // Configuración de Firebase (usa tu configuración real)
-        const firebaseConfig = {
-            apiKey: "TU_API_KEY",
-            authDomain: "TU_AUTH_DOMAIN",
-            projectId: "TU_PROJECT_ID",
-            storageBucket: "TU_STORAGE_BUCKET",
-            messagingSenderId: "TU_SENDER_ID",
-            appId: "TU_APP_ID"
-        };
-        
-        // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        const auth = Auth;
+        const db   = DB;
     </script>
     
     <!-- Script principal del dashboard -->
@@ -614,99 +615,196 @@
                 }
             });
             
-            // Inicializar FullCalendar
+            // ── FullCalendar con eventos reales de Firestore ──────────
             function initializeCalendar() {
                 const calendarEl = document.getElementById('calendar');
-                
+
                 calendar = new FullCalendar.Calendar(calendarEl, {
                     initialView: 'timeGridWeek',
                     locale: 'es',
                     headerToolbar: {
-                        left: 'prev,next today',
+                        left:   'prev,next today',
                         center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                        right:  'dayGridMonth,timeGridWeek,timeGridDay'
                     },
                     slotMinTime: '08:00:00',
                     slotMaxTime: '22:00:00',
-                    events: [
-                        // Eventos se cargarán dinámicamente desde Firebase
-                        {
-                            title: 'Sesión de fotos - María González',
-                            start: new Date(new Date().setHours(10, 0, 0)),
-                            end: new Date(new Date().setHours(12, 0, 0)),
-                            color: '#10B981',
-                            extendedProps: {
-                                type: 'appointment',
-                                status: 'confirmed',
-                                client: 'María González',
-                                service: 'Sesión de fotos profesional'
-                            }
-                        },
-                        // Más eventos...
-                    ],
-                    eventClick: function(info) {
-                        showEventDetails(info.event);
+
+                    // Carga dinámica desde Firestore según el rango visible
+                    events: async function(fetchInfo, successCallback, failureCallback) {
+                        try {
+                            const snap = await db.collection('appointments')
+                                .where('professionalId', '==', currentUser.uid)
+                                .where('startTime', '>=', fetchInfo.start)
+                                .where('startTime', '<=', fetchInfo.end)
+                                .get();
+
+                            const colorMap = {
+                                confirmed: '#10B981',
+                                pending:   '#F59E0B',
+                                cancelled: '#EF4444'
+                            };
+
+                            const events = snap.docs.map(doc => {
+                                const d = doc.data();
+                                return {
+                                    id:    doc.id,
+                                    title: `${d.serviceName || 'Cita'} — ${d.clientName || ''}`,
+                                    start: d.startTime?.toDate ? d.startTime.toDate() : d.startTime,
+                                    end:   d.endTime?.toDate   ? d.endTime.toDate()   : d.endTime,
+                                    color: colorMap[d.status] || '#6B7280',
+                                    extendedProps: {
+                                        status:  d.status,
+                                        client:  d.clientName,
+                                        service: d.serviceName,
+                                        message: d.message,
+                                        docId:   doc.id
+                                    }
+                                };
+                            });
+
+                            successCallback(events);
+                        } catch (err) {
+                            console.error('Error cargando eventos del calendario:', err);
+                            failureCallback(err);
+                        }
                     },
+
+                    eventClick: function(info) { showEventDetails(info.event); },
+
                     dateClick: function(info) {
-                        // Aquí podrías abrir un modal para agregar disponibilidad manual
-                        console.log('Fecha clickeada:', info.dateStr);
+                        // Abrir modal de disponibilidad manual (Parte 2)
+                        showNotification('Seleccionaste ' + info.dateStr, 'info');
                     }
                 });
-                
+
                 calendar.render();
             }
             
-            // Cargar datos del usuario desde Firestore
+            // ── Datos reales del profesional desde Firestore ──────────
             async function loadUserData() {
                 if (!currentUser) return;
-                
                 try {
-                    const userDoc = await db.collection('users').doc(currentUser.uid).get();
-                    
-                    if (userDoc.exists) {
-                        const userData = userDoc.data();
-                        
-                        // Actualizar UI con datos del usuario
-                        document.getElementById('ratingScore').textContent = userData.rating || '4.5';
-                        document.getElementById('punctualityScore').textContent = (userData.punctuality || '95') + '%';
-                        document.getElementById('completionScore').textContent = (userData.completionRate || '98') + '%';
-                        document.getElementById('responseScore').textContent = (userData.responseRate || '89') + '%';
-                        document.getElementById('currentRanking').textContent = userData.ranking || '12';
-                        document.getElementById('monthlyIncome').textContent = userData.monthlyIncome || '2,850';
+                    // Leer perfil profesional
+                    const profDoc = await db.collection('professionals').doc(currentUser.uid).get();
+                    if (profDoc.exists) {
+                        const p = profDoc.data();
+
+                        // Reputación
+                        const rating = p.rating || 0;
+                        document.getElementById('ratingScore').textContent =
+                            rating ? rating.toFixed(1) : '—';
+                        document.getElementById('punctualityScore').textContent =
+                            (p.punctuality || 0) + '%';
+                        document.getElementById('completionScore').textContent =
+                            (p.completionRate || 0) + '%';
+                        document.getElementById('responseScore').textContent =
+                            (p.responseRate || 0) + '%';
+
+                        // Actualizar barras de progreso
+                        ['punctuality','completionRate','responseRate'].forEach((key, i) => {
+                            const ids = ['punctualityScore','completionScore','responseScore'];
+                            const bars = document.querySelectorAll('.bg-green-500.h-2, .bg-blue-500.h-2, .bg-purple-500.h-2');
+                            if (bars[i]) bars[i].style.width = (p[key] || 0) + '%';
+                        });
+
+                        // Stats superiores
+                        document.getElementById('currentRanking').textContent =
+                            p.ranking || '—';
                     }
+
+                    // Ingresos del mes actual
+                    const now       = new Date();
+                    const startMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                    const paymentsSnap = await db.collection('payments')
+                        .where('professionalId', '==', currentUser.uid)
+                        .where('status', '==', 'succeeded')
+                        .where('createdAt', '>=', startMonth)
+                        .get();
+
+                    let monthTotal = 0;
+                    paymentsSnap.forEach(doc => { monthTotal += doc.data().amount * 0.90; });
+                    document.getElementById('monthlyIncome').textContent =
+                        monthTotal.toLocaleString('es-MX', { minimumFractionDigits: 0 });
+
+                    // Horas programadas esta semana
+                    const weekStart = new Date();
+                    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekEnd.getDate() + 7);
+
+                    const weekSnap = await db.collection('appointments')
+                        .where('professionalId', '==', currentUser.uid)
+                        .where('status', '==', 'confirmed')
+                        .where('startTime', '>=', weekStart)
+                        .where('startTime', '<=', weekEnd)
+                        .get();
+
+                    let totalHours = 0;
+                    weekSnap.forEach(doc => {
+                        const d = doc.data();
+                        if (d.startTime && d.endTime) {
+                            const s = d.startTime.toDate ? d.startTime.toDate() : new Date(d.startTime);
+                            const e = d.endTime.toDate   ? d.endTime.toDate()   : new Date(d.endTime);
+                            totalHours += (e - s) / 3600000;
+                        }
+                    });
+                    document.getElementById('scheduledHours').textContent =
+                        totalHours ? totalHours.toFixed(1) : '0';
+
                 } catch (error) {
-                    console.error('Error cargando datos del usuario:', error);
+                    console.error('Error cargando datos del profesional:', error);
                 }
             }
             
-            // Cargar citas desde Firebase
+            // ── Citas reales desde Firestore ──────────────────────────
             async function loadAppointments() {
                 if (!currentUser) return;
-                
+                const container = document.getElementById('upcomingAppointments');
+                container.innerHTML = `<div class="text-center py-8 text-gray-400">
+                    <i class="fas fa-spinner fa-spin text-2xl mb-2"></i><p>Cargando citas...</p></div>`;
+
                 try {
-                    // Simulación de carga de citas
-                    const appointments = [
-                        {
-                            id: '1',
-                            client: 'María González',
-                            service: 'Sesión de fotos profesional',
-                            date: new Date(new Date().setDate(new Date().getDate() + 1)),
-                            time: '10:00 - 12:00',
-                            status: 'confirmed'
-                        },
-                        {
-                            id: '2',
-                            client: 'Carlos Ruiz',
-                            service: 'Diseño de logotipo',
-                            date: new Date(new Date().setDate(new Date().getDate() + 2)),
-                            time: '14:00 - 16:00',
-                            status: 'pending'
-                        }
-                    ];
-                    
+                    const now  = new Date();
+                    const snap = await db.collection('appointments')
+                        .where('professionalId', '==', currentUser.uid)
+                        .where('startTime', '>=', now)
+                        .orderBy('startTime', 'asc')
+                        .limit(10)
+                        .get();
+
+                    const appointments = snap.docs.map(doc => {
+                        const d   = doc.data();
+                        const start = d.startTime?.toDate ? d.startTime.toDate() : new Date(d.startTime);
+                        const end   = d.endTime?.toDate   ? d.endTime.toDate()   : new Date(d.endTime);
+                        return {
+                            id:      doc.id,
+                            client:  d.clientName  || 'Cliente',
+                            service: d.serviceName || 'Servicio',
+                            date:    start,
+                            time:    `${start.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})} – ${end.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})}`,
+                            status:  d.status,
+                            message: d.message || ''
+                        };
+                    });
+
                     displayAppointments(appointments);
+
+                    // Actualizar contador de citas confirmadas esta semana
+                    const weekEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+                    const weekCount = appointments.filter(a =>
+                        a.date >= now && a.date <= weekEnd && a.status === 'confirmed'
+                    ).length;
+                    document.getElementById('weeklyAppointments').textContent = weekCount;
+
+                    // Refrescar el calendario
+                    if (calendar) calendar.refetchEvents();
+
                 } catch (error) {
                     console.error('Error cargando citas:', error);
+                    container.innerHTML = `<div class="text-center py-8 text-red-400">
+                        <i class="fas fa-exclamation-circle text-2xl mb-2"></i>
+                        <p>Error al cargar citas. Recarga la página.</p></div>`;
                 }
             }
             
@@ -783,35 +881,37 @@
                 document.getElementById('weeklyAppointments').textContent = weeklyCount;
             }
             
-            // Cargar solicitudes desde Firebase
-            async function loadRequests() {
+            // ── Solicitudes reales con listener en tiempo real ────────
+            function loadRequests() {
                 if (!currentUser) return;
-                
-                // Simulación de solicitudes
-                const requests = [
-                    {
-                        id: '1',
-                        client: 'Ana Martínez',
-                        service: 'Clases de guitarra',
-                        date: '2024-02-15',
-                        time: '16:00 - 18:00',
-                        message: 'Hola, me gustaría tomar clases los jueves por la tarde',
-                        status: 'pending',
-                        timestamp: new Date()
-                    },
-                    {
-                        id: '2',
-                        client: 'Roberto Sánchez',
-                        service: 'Reparación de computadora',
-                        date: '2024-02-16',
-                        time: '11:00 - 13:00',
-                        message: 'Mi laptop no enciende, necesito ayuda urgente',
-                        status: 'pending',
-                        timestamp: new Date(Date.now() - 3600000)
-                    }
-                ];
-                
-                displayRequests(requests);
+
+                db.collection('appointments')
+                    .where('professionalId', '==', currentUser.uid)
+                    .where('status', 'in', ['pending', 'confirmed', 'rejected'])
+                    .orderBy('createdAt', 'desc')
+                    .limit(30)
+                    .onSnapshot(snap => {
+                        allRequests = snap.docs.map(doc => {
+                            const d = doc.data();
+                            return {
+                                id:        doc.id,
+                                client:    d.clientName  || 'Cliente',
+                                service:   d.serviceName || 'Servicio',
+                                date:      d.startTime?.toDate
+                                           ? d.startTime.toDate().toLocaleDateString('es-MX')
+                                           : '—',
+                                time:      d.startTime?.toDate
+                                           ? d.startTime.toDate().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})
+                                           : '—',
+                                message:   d.message || '',
+                                status:    d.status,
+                                timestamp: d.createdAt?.toDate ? d.createdAt.toDate() : new Date()
+                            };
+                        });
+                        displayRequests(allRequests);
+                    }, err => {
+                        console.error('Error escuchando solicitudes:', err);
+                    });
             }
             
             // Mostrar solicitudes en la UI
@@ -988,20 +1088,34 @@
                 document.getElementById('eventModal').classList.remove('hidden');
             }
             
-            // Aceptar solicitud
+            // ── Aceptar solicitud en Firestore ────────────────────────
             async function acceptRequest(requestId) {
-                // Aquí iría la lógica para aceptar la solicitud en Firebase
-                showNotification('Solicitud aceptada correctamente', 'success');
-                // Recargar solicitudes
-                loadRequests();
+                try {
+                    await db.collection('appointments').doc(requestId).update({
+                        status:    'confirmed',
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    showNotification('✅ Solicitud aceptada', 'success');
+                    loadAppointments();   // refrescar citas y calendario
+                } catch (err) {
+                    console.error('Error aceptando solicitud:', err);
+                    showNotification('Error al aceptar. Intenta de nuevo.', 'error');
+                }
             }
-            
-            // Rechazar solicitud
+
+            // ── Rechazar solicitud en Firestore ───────────────────────
             async function rejectRequest(requestId) {
-                // Aquí iría la lógica para rechazar la solicitud en Firebase
-                showNotification('Solicitud rechazada', 'info');
-                // Recargar solicitudes
-                loadRequests();
+                if (!confirm('¿Seguro que quieres rechazar esta solicitud?')) return;
+                try {
+                    await db.collection('appointments').doc(requestId).update({
+                        status:    'rejected',
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    showNotification('Solicitud rechazada', 'info');
+                } catch (err) {
+                    console.error('Error rechazando solicitud:', err);
+                    showNotification('Error al rechazar. Intenta de nuevo.', 'error');
+                }
             }
             
             // Mostrar notificación
@@ -1028,43 +1142,181 @@
                 }, 3000);
             }
             
-            // ========== EVENT LISTENERS ==========
+            // ── Estadísticas reales desde Firestore ──────────────────
+            async function loadStats() {
+                if (!currentUser) return;
+                try {
+                    // Todos los pagos exitosos del profesional
+                    const paymentsSnap = await db.collection('payments')
+                        .where('professionalId', '==', currentUser.uid)
+                        .where('status', '==', 'succeeded')
+                        .orderBy('createdAt', 'asc')
+                        .get();
+
+                    // Todas las citas
+                    const apptSnap = await db.collection('appointments')
+                        .where('professionalId', '==', currentUser.uid)
+                        .get();
+
+                    const payments   = paymentsSnap.docs.map(d => d.data());
+                    const appts      = apptSnap.docs.map(d => d.data());
+                    const confirmed  = appts.filter(a => a.status === 'confirmed' || a.status === 'completed');
+                    const rejected   = appts.filter(a => a.status === 'rejected');
+                    const totalJobs  = confirmed.length;
+                    const totalEarnings = payments.reduce((s, p) => s + (p.amount * 0.90), 0);
+
+                    // Tasa de aceptación
+                    const acceptRate = appts.length
+                        ? Math.round((confirmed.length / appts.length) * 100) : 0;
+
+                    // Clientes únicos y recurrentes
+                    const clientCount = {};
+                    confirmed.forEach(a => {
+                        if (a.clientId) clientCount[a.clientId] = (clientCount[a.clientId] || 0) + 1;
+                    });
+                    const uniqueClients    = Object.keys(clientCount).length;
+                    const recurringClients = Object.values(clientCount).filter(c => c > 1).length;
+                    const recurringPct     = uniqueClients
+                        ? Math.round((recurringClients / uniqueClients) * 100) : 0;
+
+                    // Ingreso promedio por cita
+                    const avgIncome = totalJobs
+                        ? (totalEarnings / totalJobs).toLocaleString('es-MX', { minimumFractionDigits: 0 }) : '0';
+
+                    // ── Poblar tarjetas resumen ──
+                    document.getElementById('stat-total-jobs').textContent     = totalJobs;
+                    document.getElementById('stat-total-earnings').textContent =
+                        '$' + totalEarnings.toLocaleString('es-MX', { minimumFractionDigits: 0 });
+                    document.getElementById('stat-acceptance').textContent     = acceptRate + '%';
+                    document.getElementById('stat-recurring').textContent      = recurringPct + '%';
+
+                    // ── Poblar métricas ──
+                    document.getElementById('metric-acceptance').textContent      = acceptRate + '%';
+                    document.getElementById('metric-completed').textContent       = totalJobs;
+                    document.getElementById('metric-unique-clients').textContent  = uniqueClients;
+                    document.getElementById('metric-avg-income').textContent      = '$' + avgIncome + ' MXN';
+
+                    // ── Gráfico de barras: citas por mes últimos 6 meses ──
+                    const monthLabels = [];
+                    const monthCounts = {};
+                    for (let i = 5; i >= 0; i--) {
+                        const d   = new Date();
+                        d.setDate(1);
+                        d.setMonth(d.getMonth() - i);
+                        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                        const lbl = d.toLocaleString('es-MX', { month: 'short' });
+                        monthLabels.push({ key, lbl });
+                        monthCounts[key] = 0;
+                    }
+                    confirmed.forEach(a => {
+                        const ts = a.startTime?.toDate ? a.startTime.toDate() : new Date(a.startTime);
+                        if (!ts) return;
+                        const key = `${ts.getFullYear()}-${String(ts.getMonth() + 1).padStart(2, '0')}`;
+                        if (monthCounts[key] !== undefined) monthCounts[key]++;
+                    });
+                    const maxCount = Math.max(...Object.values(monthCounts), 1);
+                    const chartEl  = document.getElementById('monthly-chart');
+                    chartEl.innerHTML = monthLabels.map(({ key, lbl }) => {
+                        const val = monthCounts[key];
+                        const pct = Math.round((val / maxCount) * 100);
+                        const h   = Math.max(pct * 1.6, 4); // px, mínimo 4px
+                        return `
+                          <div class="flex-1 flex flex-col items-center justify-end gap-1">
+                            <span class="text-xs font-bold text-blue-700">${val || ''}</span>
+                            <div class="w-full bg-blue-500 rounded-t-md transition-all"
+                                 style="height:${h}px;min-height:4px"></div>
+                            <span class="text-xs text-gray-500">${lbl}</span>
+                          </div>`;
+                    }).join('');
+
+                    // ── Mejores clientes (top 5 por número de citas) ──
+                    const topClients = Object.entries(clientCount)
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 5);
+
+                    if (topClients.length === 0) {
+                        document.getElementById('top-clients-list').innerHTML =
+                            '<p class="text-gray-400 text-sm italic">Aún no tienes clientes.</p>';
+                        return;
+                    }
+
+                    // Buscar nombres reales en Firestore
+                    const clientNames = {};
+                    await Promise.all(topClients.map(async ([uid]) => {
+                        try {
+                            const snap = await db.collection('users').doc(uid).get();
+                            clientNames[uid] = snap.exists
+                                ? (snap.data().displayName || snap.data().email || uid)
+                                : 'Cliente';
+                        } catch { clientNames[uid] = 'Cliente'; }
+                    }));
+
+                    document.getElementById('top-clients-list').innerHTML = topClients.map(([uid, count]) => `
+                        <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                            <div class="h-9 w-9 bg-amber-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                <i class="fas fa-user text-amber-600 text-sm"></i>
+                            </div>
+                            <div class="flex-grow min-w-0">
+                                <p class="font-medium text-sm truncate">${clientNames[uid]}</p>
+                                <p class="text-xs text-gray-500">${count} ${count === 1 ? 'cita' : 'citas'}</p>
+                            </div>
+                        </div>`).join('');
+
+                } catch (err) {
+                    console.error('Error cargando estadísticas:', err);
+                    showNotification('Error al cargar estadísticas', 'error');
+                }
+            }
+
+            // ── Cargar disponibilidad guardada al abrir pestaña ───────
+            async function loadSavedAvailability() {
+                if (!currentUser) return;
+                try {
+                    const doc = await db.collection('professionals').doc(currentUser.uid).get();
+                    if (!doc.exists || !doc.data().availability) return;
+                    const saved = doc.data().availability;
+                    const days  = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+                    days.forEach(day => {
+                        const s = saved[day];
+                        if (!s) return;
+                        const chk = document.getElementById(`available-${day}`);
+                        if (chk) chk.checked = s.available !== false;
+                        const inputs = document.querySelectorAll(
+                            `#weeklySchedule div[data-day="${day}"] input[type="time"]`
+                        );
+                        if (inputs[0] && s.start) inputs[0].value = s.start;
+                        if (inputs[1] && s.end)   inputs[1].value = s.end;
+                    });
+                } catch (err) { console.error('Error cargando disponibilidad:', err); }
+            }
             
-            // Navegación entre pestañas del sidebar
+            // ── Navegación del sidebar con hooks por pestaña ──────────
             document.querySelectorAll('.sidebar-item').forEach(item => {
                 item.addEventListener('click', function(e) {
                     e.preventDefault();
-                    
-                    // Remover clase active de todos
-                    document.querySelectorAll('.sidebar-item').forEach(i => {
-                        i.classList.remove('active');
-                    });
-                    
-                    // Añadir clase active al elemento clickeado
+                    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                     this.classList.add('active');
-                    
-                    // Ocultar todas las secciones
-                    document.querySelectorAll('.content-section').forEach(section => {
-                        section.classList.add('hidden');
-                    });
-                    
-                    // Mostrar la sección correspondiente
+                    document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
+
                     const sectionMap = {
-                        'tabDashboard': 'calendarSection',
-                        'tabRequests': 'requestsSection',
+                        'tabDashboard':    'calendarSection',
+                        'tabRequests':     'requestsSection',
                         'tabAvailability': 'availabilitySection',
-                        'tabStats': 'statsSection',
-                        'tabSync': 'syncSection'
+                        'tabStats':        'statsSection',
+                        'tabSync':         'syncSection'
                     };
-                    
+
                     const sectionId = sectionMap[this.id];
-                    if (sectionId) {
-                        document.getElementById(sectionId).classList.remove('hidden');
-                        currentSection = sectionId;
-                    }
+                    if (!sectionId) return;
+                    document.getElementById(sectionId).classList.remove('hidden');
+                    currentSection = sectionId;
+
+                    // Cargar datos al abrir pestaña por primera vez
+                    if (sectionId === 'statsSection')        loadStats();
+                    if (sectionId === 'availabilitySection') loadSavedAvailability();
                 });
             });
-            
+
             // Filtros de solicitudes
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -1144,10 +1396,40 @@
                 showNotification('Excepción agregada', 'success');
             });
             
-            // Botón para guardar disponibilidad
-            document.getElementById('saveAvailabilityBtn').addEventListener('click', function() {
-                // Aquí iría la lógica para guardar la disponibilidad en Firebase
-                showNotification('Disponibilidad guardada correctamente', 'success');
+            // ── Guardar disponibilidad en Firestore ───────────────────
+            document.getElementById('saveAvailabilityBtn').addEventListener('click', async function() {
+                if (!currentUser) return;
+                const btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Guardando...';
+
+                try {
+                    // Recoger horarios del formulario
+                    const days    = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+                    const schedule = {};
+                    days.forEach(day => {
+                        const chk   = document.getElementById(`available-${day}`);
+                        const times = document.querySelectorAll(`#weeklySchedule [id^="available-${day}"] ~ div input[type="time"]`);
+                        schedule[day] = {
+                            available: chk ? chk.checked : true,
+                            start:     times[0]?.value || '09:00',
+                            end:       times[1]?.value || '18:00'
+                        };
+                    });
+
+                    await db.collection('professionals').doc(currentUser.uid).set(
+                        { availability: schedule, availabilityUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() },
+                        { merge: true }
+                    );
+
+                    showNotification('✅ Disponibilidad guardada', 'success');
+                } catch (err) {
+                    console.error('Error guardando disponibilidad:', err);
+                    showNotification('Error al guardar. Intenta de nuevo.', 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-save mr-2"></i>Guardar disponibilidad';
+                }
             });
             
             // Botones de sincronización de calendarios (simulación)

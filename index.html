@@ -45,20 +45,20 @@
     .status-bar.error { background-color: #EF4444; color: white; }
     .status-bar.warning { background-color: #F59E0B; color: white; }
   </style>
-
+ 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
-
+ 
   <!-- Veriff SDK -->
   <script src="https://cdn.veriff.me/v2/veriff.js"></script>
-
+ 
   <!-- Cargar veriff-working.js si existe -->
   <script src="veriff-working.js"></script>
 </head>
-
+ 
 <body class="min-h-screen bg-offwhite flex flex-col">
   
   <!-- Barra de estado superior (mejora nueva) -->
@@ -66,7 +66,7 @@
     <i id="statusIcon" class="fas fa-spinner fa-spin mr-2"></i>
     <span id="statusText">Cargando...</span>
   </div>
-
+ 
   <!-- Contenido principal -->
   <main class="flex-grow flex flex-col items-center justify-center px-4 py-12 space-y-10">
     
@@ -85,7 +85,7 @@
     
     <!-- Subtítulo debajo -->
     <p class="text-lg text-gray-600 text-center">QUIERO</p>
-
+ 
     <!-- Hexágonos -->
     <div class="flex flex-col md:flex-row items-center justify-center gap-8">
       <a href="professional-type.html"
@@ -94,7 +94,7 @@
          style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
         CONTRATAR
       </a>
-
+ 
       <a href="apply.html"
          class="relative w-48 h-52 flex items-center justify-center text-white font-bold text-xl
                 bg-yellow-500 shadow-lg hover:bg-yellow-600 transition-all duration-300"
@@ -102,7 +102,7 @@
         SER CONTRATADO
       </a>
     </div>
-
+ 
     <!-- Botón con logo de Google (POPUP sin redirigir) -->
     <button id="btnGoogle" class="mt-6 px-5 py-2.5 bg-white text-gray-700 rounded-md border border-gray-300 hover:bg-gray-50 transition inline-flex items-center justify-center gap-2">
       <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
@@ -110,7 +110,7 @@
            alt="Google">
       <span class="inline-block align-middle text-sm">Ingresar con Google</span>
     </button>
-
+ 
     <!-- Botón flotante Verificar Identidad (solo logueado) -->
     <div id="veriffWrapper" class="fixed bottom-4 right-4 hidden">
       <button id="veriffBtn"
@@ -118,7 +118,7 @@
         Verificar mi identidad
       </button>
     </div>
-
+ 
     <!-- Badge de verificación -->
     <div id="verifiedBadge" class="fixed top-4 right-4 hidden z-50">
       <div class="px-4 py-2 bg-green-100 text-green-800 rounded-full flex items-center gap-2">
@@ -126,7 +126,7 @@
         <span class="font-medium">Verificado</span>
       </div>
     </div>
-
+ 
     <!-- Mini Juego -->
     <div class="mt-8 text-center">
       <h3 class="text-base font-semibold text-yellow-700 mb-2">Mini Juego</h3>
@@ -157,11 +157,7 @@
               <i class="fas fa-file-contract text-yellow-500 text-xs group-hover:scale-110 transition-transform"></i>
               <span class="text-sm">Política de Privacidad</span>
             </a>
-            <a href="#" 
-               class="flex items-center gap-2 text-gray-600 hover:text-yellow-600 transition-colors group">
-              <i class="fas fa-balance-scale text-yellow-500 text-xs group-hover:scale-110 transition-transform"></i>
-              <span class="text-sm">Términos y Condiciones</span>
-            </a>
+            <a href="terminos.html" class="flex items-center gap-2 text-gray-600 hover:text-yellow-600 transition-colors group"><i class="fas fa-balance-scale text-yellow-500 text-xs group-hover:scale-110 transition-transform"></i><span class="text-sm">Términos y Condiciones</span></a>
             <a href="#" 
                class="flex items-center gap-2 text-gray-600 hover:text-yellow-600 transition-colors group">
               <i class="fas fa-question-circle text-yellow-500 text-xs group-hover:scale-110 transition-transform"></i>
@@ -235,7 +231,7 @@
               </a>
               
               <!-- WhatsApp -->
-              <a href="https://wa.me/5215512345678" 
+              <a href="https://wa.me/521TUNUMERO" 
                  target="_blank" 
                  rel="noopener noreferrer"
                  class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white hover:shadow-lg hover:scale-110 transition-all duration-200"
@@ -301,14 +297,14 @@
       </div>
     </div>
   </footer>
-
+ 
   <!-- Scripts de juego (se mantienen) -->
   <script src="https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.min.js"></script>
   <script src="preguntas.js"></script>
   <script src="mini-juego.js"></script>
   <script src="sketch.js"></script>
   <script src="juego-logica.js"></script>
-
+ 
   <script>
     // ========== CONFIGURACIÓN GLOBAL MEJORADA ==========
     

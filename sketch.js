@@ -5,11 +5,11 @@ const ANCHO_TUBO = 80;
 const ESPACIO_TUBO = 180;
 const MIN_HUECO = 120;
 let abeja, tubos, velocidad, nivel, puntos, juegoCongelado, preguntaActiva;
-
+ 
 function setup() {
   let ancho = min(windowWidth, 480);
   let canvas = createCanvas(ancho, ancho * 0.75);
-  canvas.parent('lienzo');
+  
   canvas.parent('lienzo');
   abeja = { x: 150, y: height / 2, r: 16, vy: 0 };
   tubos = [];
@@ -21,7 +21,7 @@ function setup() {
   textAlign(CENTER, CENTER);
   tubos.push(nuevoTubo());
 }
-
+ 
 function draw() {
   drawFondo8bits();
   if (!juegoCongelado) {
@@ -32,7 +32,7 @@ function draw() {
   dibujarAbeja8bits();
   mostrarHUD();
 }
-
+ 
 function drawFondo8bits() {
   background(135, 206, 235);
   noStroke();
@@ -44,7 +44,7 @@ function drawFondo8bits() {
     rect(x + 30, 70 + i * 70, 40, 20);
   }
 }
-
+ 
 function fisica() {
   abeja.vy += GRAVEDAD;
   abeja.y += abeja.vy;
@@ -56,18 +56,18 @@ function fisica() {
   if (tubos.length === 0 || tubos[tubos.length - 1].x < width - 300) tubos.push(nuevoTubo());
   if (abeja.y > height - abeja.r || abeja.y < abeja.r) resetJuego();
 }
-
+ 
 function nuevoTubo() {
   let huecoY = random(MIN_HUECO, height - MIN_HUECO - ESPACIO_TUBO);
   return { x: width, huecoY: huecoY, pasada: false };
 }
-
+ 
 function colision(t) {
   if (abeja.x + abeja.r < t.x || abeja.x - abeja.r > t.x + ANCHO_TUBO) return false;
   if (abeja.y - abeja.r < t.huecoY || abeja.y + abeja.r > t.huecoY + ESPACIO_TUBO) return true;
   return false;
 }
-
+ 
 function dibujarTubos() {
   fill(34, 139, 34); noStroke();
   for (let t of tubos) {
@@ -75,7 +75,7 @@ function dibujarTubos() {
     rect(t.x, t.huecoY + ESPACIO_TUBO, ANCHO_TUBO, height);
   }
 }
-
+ 
 function dibujarAbeja8bits() {
   noStroke();
   fill(255, 255, 0);
@@ -88,7 +88,7 @@ function dibujarAbeja8bits() {
   rect(abeja.x - 6, abeja.y - 6, 4, 4);
   rect(abeja.x + 2, abeja.y - 6, 4, 4);
 }
-
+ 
 function chequearPuntos() {
   for (let t of tubos) {
     if (!t.pasada && t.x + ANCHO_TUBO < abeja.x) {
@@ -102,32 +102,32 @@ function chequearPuntos() {
     }
   }
 }
-
+ 
 function mostrarHUD() {
   fill(0); textSize(24);
   text(`Tubos: ${puntos}`, width / 2, 40);
   text(`Nivel: ${nivel}`, width / 2, 70);
 }
-
+ 
 function keyPressed() {
   if (preguntaActiva) return;
   if (key === ' ') abeja.vy = SALTO;
 }
-
+ 
   // Toques en móvil
 function touchStarted() {
   if (preguntaActiva) return;          // no saltar si hay pregunta
   abeja.vy = SALTO;
   return false;                        // evita scroll/zoom
 }
-
+ 
 // Doble toque = enviar respuesta (si hay pregunta)
 function touchEnded() {
   if (preguntaActiva) {
     window.verificar();
   }
 }
-
+ 
 function mostrarPregunta() {
   const q = banco.find(p => p.nivel === nivel);
   if (!q) {
@@ -141,7 +141,7 @@ function mostrarPregunta() {
   document.getElementById('respuesta').value = '';
   document.getElementById('retro').textContent = '';
 }
-
+ 
 function resetJuego() {
   abeja.y = height / 2; abeja.vy = 0;
   tubos = []; tubos.push(nuevoTubo());
