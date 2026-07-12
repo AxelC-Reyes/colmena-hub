@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Encuentra el profesionista que necesitas en COLMENA HUB. Ingenieros, médicos, abogados, contadores y más.">
-  <title>Profesionistas – COLMENA HUB</title>
+  <meta name="description" content="Encuentra el oficiador que necesitas en COLMENA HUB. Electricistas, plomeros, carpinteros y más.">
+  <title>Oficiadores – COLMENA HUB</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -24,7 +24,7 @@
         <span class="font-bold text-xl text-gray-900">COLMENA HUB</span>
       </a>
       <a href="apply.html" class="text-sm font-medium text-amber-600 hover:text-amber-700">
-        <i class="fas fa-user-plus mr-1"></i>Regístrate como profesional
+        <i class="fas fa-user-plus mr-1"></i>Regístrate como oficiador
       </a>
     </div>
   </header>
@@ -32,11 +32,11 @@
   <!-- Búsqueda -->
   <div class="bg-gradient-to-r from-amber-500 to-yellow-400 py-10 px-4">
     <div class="max-w-2xl mx-auto text-center">
-      <h1 class="text-3xl font-bold text-white mb-2">Profesionistas Verificados</h1>
-      <p class="text-yellow-100 mb-6">Ingenieros, médicos, abogados, arquitectos y más</p>
+      <h1 class="text-3xl font-bold text-black mb-2">Oficiadores Verificados</h1>
+      <p class="text-yellow-300 mb-6">Electricistas, plomeros, carpinteros, mecánicos y más</p>
       <div class="relative">
         <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-        <input id="search" type="text" placeholder="Busca por profesión, especialidad..."
+        <input id="search" type="text" placeholder="Busca por oficio, especialidad..."
                class="w-full pl-12 pr-4 py-4 rounded-xl text-gray-800 text-base shadow-lg border-0 outline-none focus:ring-2 focus:ring-white">
       </div>
     </div>
@@ -50,7 +50,7 @@
     <div id="no-results" class="hidden text-center py-16">
       <i class="fas fa-search text-4xl text-gray-300 mb-4"></i>
       <h3 class="text-xl font-bold text-gray-600 mb-2">Sin resultados</h3>
-      <p class="text-gray-500">Intenta con otro término o <a href="oficiadores.html" class="text-amber-600 underline">busca un oficio</a>.</p>
+      <p class="text-gray-500">Intenta con otro término o <a href="professions-list.html" class="text-amber-600 underline">busca un profesionista</a>.</p>
     </div>
   </main>
 
@@ -66,54 +66,121 @@
   </footer>
 
   <script>
-    const PROFESIONES = [
+    const OFICIOS = [
       {
-        cat: "⚕️ Salud",
-        color: "bg-red-100 text-red-800",
-        items: ["Médico general","Médico especialista","Dentista","Psicólogo","Nutriólogo",
-                "Fisioterapeuta","Optometrista","Veterinario","Enfermero","Radiólogo","Farmacéutico"]
+        cat: "🧹 Limpieza, Mantenimiento y Servicios Generales",
+        color: "bg-gray-100 text-gray-800",
+        items: [
+          "Afinador de pianos", "Afilador de cuchillos", "Ama de llaves", "Boleador",
+          "Cargador", "Fumigador", "Limpia piscinas", "Limpia vidrios", "Mucama",
+          "Personal de limpieza", "Portero", "Recolección de basura", "Retiro de escombros"
+        ]
       },
       {
-        cat: "⚖️ Legal y Finanzas",
+        cat: "🏗️ Construcción, Oficios Técnicos y Reparación",
+        color: "bg-yellow-100 text-yellow-800",
+        items: [
+          "Albañil", "Blindador", "Carpintero", "Cerrajero", "Chalan",
+          "Electricista (técnico)", "Herrero", "Mecánico", "Pintor", "Plomero",
+          "Técnico en climatización", "Técnico en refrigeración", "Técnicos en reparación",
+          "Técnico industrial", "Tornero", "Vidriero", "Zapatero"
+        ]
+      },
+      {
+        cat: "🚚 Transporte, Logística y Mensajería",
         color: "bg-blue-100 text-blue-800",
-        items: ["Abogado","Notario","Contador público","Auditor","Asesor financiero",
-                "Actuario","Economista","Agente de seguros","Corredor de bolsa"]
+        items: [
+          "Chofer", "Grúas (operador de grúa)", "Mensajero", "Mudanzas",
+          "Personal de almacén", "Valet parking"
+        ]
       },
       {
-        cat: "🏗️ Ingeniería y Arquitectura",
-        color: "bg-orange-100 text-orange-800",
-        items: ["Ingeniero civil","Ingeniero eléctrico","Ingeniero mecánico","Ingeniero en sistemas",
-                "Arquitecto","Urbanista","Topógrafo","Ingeniero ambiental","Ingeniero industrial"]
+        cat: "🍽️ Alimentos, Bebidas y Servicios de Restaurante",
+        color: "bg-red-100 text-red-800",
+        items: [
+          "Ayudante de cocina", "Barista", "Bartender", "Carnicero", "Cocinero",
+          "Comida para eventos (servicio de catering)", "Hostess", "Lavaplatos",
+          "Mesero", "Panadero", "Parrillero", "Repostero", "Sommelier", "Tortillero"
+        ]
       },
       {
-        cat: "💻 Tecnología",
-        color: "bg-purple-100 text-purple-800",
-        items: ["Desarrollador web","Desarrollador móvil","Diseñador UX/UI","Data scientist",
-                "Administrador de redes","Especialista en ciberseguridad","DevOps","DBA",
-                "Analista de sistemas","Product manager"]
-      },
-      {
-        cat: "🎓 Educación",
-        color: "bg-green-100 text-green-800",
-        items: ["Maestro de primaria","Maestro de secundaria","Tutor universitario","Profesor de idiomas",
-                "Orientador vocacional","Educador especial","Coach educativo"]
-      },
-      {
-        cat: "🎨 Diseño y Comunicación",
+        cat: "💄 Belleza, Estética y Bienestar",
         color: "bg-pink-100 text-pink-800",
-        items: ["Diseñador gráfico","Diseñador industrial","Publicista","Relacionista público",
-                "Periodista","Locutor","Corrector de estilo","Fotógrafo profesional","Cineasta"]
+        items: [
+          "Barbero", "Estilista", "Groomer (estilista canino)", "Manicurista",
+          "Maquillista", "Masajista", "Tatuador"
+        ]
       },
       {
-        cat: "🏢 Administración y RRHH",
+        cat: "🎨 Artes, Diseño y Oficios Artísticos",
+        color: "bg-purple-100 text-purple-800",
+        items: [
+          "Actor", "Actor de doblaje", "Alfarero", "Animador de fiestas",
+          "Artesano de fibras vegetales", "Bailarín / Bailarina", "Bordador",
+          "Cantante", "Ceramista", "Creador de contenido", "Decorador de interiores",
+          "Diseño de modas", "Escritor", "Fotógrafo", "Joyero", "Músico / Bandas",
+          "Modelos", "Orfebre", "Serigrafista", "Tallador de piedra", "Tejedor"
+        ]
+      },
+      {
+        cat: "🐶 Cuidado de Personas y Animales",
+        color: "bg-green-100 text-green-800",
+        items: [
+          "Entrenador canino", "Gericultor (cuidado de adultos mayores)",
+          "Niñera", "Paseador de perros"
+        ]
+      },
+      {
+        cat: "🏋️ Deportes, Entrenamiento e Instrucción",
+        color: "bg-orange-100 text-orange-800",
+        items: [
+          "Árbitro de ajedrez", "Árbitro de fútbol", "Árbitro de fútbol americano",
+          "Árbitro de hockey", "Árbitro de voleibol", "Entrenador de armwrestling",
+          "Entrenador de boxeo", "Entrenador de calistenia", "Entrenador de fútbol",
+          "Entrenador de gimnasia", "Entrenador personal", "Instructor de buceo",
+          "Instructor de paracaidismo", "Maestro de yoga", "Maestro de zumba"
+        ]
+      },
+      {
+        cat: "🏥 Salud y Laboratorio",
+        color: "bg-red-100 text-red-800",
+        items: [
+          "Criminalista", "Experto en higiene forense", "Laboratorista dental",
+          "Optometrista", "Radiólogo", "Técnico dental", "Técnicos en laboratorio"
+        ]
+      },
+      {
+        cat: "🧾 Administración, Finanzas y Oficina",
         color: "bg-indigo-100 text-indigo-800",
-        items: ["Administrador de empresas","Especialista en RRHH","Consultor de negocios",
-                "Gerente de proyectos","Logístico","Comercio exterior","Mercadólogo"]
+        items: [
+          "Archivista", "Asistente administrativa", "Asistente personal", "Cajero",
+          "Corrector de texto", "Líder sindical", "Representante de atención al cliente",
+          "Técnico de RRHH", "Técnico en contabilidad", "Técnico en finanzas",
+          "Técnico en informática", "Valuador", "Vendedor"
+        ]
       },
       {
-        cat: "🌿 Ciencias y Medioambiente",
-        color: "bg-teal-100 text-teal-800",
-        items: ["Biólogo","Químico","Físico","Geólogo","Ecólogo","Agrónomo","Oceanógrafo","Meteorólogo"]
+        cat: "🛡️ Seguridad, Emergencias e Investigación",
+        color: "bg-blue-100 text-blue-800",
+        items: [
+          "Bombero", "Guardaespaldas", "Inspector privado", "Personal de seguridad", "Vigilante"
+        ]
+      },
+      {
+        cat: "🌾 Campo y Producción",
+        color: "bg-emerald-100 text-emerald-800",
+        items: [
+          "Agricultor", "Apicultor", "Granjero"
+        ]
+      },
+      {
+        cat: "🎉 Eventos, Turismo y Servicios Especiales",
+        color: "bg-amber-100 text-amber-800",
+        items: [
+          "Agente aduanal", "Agente de viajes", "Botarguero", "Cambiador de publicidad",
+          "Enterrador", "Guía de turistas", "Mayordomo", "Organizador de eventos",
+          "Sustituto de filas", "Ufólogo"
+        ]
       }
     ];
 
@@ -125,9 +192,9 @@
       grid.innerHTML = '';
 
       const grouped = {};
-      list.forEach(({ cat, color, prof }) => {
-        if (!grouped[cat]) grouped[cat] = { color, profs: [] };
-        grouped[cat].profs.push(prof);
+      list.forEach(({ cat, color, oficio }) => {
+        if (!grouped[cat]) grouped[cat] = { color, oficios: [] };
+        grouped[cat].oficios.push(oficio);
       });
 
       if (!Object.keys(grouped).length) {
@@ -136,20 +203,20 @@
       }
       noResults.classList.add('hidden');
 
-      for (const [cat, { color, profs }] of Object.entries(grouped)) {
+      for (const [cat, { color, oficios }] of Object.entries(grouped)) {
         const section = document.createElement('div');
         section.innerHTML = `
           <h2 class="text-lg font-bold text-gray-700 mb-3">${cat}</h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"></div>`;
         const cardGrid = section.querySelector('.grid');
 
-        profs.forEach(prof => {
+        oficios.forEach(oficio => {
           const a = document.createElement('a');
-          a.href = `listing.html?category=${encodeURIComponent(prof)}`;
+          a.href = `listing.html?category=${encodeURIComponent(oficio)}`;
           a.className = 'card bg-white rounded-xl p-4 shadow-sm flex items-center gap-3';
           a.innerHTML = `
             <span class="pill ${color}">${cat.slice(0,2)}</span>
-            <span class="text-sm font-medium text-gray-800">${prof}</span>
+            <span class="text-sm font-medium text-gray-800">${oficio}</span>
             <i class="fas fa-chevron-right text-gray-300 ml-auto text-xs"></i>`;
           cardGrid.appendChild(a);
         });
@@ -159,8 +226,8 @@
     }
 
     function buildAllCards() {
-      return PROFESIONES.flatMap(({ cat, color, items }) =>
-        items.map(prof => ({ cat, color, prof }))
+      return OFICIOS.flatMap(({ cat, color, items }) =>
+        items.map(oficio => ({ cat, color, oficio }))
       );
     }
 
@@ -170,7 +237,7 @@
       clearTimeout(timer);
       timer = setTimeout(() => {
         const q = this.value.toLowerCase().trim();
-        render(q ? allCards.filter(c => c.prof.toLowerCase().includes(q) || c.cat.toLowerCase().includes(q)) : allCards);
+        render(q ? allCards.filter(c => c.oficio.toLowerCase().includes(q) || c.cat.toLowerCase().includes(q)) : allCards);
       }, 200);
     });
 

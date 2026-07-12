@@ -3,191 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Programa de Pasantes COLMENA HUB - Conectamos estudiantes avanzados con oportunidades profesionales.">
   <title>Programa de Pasantes – COLMENA HUB</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    :root {
-      --primary-blue: #3B82F6;
-      --secondary-blue: #1D4ED8;
-      --light-blue: #EFF6FF;
-    }
-    
-    body {
-      background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
-      font-family: 'Segoe UI', sans-serif;
-    }
-    
-    .glass-card {
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
-    }
-    
-    .btn-pasante {
-      background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-      color: white;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-    
-    .btn-pasante:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
-    }
-    
-    .progress-circle {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: conic-gradient(var(--primary-blue) 75%, #E5E7EB 0%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .progress-circle::before {
-      content: '';
-      width: 90px;
-      height: 90px;
-      background: white;
-      border-radius: 50%;
-      position: absolute;
-    }
-    
-    .requirement-item {
-      transition: all 0.3s ease;
-    }
-    
-    .requirement-item:hover {
-      transform: translateX(5px);
-    }
-    
-    .timeline-item {
-      position: relative;
-      padding-left: 30px;
-      margin-bottom: 30px;
-    }
-    
-    .timeline-item::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 5px;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--primary-blue);
-    }
-    
-    .timeline-item::after {
-      content: '';
-      position: absolute;
-      left: 5px;
-      top: 17px;
-      width: 2px;
-      height: calc(100% + 13px);
-      background: #CBD5E1;
-    }
-    
-    .timeline-item:last-child::after {
-      display: none;
-    }
+    body { background:#FFFBEB; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; }
+    .glass-card { background:rgba(255,252,245,0.92); backdrop-filter:blur(12px); border:1px solid rgba(201,169,110,0.25); box-shadow:0 8px 32px rgba(139,107,61,0.08); }
+    .btn-pasante { background:linear-gradient(135deg, #FBBF24, #D97706); color:white; font-weight:600; transition:all .3s ease; }
+    .btn-pasante:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(251,191,36,0.4); }
+    .progress-circle { width:120px; height:120px; border-radius:50%; background:conic-gradient(#FBBF24 75%, #E5E7EB 0%); display:flex; align-items:center; justify-content:center; position:relative; }
+    .progress-circle::before { content:''; width:90px; height:90px; background:#FFFBEB; border-radius:50%; position:absolute; }
+    .timeline-item { position:relative; padding-left:30px; margin-bottom:30px; }
+    .timeline-item::before { content:''; position:absolute; left:0; top:5px; width:12px; height:12px; border-radius:50%; background:#FBBF24; }
+    .timeline-item::after { content:''; position:absolute; left:5px; top:17px; width:2px; height:calc(100% + 13px); background:#E5D5B5; }
+    .timeline-item:last-child::after { display:none; }
+    .badge-pasante { background:#FEF3C7; color:#92400E; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600; }
   </style>
 </head>
 <body class="min-h-screen">
+
   <!-- Barra de estado -->
-  <div id="statusBar" class="fixed top-0 left-0 right-0 bg-blue-600 text-white py-3 px-4 text-center z-50 hidden">
+  <div id="statusBar" class="fixed top-0 left-0 right-0 bg-amber-500 text-white py-3 px-4 text-center z-50 hidden">
     <i id="statusIcon" class="fas fa-spinner fa-spin mr-2"></i>
     <span id="statusText">Cargando...</span>
   </div>
 
   <!-- Header -->
-  <header class="glass-card sticky top-0 z-40">
-    <div class="container mx-auto px-4 py-4">
-      <div class="flex flex-col md:flex-row justify-between items-center">
-        <div class="flex items-center space-x-3 mb-4 md:mb-0">
-          <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-            <i class="fas fa-graduation-cap text-white text-xl"></i>
-          </div>
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900">COLMENA HUB</h1>
-            <p class="text-xs text-blue-700 font-medium">Programa de Pasantes</p>
-          </div>
-        </div>
-        <nav class="flex space-x-4">
-          <a href="index.html" class="text-gray-600 hover:text-blue-600">
-            <i class="fas fa-home mr-1"></i>Inicio
-          </a>
-          <a href="apply.html" class="text-blue-600 font-semibold">
-            <i class="fas fa-user-graduate mr-1"></i>Soy Pasante
-          </a>
-        </nav>
-      </div>
+  <header class="bg-white shadow-sm sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3">
+        <img src="colmena-hubLOGO.png" alt="COLMENA HUB" class="h-10 w-auto">
+        <span class="font-bold text-xl text-gray-900">COLMENA HUB</span>
+      </a>
+      <nav class="flex items-center gap-4">
+        <a href="index.html" class="text-gray-600 hover:text-amber-600">
+          <i class="fas fa-home mr-1"></i>Inicio
+        </a>
+        <a href="apply-pasante.html" class="text-sm font-medium text-amber-600 hover:text-amber-700">
+          <i class="fas fa-user-graduate mr-1"></i>Soy Pasante
+        </a>
+      </nav>
     </div>
   </header>
 
   <!-- Hero Section -->
-  <section class="py-12 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-    <div class="container mx-auto px-4 text-center">
-      <div class="max-w-3xl mx-auto">
-        <h1 class="text-4xl md:text-5xl font-bold mb-6">
-          <i class="fas fa-graduation-cap mr-3"></i>
-          Programa de Pasantes COLMENA HUB
-        </h1>
-        <p class="text-xl mb-8 opacity-90">
-          Conectamos estudiantes avanzados (75%+ de carrera) con oportunidades profesionales reales
-        </p>
-        
-        <!-- Estadísticas -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-10">
-          <div class="text-center">
-            <div class="text-3xl font-bold mb-2">75%+</div>
-            <p class="text-sm opacity-80">Avance mínimo requerido</p>
-          </div>
-          <div class="text-center">
-            <div class="text-3xl font-bold mb-2">7 años</div>
-            <p class="text-sm opacity-80">Límite máximo de estudios</p>
-          </div>
-          <div class="text-center">
-            <div class="text-3xl font-bold mb-2">1 año</div>
-            <p class="text-sm opacity-80">Máximo de inactividad</p>
-          </div>
-          <div class="text-center">
-            <div class="text-3xl font-bold mb-2">Titulación</div>
-            <p class="text-sm opacity-80">Requisito al año 7</p>
-          </div>
+  <section class="py-12 bg-gradient-to-r from-amber-500 to-yellow-400 text-black">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <h1 class="text-4xl md:text-5xl font-bold mb-6">
+        Programa de Pasantes
+      </h1>
+      <p class="text-xl mb-8 opacity-90">
+        Conectamos estudiantes avanzados (75%+ de carrera) con oportunidades profesionales reales
+      </p>
+      
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-10">
+        <div class="text-center">
+          <div class="text-3xl font-bold mb-2">75%+</div>
+          <p class="text-sm opacity-80">Avance mínimo</p>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold mb-2">7 años</div>
+          <p class="text-sm opacity-80">Límite de estudios</p>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold mb-2">1 año</div>
+          <p class="text-sm opacity-80">Inactividad máxima</p>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold mb-2">Titulación</div>
+          <p class="text-sm opacity-80">Requisito al año 7</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Contenido Principal -->
-  <main class="container mx-auto px-4 py-12">
-    <!-- Grid de información -->
+  <main class="max-w-7xl mx-auto px-4 py-12">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
       <!-- Requisitos -->
       <div class="glass-card rounded-2xl p-8">
         <h2 class="text-2xl font-bold text-gray-900 mb-6">
-          <i class="fas fa-clipboard-check text-blue-500 mr-3"></i>
+          <i class="fas fa-clipboard-check text-amber-500 mr-3"></i>
           Requisitos para Pasantes
         </h2>
         
         <div class="space-y-4">
-          <div class="requirement-item p-4 bg-blue-50 rounded-lg">
+          <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
             <div class="flex items-center">
               <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
                 <i class="fas fa-check text-green-600"></i>
               </div>
               <div>
                 <h3 class="font-semibold text-gray-900">Avance académico ≥ 75%</h3>
-                <p class="text-sm text-gray-600">Debes haber completado al menos el 75% de los créditos de tu carrera</p>
+                <p class="text-sm text-gray-600">Debes haber completado al menos el 75% de los créditos</p>
               </div>
             </div>
           </div>
           
-          <div class="requirement-item p-4 bg-blue-50 rounded-lg">
+          <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
             <div class="flex items-center">
               <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
                 <i class="fas fa-check text-green-600"></i>
@@ -199,7 +113,7 @@
             </div>
           </div>
           
-          <div class="requirement-item p-4 bg-blue-50 rounded-lg">
+          <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
             <div class="flex items-center">
               <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
                 <i class="fas fa-check text-green-600"></i>
@@ -211,14 +125,14 @@
             </div>
           </div>
           
-          <div class="requirement-item p-4 bg-blue-50 rounded-lg">
+          <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
             <div class="flex items-center">
               <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
                 <i class="fas fa-check text-green-600"></i>
               </div>
               <div>
                 <h3 class="font-semibold text-gray-900">Verificación académica</h3>
-                <p class="text-sm text-gray-600">Debes proporcionar comprobantes de estudios</p>
+                <p class="text-sm text-gray-600">Comprobantes de estudios (kardex, constancia)</p>
               </div>
             </div>
           </div>
@@ -230,7 +144,7 @@
             <div>
               <h4 class="font-bold text-yellow-800 mb-2">Importante</h4>
               <p class="text-yellow-700 text-sm">
-                Al cumplir 7 años desde tu ingreso, debes presentar tu título profesional para mantenerte activo en la plataforma.
+                Al cumplir 7 años desde tu ingreso, debes presentar tu título profesional para mantenerte activo.
               </p>
             </div>
           </div>
@@ -240,7 +154,7 @@
       <!-- Proceso de aplicación -->
       <div class="glass-card rounded-2xl p-8">
         <h2 class="text-2xl font-bold text-gray-900 mb-6">
-          <i class="fas fa-road text-blue-500 mr-3"></i>
+          <i class="fas fa-road text-amber-500 mr-3"></i>
           Proceso de Aplicación
         </h2>
         
@@ -283,7 +197,7 @@
     <!-- Calculadora de elegibilidad -->
     <div class="glass-card rounded-2xl p-8 mb-12">
       <h2 class="text-2xl font-bold text-gray-900 mb-6">
-        <i class="fas fa-calculator text-blue-500 mr-3"></i>
+        <i class="fas fa-calculator text-amber-500 mr-3"></i>
         Calculadora de Elegibilidad
       </h2>
       
@@ -296,7 +210,7 @@
                 Año de ingreso a la carrera
               </label>
               <input type="number" id="year-of-entry" 
-                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
                      min="2010" max="2024" 
                      placeholder="Ej: 2020" required>
             </div>
@@ -307,11 +221,11 @@
                 Porcentaje de avance (%)
               </label>
               <input type="range" id="progress-slider" 
-                     class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                     class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-amber-500"
                      min="0" max="100" value="75">
               <div class="flex justify-between text-sm text-gray-600">
                 <span>0%</span>
-                <span id="progress-value">75%</span>
+                <span id="progress-value" class="font-bold text-amber-600">75%</span>
                 <span>100%</span>
               </div>
             </div>
@@ -322,7 +236,7 @@
                 Meses inactivo (sin cursar)
               </label>
               <input type="number" id="inactive-months" 
-                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
                      min="0" max="120" 
                      placeholder="Ej: 6" required>
             </div>
@@ -333,7 +247,7 @@
                 ¿Tienes título profesional?
               </label>
               <select id="has-degree" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-amber-400">
                 <option value="no">No, aún no</option>
                 <option value="yes">Sí, ya soy titulado</option>
               </select>
@@ -348,9 +262,9 @@
         </div>
         
         <div>
-          <div id="eligibility-result" class="text-center p-6">
+          <div id="eligibility-result" class="text-center p-6 bg-amber-50 rounded-xl">
             <div class="progress-circle mx-auto mb-6 relative">
-              <span class="text-2xl font-bold text-blue-600 z-10">0%</span>
+              <span class="text-2xl font-bold text-amber-600 z-10 relative">0%</span>
             </div>
             <h3 class="text-xl font-bold text-gray-900 mb-4">Tu elegibilidad</h3>
             <div id="result-message" class="text-gray-600 mb-4">
@@ -365,30 +279,30 @@
     <!-- Beneficios -->
     <div class="glass-card rounded-2xl p-8">
       <h2 class="text-2xl font-bold text-gray-900 mb-6">
-        <i class="fas fa-gift text-blue-500 mr-3"></i>
+        <i class="fas fa-gift text-amber-500 mr-3"></i>
         Beneficios para Pasantes
       </h2>
       
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="p-6 bg-blue-50 rounded-xl text-center">
-          <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <i class="fas fa-briefcase text-blue-600 text-2xl"></i>
+        <div class="p-6 bg-amber-50 rounded-xl text-center">
+          <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-briefcase text-amber-600 text-2xl"></i>
           </div>
           <h3 class="font-bold text-gray-900 mb-2">Experiencia real</h3>
           <p class="text-gray-600 text-sm">Trabaja en proyectos reales con profesionales</p>
         </div>
         
-        <div class="p-6 bg-blue-50 rounded-xl text-center">
-          <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <i class="fas fa-network-wired text-blue-600 text-2xl"></i>
+        <div class="p-6 bg-amber-50 rounded-xl text-center">
+          <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-network-wired text-amber-600 text-2xl"></i>
           </div>
           <h3 class="font-bold text-gray-900 mb-2">Networking</h3>
           <p class="text-gray-600 text-sm">Conecta con profesionales de tu industria</p>
         </div>
         
-        <div class="p-6 bg-blue-50 rounded-xl text-center">
-          <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <i class="fas fa-file-contract text-blue-600 text-2xl"></i>
+        <div class="p-6 bg-amber-50 rounded-xl text-center">
+          <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-file-contract text-amber-600 text-2xl"></i>
           </div>
           <h3 class="font-bold text-gray-900 mb-2">Cartas de recomendación</h3>
           <p class="text-gray-600 text-sm">Obtén referencias profesionales verificadas</p>
@@ -398,37 +312,16 @@
   </main>
 
   <!-- Footer -->
-  <footer class="mt-16 bg-gray-800 text-white">
-    <div class="container mx-auto px-4 py-8">
-      <div class="flex flex-col md:flex-row justify-between items-center">
-        <div class="mb-6 md:mb-0">
-          <div class="flex items-center space-x-3">
-            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-              <i class="fas fa-bee text-white text-sm"></i>
-            </div>
-            <span class="text-lg font-bold">COLMENA HUB - Pasantes</span>
-          </div>
-          <p class="text-gray-400 text-sm mt-2">Conectando el futuro profesional</p>
-        </div>
-        <div class="text-center md:text-right">
-          <p class="text-gray-400 text-sm">© 2024 COLMENA HUB. Todos los derechos reservados.</p>
-          <div class="flex space-x-4 mt-3 justify-center md:justify-end">
-            <a href="#" class="text-gray-400 hover:text-blue-400">
-              <i class="fab fa-facebook"></i>
-            </a>
-            <a href="#" class="text-gray-400 hover:text-blue-400">
-              <i class="fab fa-instagram"></i>
-            </a>
-            <a href="#" class="text-gray-400 hover:text-blue-400">
-              <i class="fab fa-linkedin"></i>
-            </a>
-          </div>
-        </div>
+  <footer class="bg-gray-800 text-white mt-16">
+    <div class="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <img src="colmena-hubLOGO.png" alt="" class="h-8 w-auto opacity-80">
+        <span class="font-bold">COLMENA HUB - Pasantes</span>
       </div>
+      <p class="text-gray-400 text-sm">© 2025 COLMENA HUB. Todos los derechos reservados.</p>
     </div>
   </footer>
 
-  <!-- JavaScript -->
   <script>
     // Barra de estado
     function showStatus(message, type = 'info') {
@@ -453,7 +346,7 @@
           iconClass = 'fa-exclamation-triangle';
           break;
         default:
-          bar.classList.add('bg-blue-600', 'text-white');
+          bar.classList.add('bg-amber-500', 'text-white');
           iconClass = 'fa-spinner fa-spin';
           break;
       }
@@ -478,7 +371,6 @@
       const inactiveMonths = parseInt(document.getElementById('inactive-months').value);
       const hasDegree = document.getElementById('has-degree').value === 'yes';
       
-      // Validaciones
       if (!yearOfEntry || !progress || isNaN(inactiveMonths)) {
         showStatus('Completa todos los campos', 'error');
         return;
@@ -487,72 +379,39 @@
       const currentYear = new Date().getFullYear();
       const yearsSinceEntry = currentYear - yearOfEntry;
       
-      // Calcular puntuación
       let score = 0;
       let requirements = [];
       
       // 1. Verificar años desde ingreso (máximo 7 años)
       if (yearsSinceEntry <= 7) {
         score += 30;
-        requirements.push({
-          icon: '✅',
-          text: `Años desde ingreso: ${yearsSinceEntry} (límite: 7 años)`,
-          passed: true
-        });
+        requirements.push({ icon: '✅', text: `Años desde ingreso: ${yearsSinceEntry} (límite: 7 años)`, passed: true });
       } else {
-        requirements.push({
-          icon: '❌',
-          text: `Años desde ingreso: ${yearsSinceEntry} (supera el límite de 7 años)`,
-          passed: false
-        });
+        requirements.push({ icon: '❌', text: `Años desde ingreso: ${yearsSinceEntry} (supera el límite de 7 años)`, passed: false });
       }
       
       // 2. Verificar avance (mínimo 75%)
       if (progress >= 75) {
         score += 30;
-        requirements.push({
-          icon: '✅',
-          text: `Avance académico: ${progress}% (mínimo requerido: 75%)`,
-          passed: true
-        });
+        requirements.push({ icon: '✅', text: `Avance académico: ${progress}% (mínimo: 75%)`, passed: true });
       } else {
-        requirements.push({
-          icon: '❌',
-          text: `Avance académico: ${progress}% (requieres mínimo 75%)`,
-          passed: false
-        });
+        requirements.push({ icon: '❌', text: `Avance académico: ${progress}% (requieres mínimo 75%)`, passed: false });
       }
       
       // 3. Verificar inactividad (máximo 12 meses)
       if (inactiveMonths <= 12) {
         score += 20;
-        requirements.push({
-          icon: '✅',
-          text: `Meses inactivo: ${inactiveMonths} (límite: 12 meses)`,
-          passed: true
-        });
+        requirements.push({ icon: '✅', text: `Meses inactivo: ${inactiveMonths} (límite: 12 meses)`, passed: true });
       } else {
-        requirements.push({
-          icon: '❌',
-          text: `Meses inactivo: ${inactiveMonths} (supera el límite de 12 meses)`,
-          passed: false
-        });
+        requirements.push({ icon: '❌', text: `Meses inactivo: ${inactiveMonths} (supera el límite de 12 meses)`, passed: false });
       }
       
       // 4. Verificar título (requerido al año 7)
       if (yearsSinceEntry < 7 || hasDegree) {
         score += 20;
-        requirements.push({
-          icon: hasDegree ? '✅' : '⏳',
-          text: hasDegree ? 'Título profesional: Sí' : `Título requerido al año ${yearOfEntry + 7}`,
-          passed: true
-        });
+        requirements.push({ icon: hasDegree ? '✅' : '⏳', text: hasDegree ? 'Título profesional: Sí' : `Título requerido al año ${yearOfEntry + 7}`, passed: true });
       } else {
-        requirements.push({
-          icon: '❌',
-          text: `Año ${yearOfEntry + 7}: Requieres título profesional`,
-          passed: false
-        });
+        requirements.push({ icon: '❌', text: `Año ${yearOfEntry + 7}: Requieres título profesional`, passed: false });
       }
       
       // Actualizar UI
@@ -562,16 +421,14 @@
       const messageElement = document.getElementById('result-message');
       const requirementsElement = document.getElementById('requirements-list');
       
-      // Actualizar círculo de progreso
       percentageElement.textContent = score + '%';
-      progressElement.style.background = `conic-gradient(var(--primary-blue) ${score}%, #E5E7EB 0%)`;
+      progressElement.style.background = `conic-gradient(#FBBF24 ${score}%, #E5E7EB 0%)`;
       
-      // Determinar mensaje
       let message = '';
       let messageType = '';
       
       if (score >= 80) {
-        message = '¡Elegible para el programa de pasantes!';
+        message = '¡Elegible para el programa de pasantes! 🎉';
         messageType = 'success';
       } else if (score >= 60) {
         message = 'Casi elegible - Revisa los requisitos pendientes';
@@ -585,12 +442,9 @@
         <div class="font-bold text-${messageType === 'success' ? 'green' : messageType === 'warning' ? 'yellow' : 'red'}-600 mb-2">
           ${message}
         </div>
-        <div class="text-sm">
-          Puntuación: ${score}/100
-        </div>
+        <div class="text-sm">Puntuación: ${score}/100</div>
       `;
       
-      // Mostrar requisitos
       requirementsElement.innerHTML = requirements.map(req => `
         <div class="flex items-center ${req.passed ? 'text-green-600' : 'text-red-600'}">
           <span class="mr-2">${req.icon}</span>
@@ -598,7 +452,6 @@
         </div>
       `).join('');
       
-      // Mostrar resultado en barra de estado
       if (score >= 80) {
         showStatus('¡Felicidades! Eres elegible para el programa', 'success');
       } else if (score >= 60) {
@@ -608,7 +461,6 @@
       }
     }
     
-    // Inicialización
     document.addEventListener('DOMContentLoaded', () => {
       showStatus('Calculadora de pasantes lista', 'success');
     });
