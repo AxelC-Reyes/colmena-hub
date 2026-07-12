@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>¿Qué necesitas? – COLMENA HUB</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background:#FFFBEB; }
+  </style>
 </head>
 
 <body class="min-h-screen bg-offwhite">
@@ -13,7 +17,7 @@
 
     <div class="flex flex-col md:flex-row items-center justify-center gap-12">
       <!-- Profesionistas -->
-      <a href="professions-list.html?cat=professionals"
+      <a href="professions-list.html"
          class="relative w-48 h-52 flex items-center justify-center text-white font-bold text-xl
                 bg-yellow-500 shadow-lg hover:bg-yellow-600 transition-all duration-300"
                 style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
@@ -22,17 +26,189 @@
 
       <!-- Oficiadores -->
       <a href="oficiadores.html"
-   class="relative w-48 h-52 flex items-center justify-center text-white font-bold text-xl
-          bg-yellow-500 shadow-lg hover:bg-yellow-600 transition-all duration-300"
-   style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
-  Oficiadores
+         class="relative w-48 h-52 flex items-center justify-center text-white font-bold text-xl
+                bg-yellow-500 shadow-lg hover:bg-yellow-600 transition-all duration-300"
+         style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+        Oficiadores
       </a>
     </div>
 
-    <!-- Barra de búsqueda (estática) -->
+    <!-- Barra de búsqueda -->
     <div class="w-full max-w-md">
-      <input type="text" placeholder="Buscar profesionales..." class="w-full px-4 py-3 border border-gray-300 rounded-lg">
+      <form id="searchForm" class="relative">
+        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+        <input type="text" 
+               id="searchInput"
+               placeholder="Buscar profesionales..." 
+               class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none">
+      </form>
+      
+      <!-- Resultados de búsqueda -->
+      <div id="searchResults" class="hidden mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto">
+        <div class="p-2 space-y-1">
+          <!-- Resultados se insertan aquí -->
+        </div>
+      </div>
     </div>
   </div>
+
+  <script>
+    // Todas las profesiones y oficios
+    const profesionistas = [
+      "Actuaría", "Arquitectura", "Arquitectura de Paisaje", "Ciencia de Materiales Sustentables",
+      "Ciencias Atmosféricas", "Ciencias de la Computación", "Ciencias de la Tierra", "Computación",
+      "Física", "Física Biomédica", "Geociencias", "Ingeniería Aeroespacial", "Ingeniería Aeronáutica",
+      "Ingeniería Agrícola", "Ingeniería Ambiental", "Ingeniería Biomédica", "Ingeniería Biónica",
+      "Ingeniería Bioquímica", "Ingeniería Biotecnológica", "Ingeniería Civil", "Ingeniería de Minas y Metalurgia",
+      "Ingeniería Eléctrica", "Ingeniería Electrónica", "Ingeniería Eléctrica y Electrónica",
+      "Ingeniería en Alimentos", "Ingeniería en Computación", "Ingeniería en Control y Automatización",
+      "Ingeniería en Energía", "Ingeniería en Energías Renovables", "Ingeniería en Inteligencia Artificial",
+      "Ingeniería en Robótica Industrial", "Ingeniería en Sistemas Automotrices",
+      "Ingeniería en Telecomunicaciones", "Ingeniería en Telecomunicaciones, Sistemas y Electrónica",
+      "Ingeniería Farmacéutica", "Ingeniería Ferroviaria", "Ingeniería Fotónica", "Ingeniería Geofísica",
+      "Ingeniería Geológica", "Ingeniería Geomática", "Ingeniería Hidrológica", "Ingeniería Industrial",
+      "Ingeniería Informática", "Ingeniería Matemática", "Ingeniería Mecánica", "Ingeniería Mecánica Eléctrica",
+      "Ingeniería Mecatrónica", "Ingeniería Metalúrgica", "Ingeniería Petrolera", "Ingeniería Química",
+      "Ingeniería Química Industrial", "Ingeniería Química Metalúrgica", "Ingeniería Química Petrolera",
+      "Ingeniería Sistemas Ambientales", "Ingeniería Sistemas Computacionales",
+      "Ingeniería Sistemas Energéticos y Redes Inteligentes", "Ingeniería Telemática",
+      "Ingeniería Topográfica y Fotogramétrica", "Ingeniería Transporte", "Matemáticas", "Matemáticas Aplicadas",
+      "Matemáticas Aplicadas y Computación", "Matemáticas para el Desarrollo", "Nanotecnología",
+      "Tecnología", "Tecnologías para la Información en Ciencias", "Urbanismo",
+      "Agronomía", "Bioquímica Diagnóstica", "Biología", "Ciencia de la Nutrición Humana",
+      "Ciencia Forense", "Ciencias Agroforestales", "Ciencias Agrogenómicas", "Ciencias Ambientales",
+      "Ciencias Genómicas", "Ecología", "Enfermería", "Enfermería y Obstetricia", "Estomatología",
+      "Farmacia", "Fisioterapia", "Investigación Biomédica Básica", "Manejo Sustentable de Zonas Costeras",
+      "Medicina", "Medicina Veterinaria y Zootecnia", "Médico Cirujano", "Médico Cirujano Homeópata",
+      "Médico Cirujano Partero", "Neurociencias", "Nutrición Humana", "Nutriología", "Odontología",
+      "Optometría", "Órtesis y Prótesis", "Química", "Química de Alimentos", "Química Farmacéutica Biológica",
+      "Químico Bacteriólogo y Parasitólogo", "Químico Farmacéutico Industrial",
+      "Administración", "Administración Agropecuaria", "Administración de Archivos y Gestión Documental",
+      "Administración Industrial", "Administración y Desarrollo Empresarial", "Antropología",
+      "Bibliotecología y Estudios de la Información", "Ciencias de la Comunicación",
+      "Ciencias Políticas y Administración Pública", "Comunicación", "Comunicación Social",
+      "Comunicación y Periodismo", "Contaduría", "Contaduría y Finanzas Públicas", "Derecho",
+      "Desarrollo Comunitario para el Envejecimiento", "Desarrollo Territorial", "Economía",
+      "Economía Industrial", "Estudios Sociales y Gestión Local", "Geografía", "Geografía Aplicada",
+      "Geohistoria", "Informática", "Mercadotecnia Digital", "Movilidad Urbana",
+      "Negocios Energéticos Sustentables", "Negocios Internacionales", "Planeación Territorial",
+      "Planificación para el Desarrollo Agropecuario", "Política y Gestión Social", "Psicología",
+      "Relaciones Comerciales", "Relaciones Internacionales", "Sociología", "Sociología Aplicada",
+      "Trabajo Social", "Turismo y Desarrollo Sostenible",
+      "Arte y Diseño", "Artes Visuales", "Canto", "Composición", "Desarrollo y Gestión Interculturales",
+      "Diseño de la Comunicación Gráfica", "Diseño Gráfico", "Diseño Industrial",
+      "Diseño y Comunicación Visual", "Educación Musical", "Enseñanza de Inglés",
+      "Enseñanza de Español como Lengua Extranjera", "Enseñanza de Inglés como Lengua Extranjera",
+      "Estudios Latinoamericanos", "Etnomusicología", "Filosofía", "Historia", "Historia del Arte",
+      "Instrumentista", "Lengua y Literaturas Hispánicas", "Lengua y Literaturas Modernas Alemanas",
+      "Lengua y Literaturas Modernas Francesas", "Lengua y Literaturas Modernas Inglesas",
+      "Lengua y Literaturas Modernas Italianas", "Lengua y Literaturas Modernas Portuguesas",
+      "Letras Clásicas", "Lingüística Aplicada", "Literatura Dramática y Teatro",
+      "Literatura Intercultural", "Música y Tecnología Artística", "Pedagogía", "Piano",
+      "Teatro y Actuación", "Traducción"
+    ];
+
+    const oficiadores = [
+      "Afinador de pianos", "Afilador de cuchillos", "Ama de llaves", "Boleador",
+      "Cargador", "Fumigador", "Limpia piscinas", "Limpia vidrios", "Mucama",
+      "Personal de limpieza", "Portero", "Recolección de basura", "Retiro de escombros",
+      "Albañil", "Blindador", "Carpintero", "Cerrajero", "Chalan",
+      "Electricista (técnico)", "Herrero", "Mecánico", "Pintor", "Plomero",
+      "Técnico en climatización", "Técnico en refrigeración", "Técnicos en reparación",
+      "Técnico industrial", "Tornero", "Vidriero", "Zapatero",
+      "Chofer", "Grúas (operador de grúa)", "Mensajero", "Mudanzas",
+      "Personal de almacén", "Valet parking",
+      "Ayudante de cocina", "Barista", "Bartender", "Carnicero", "Cocinero",
+      "Comida para eventos (servicio de catering)", "Hostess", "Lavaplatos",
+      "Mesero", "Panadero", "Parrillero", "Repostero", "Sommelier", "Tortillero",
+      "Barbero", "Estilista", "Groomer (estilista canino)", "Manicurista",
+      "Maquillista", "Masajista", "Tatuador",
+      "Actor", "Actor de doblaje", "Alfarero", "Animador de fiestas",
+      "Artesano de fibras vegetales", "Bailarín / Bailarina", "Bordador",
+      "Cantante", "Ceramista", "Creador de contenido", "Decorador de interiores",
+      "Diseño de modas", "Escritor", "Fotógrafo", "Joyero", "Músico / Bandas",
+      "Modelos", "Orfebre", "Serigrafista", "Tallador de piedra", "Tejedor",
+      "Entrenador canino", "Gericultor (cuidado de adultos mayores)",
+      "Niñera", "Paseador de perros",
+      "Árbitro de ajedrez", "Árbitro de fútbol", "Árbitro de fútbol americano",
+      "Árbitro de hockey", "Árbitro de voleibol", "Entrenador de armwrestling",
+      "Entrenador de boxeo", "Entrenador de calistenia", "Entrenador de fútbol",
+      "Entrenador de gimnasia", "Entrenador personal", "Instructor de buceo",
+      "Instructor de paracaidismo", "Maestro de yoga", "Maestro de zumba",
+      "Criminalista", "Experto en higiene forense", "Laboratorista dental",
+      "Optometrista", "Radiólogo", "Técnico dental", "Técnicos en laboratorio",
+      "Archivista", "Asistente administrativa", "Asistente personal", "Cajero",
+      "Corrector de texto", "Líder sindical", "Representante de atención al cliente",
+      "Técnico de RRHH", "Técnico en contabilidad", "Técnico en finanzas",
+      "Técnico en informática", "Valuador", "Vendedor",
+      "Bombero", "Guardaespaldas", "Inspector privado", "Personal de seguridad", "Vigilante",
+      "Agricultor", "Apicultor", "Granjero",
+      "Agente aduanal", "Agente de viajes", "Botarguero", "Cambiador de publicidad",
+      "Enterrador", "Guía de turistas", "Mayordomo", "Organizador de eventos",
+      "Sustituto de filas", "Ufólogo"
+    ];
+
+    // Búsqueda en vivo
+    document.getElementById('searchInput').addEventListener('input', function() {
+      const query = this.value.toLowerCase().trim();
+      const resultsContainer = document.getElementById('searchResults');
+      const resultsList = resultsContainer.querySelector('.p-2');
+      
+      if (!query) {
+        resultsContainer.classList.add('hidden');
+        return;
+      }
+      
+      // Buscar en ambas listas
+      const allItems = [
+        ...profesionistas.map(item => ({ name: item, type: 'profesionista' })),
+        ...oficiadores.map(item => ({ name: item, type: 'oficiador' }))
+      ];
+      
+      const matches = allItems.filter(item => 
+        item.name.toLowerCase().includes(query)
+      ).slice(0, 10);
+      
+      if (matches.length === 0) {
+        resultsList.innerHTML = `
+          <div class="text-gray-500 text-sm text-center py-2">
+            No se encontraron resultados
+          </div>
+        `;
+        resultsContainer.classList.remove('hidden');
+        return;
+      }
+      
+      resultsList.innerHTML = matches.map(match => `
+        <a href="${match.type === 'profesionista' ? 'professions-list.html' : 'oficiadores.html'}?search=${encodeURIComponent(match.name)}"
+           class="block px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors text-sm">
+          <span class="text-gray-800">${match.name}</span>
+          <span class="text-xs text-gray-500 ml-2">${match.type === 'profesionista' ? '🎓' : '🔧'}</span>
+        </a>
+      `).join('');
+      
+      resultsContainer.classList.remove('hidden');
+    });
+
+    // Cerrar resultados al hacer clic fuera
+    document.addEventListener('click', function(e) {
+      const searchContainer = document.querySelector('.w-full.max-w-md');
+      if (!searchContainer.contains(e.target)) {
+        document.getElementById('searchResults').classList.add('hidden');
+      }
+    });
+
+    // Soporte para Enter
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const query = this.value.trim();
+        if (query) {
+          // Redirigir a profesionistas por defecto
+          window.location.href = `professions-list.html?search=${encodeURIComponent(query)}`;
+        }
+      }
+    });
+  </script>
 </body>
 </html>
