@@ -3,28 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Encuentra el profesionista que necesitas en COLMENA HUB. Ingenieros, médicos, abogados, contadores y más.">
+  <meta name="description" content="Encuentra el profesionista titulado que necesitas en COLMENA HUB. Ingenieros, médicos, abogados, contadores y más.">
   <title>Profesionistas – COLMENA HUB</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body { background:#FFFBEB; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; }
-    .glass-card { background:rgba(255,252,245,0.92); backdrop-filter:blur(12px); border:1px solid rgba(201,169,110,0.25); box-shadow:0 8px 32px rgba(139,107,61,0.08); }
-    .category-card { transition:all .35s cubic-bezier(0.4,0,0.2,1); border-left:4px solid transparent; background:rgba(255,252,245,0.85); backdrop-filter:blur(8px); border:1px solid rgba(201,169,110,0.2); box-shadow:0 2px 12px rgba(139,107,61,0.06); }
-    .category-card:hover { transform:translateY(-4px); border-left-color:#FBBF24; box-shadow:0 12px 30px rgba(251,191,36,0.15); background:rgba(255,252,245,0.98); }
-    .category-card.hide-card { display:none !important; }
-    .section-divider { height:2px; background:linear-gradient(90deg, transparent, #FBBF24, transparent); margin:2rem 0; opacity:0.5; }
-    .section-divider.hide-divider { display:none !important; }
-    .category-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; background:rgba(201,169,110,0.15); color:#8B6B3D; }
-    .badge { font-size:0.65rem; padding:0.2rem 0.7rem; border-radius:20px; font-weight:600; letter-spacing:0.3px; text-transform:uppercase; }
-    .badge-physics { background:#E8D5B5; color:#6B4F2A; }
-    .badge-bio { background:#D4E8D4; color:#2D5A2D; }
-    .badge-social { background:#D5C8E8; color:#4A2D6B; }
-    .badge-humanities { background:#F0D5C8; color:#6B3D2A; }
-    .btn-primary { background:linear-gradient(135deg, #FBBF24, #D97706); color:white; transition:all .3s ease; }
-    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(251,191,36,0.3); }
-    .search-input { background:rgba(255,252,245,0.9); border:2px solid rgba(201,169,110,0.3); transition:all .3s ease; }
-    .search-input:focus { border-color:#FBBF24; box-shadow:0 0 0 4px rgba(251,191,36,0.15); outline:none; }
+    .card { transition:all .25s ease; border-left:4px solid transparent; }
+    .card:hover { transform:translateY(-3px); border-left-color:#FBBF24; box-shadow:0 8px 24px rgba(251,191,36,.15); }
+    .pill { display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:600; }
   </style>
 </head>
 <body class="min-h-screen">
@@ -36,43 +23,42 @@
         <img src="colmena-hubLOGO.png" alt="COLMENA HUB" class="h-10 w-auto">
         <span class="font-bold text-xl text-gray-900">COLMENA HUB</span>
       </a>
-      <nav class="flex items-center gap-4">
-        <a href="index.html" class="text-gray-600 hover:text-amber-600"><i class="fas fa-home mr-1"></i>Inicio</a>
-        <a href="oficiadores.html" class="text-gray-600 hover:text-amber-600"><i class="fas fa-tools mr-1"></i>Oficiadores</a>
-        <a href="apply.html" class="btn-primary px-5 py-2.5 rounded-xl font-semibold"><i class="fas fa-user-graduate mr-1"></i>Regístrate</a>
-      </nav>
+      <a href="apply.html" class="text-sm font-medium text-amber-600 hover:text-amber-700">
+        <i class="fas fa-user-plus mr-1"></i>Regístrate como profesionista
+      </a>
     </div>
   </header>
 
-  <!-- Hero -->
+  <!-- Búsqueda -->
   <div class="bg-gradient-to-r from-amber-500 to-yellow-400 py-10 px-4">
     <div class="max-w-2xl mx-auto text-center">
-      <h1 class="text-3xl font-bold text-white mb-2"><i class="fas fa-user-tie mr-3"></i>Profesionistas Certificados</h1>
-      <p class="text-yellow-100 mb-6">Encuentra profesionales titulados y especializados para proyectos complejos</p>
+      <h1 class="text-3xl font-bold text-black mb-2">Profesionistas Certificados</h1>
+      <p class="text-yellow-900 mb-6">Ingenieros, médicos, abogados, arquitectos y más</p>
       <div class="relative">
         <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-        <input type="text" id="search" placeholder="Buscar profesionistas por especialidad o título..." class="search-input w-full pl-12 pr-4 py-4 rounded-xl text-gray-800 text-base shadow-lg">
+        <input id="search" type="text" placeholder="Busca por carrera o especialidad..."
+               class="w-full pl-12 pr-4 py-4 rounded-xl text-gray-800 text-base shadow-lg border-0 outline-none focus:ring-2 focus:ring-white">
       </div>
     </div>
   </div>
 
   <!-- Categorías -->
   <main class="max-w-7xl mx-auto px-4 py-8">
-    <div id="list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+    <div id="categories-grid" class="space-y-8"></div>
 
+    <!-- Sin resultados -->
     <div id="no-results" class="hidden text-center py-16">
       <i class="fas fa-search text-4xl text-gray-300 mb-4"></i>
-      <h3 class="text-xl font-bold text-gray-600 mb-2">No se encontraron resultados</h3>
-      <p class="text-gray-500">Intenta con otros términos o explora todas las categorías.</p>
+      <h3 class="text-xl font-bold text-gray-600 mb-2">Sin resultados</h3>
+      <p class="text-gray-500">Intenta con otro término o <a href="oficiadores.html" class="text-amber-600 underline">busca un oficio</a>.</p>
     </div>
 
-    <!-- CTA -->
     <div class="mt-12 text-center">
-      <div class="glass-card rounded-2xl p-8 max-w-2xl mx-auto border-2 border-amber-200">
+      <div class="bg-white rounded-2xl p-8 max-w-2xl mx-auto shadow-sm">
         <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6"><i class="fas fa-user-graduate text-3xl text-amber-600"></i></div>
         <h3 class="text-2xl font-bold text-gray-900 mb-4">¿Eres un profesional titulado?</h3>
         <p class="text-gray-600 mb-6">Únete a nuestra red de profesionales verificados. Verificamos tu titulación, experiencia y referencias para ofrecerte a clientes de confianza.</p>
-        <a href="apply.html" class="btn-primary inline-flex items-center px-6 py-3 rounded-xl font-semibold shadow-lg"><i class="fas fa-graduation-cap mr-2"></i>Registro para Profesionales Titulados</a>
+        <a href="apply.html" class="inline-flex items-center bg-amber-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-600 transition-colors shadow-lg"><i class="fas fa-graduation-cap mr-2"></i>Registro para Profesionales Titulados</a>
         <p class="text-xs text-gray-500 mt-4">* Requiere cédula profesional o título universitario</p>
       </div>
     </div>
@@ -85,194 +71,93 @@
         <img src="colmena-hubLOGO.png" alt="" class="h-8 w-auto opacity-80">
         <span class="font-bold">COLMENA HUB</span>
       </div>
-      <p class="text-gray-400 text-sm">© 2025 COLMENA HUB. Profesiones reguladas.</p>
+      <p class="text-gray-400 text-sm">© 2025 COLMENA HUB. Todos los derechos reservados.</p>
     </div>
   </footer>
 
   <script>
-    const categories = [
-      { name: "🔬 Físico-Matemáticas e Ingenierías", icon: "atom", color: "gold", badge: "badge-physics", items: [
-        "Actuaría","Arquitectura","Arquitectura de Paisaje","Ciencia de Materiales Sustentables",
-        "Ciencias Atmosféricas","Ciencias de la Computación","Ciencias de la Tierra","Computación",
-        "Física","Física Biomédica","Geociencias","Ingeniería Aeroespacial","Ingeniería Aeronáutica",
-        "Ingeniería Agrícola","Ingeniería Ambiental","Ingeniería Biomédica","Ingeniería Biónica",
-        "Ingeniería Bioquímica","Ingeniería Biotecnológica","Ingeniería Civil","Ingeniería de Minas y Metalurgia",
-        "Ingeniería Eléctrica","Ingeniería Electrónica","Ingeniería Eléctrica y Electrónica",
-        "Ingeniería en Alimentos","Ingeniería en Computación","Ingeniería en Control y Automatización",
-        "Ingeniería en Energía","Ingeniería en Energías Renovables","Ingeniería en Inteligencia Artificial",
-        "Ingeniería en Robótica Industrial","Ingeniería en Sistemas Automotrices",
-        "Ingeniería en Telecomunicaciones","Ingeniería en Telecomunicaciones, Sistemas y Electrónica",
-        "Ingeniería Farmacéutica","Ingeniería Ferroviaria","Ingeniería Fotónica","Ingeniería Geofísica",
-        "Ingeniería Geológica","Ingeniería Geomática","Ingeniería Hidrológica","Ingeniería Industrial",
-        "Ingeniería Informática","Ingeniería Matemática","Ingeniería Mecánica","Ingeniería Mecánica Eléctrica",
-        "Ingeniería Mecatrónica","Ingeniería Metalúrgica","Ingeniería Petrolera","Ingeniería Química",
-        "Ingeniería Química Industrial","Ingeniería Química Metalúrgica","Ingeniería Química Petrolera",
-        "Ingeniería Sistemas Ambientales","Ingeniería Sistemas Computacionales",
-        "Ingeniería Sistemas Energéticos y Redes Inteligentes","Ingeniería Telemática",
-        "Ingeniería Topográfica y Fotogramétrica","Ingeniería Transporte","Matemáticas","Matemáticas Aplicadas",
-        "Matemáticas Aplicadas y Computación","Matemáticas para el Desarrollo","Nanotecnología",
-        "Tecnología","Tecnologías para la Información en Ciencias","Urbanismo"
-      ]},
-      { name: "🧬 Ciencias Biológicas, Químicas y de la Salud", icon: "dna", color: "green", badge: "badge-bio", items: [
-        "Agronomía","Bioquímica Diagnóstica","Biología","Ciencia de la Nutrición Humana",
-        "Ciencia Forense","Ciencias Agroforestales","Ciencias Agrogenómicas","Ciencias Ambientales",
-        "Ciencias Genómicas","Ecología","Enfermería","Enfermería y Obstetricia","Estomatología",
-        "Farmacia","Fisioterapia","Investigación Biomédica Básica","Manejo Sustentable de Zonas Costeras",
-        "Medicina","Medicina Veterinaria y Zootecnia","Médico Cirujano","Médico Cirujano Homeópata",
-        "Médico Cirujano Partero","Neurociencias","Nutrición Humana","Nutriología","Odontología",
-        "Optometría","Órtesis y Prótesis","Química","Química de Alimentos","Química Farmacéutica Biológica",
-        "Químico Bacteriólogo y Parasitólogo","Químico Farmacéutico Industrial"
-      ]},
-      { name: "🏛️ Ciencias Sociales", icon: "users", color: "purple", badge: "badge-social", items: [
-        "Administración","Administración Agropecuaria","Administración de Archivos y Gestión Documental",
-        "Administración Industrial","Administración y Desarrollo Empresarial","Antropología",
-        "Bibliotecología y Estudios de la Información","Ciencias de la Comunicación",
-        "Ciencias Políticas y Administración Pública","Comunicación","Comunicación Social",
-        "Comunicación y Periodismo","Contaduría","Contaduría y Finanzas Públicas","Derecho",
-        "Desarrollo Comunitario para el Envejecimiento","Desarrollo Territorial","Economía",
-        "Economía Industrial","Estudios Sociales y Gestión Local","Geografía","Geografía Aplicada",
-        "Geohistoria","Informática","Mercadotecnia Digital","Movilidad Urbana",
-        "Negocios Energéticos Sustentables","Negocios Internacionales","Planeación Territorial",
-        "Planificación para el Desarrollo Agropecuario","Política y Gestión Social","Psicología",
-        "Relaciones Comerciales","Relaciones Internacionales","Sociología","Sociología Aplicada",
-        "Trabajo Social","Turismo y Desarrollo Sostenible"
-      ]},
-      { name: "🎨 Humanidades y Artes", icon: "palette", color: "pink", badge: "badge-humanities", items: [
-        "Arte y Diseño","Artes Visuales","Canto","Composición","Desarrollo y Gestión Interculturales",
-        "Diseño de la Comunicación Gráfica","Diseño Gráfico","Diseño Industrial",
-        "Diseño y Comunicación Visual","Educación Musical","Enseñanza de Inglés",
-        "Enseñanza de Español como Lengua Extranjera","Enseñanza de Inglés como Lengua Extranjera",
-        "Estudios Latinoamericanos","Etnomusicología","Filosofía","Historia","Historia del Arte",
-        "Instrumentista","Lengua y Literaturas Hispánicas","Lengua y Literaturas Modernas Alemanas",
-        "Lengua y Literaturas Modernas Francesas","Lengua y Literaturas Modernas Inglesas",
-        "Lengua y Literaturas Modernas Italianas","Lengua y Literaturas Modernas Portuguesas",
-        "Letras Clásicas","Lingüística Aplicada","Literatura Dramática y Teatro",
-        "Literatura Intercultural","Música y Tecnología Artística","Pedagogía","Piano",
-        "Teatro y Actuación","Traducción"
-      ]}
+    const CATEGORIAS = [
+      {
+        cat: "🔬 Físico-Matemáticas e Ingenierías",
+        color: "bg-blue-100 text-blue-800",
+        items: ["Actuaría","Arquitectura","Arquitectura de Paisaje","Ciencia de Materiales Sustentables","Ciencias Atmosféricas","Ciencias de la Computación","Ciencias de la Tierra","Computación","Física","Física Biomédica","Geociencias","Ingeniería Aeroespacial","Ingeniería Aeronáutica","Ingeniería Agrícola","Ingeniería Ambiental","Ingeniería Biomédica","Ingeniería Biónica","Ingeniería Bioquímica","Ingeniería Biotecnológica","Ingeniería Civil","Ingeniería de Minas y Metalurgia","Ingeniería Eléctrica","Ingeniería Electrónica","Ingeniería Eléctrica y Electrónica","Ingeniería en Alimentos","Ingeniería en Computación","Ingeniería en Control y Automatización","Ingeniería en Energía","Ingeniería en Energías Renovables","Ingeniería en Inteligencia Artificial","Ingeniería en Robótica Industrial","Ingeniería en Sistemas Automotrices","Ingeniería en Telecomunicaciones","Ingeniería en Telecomunicaciones, Sistemas y Electrónica","Ingeniería Farmacéutica","Ingeniería Ferroviaria","Ingeniería Fotónica","Ingeniería Geofísica","Ingeniería Geológica","Ingeniería Geomática","Ingeniería Hidrológica","Ingeniería Industrial","Ingeniería Informática","Ingeniería Matemática","Ingeniería Mecánica","Ingeniería Mecánica Eléctrica","Ingeniería Mecatrónica","Ingeniería Metalúrgica","Ingeniería Petrolera","Ingeniería Química","Ingeniería Química Industrial","Ingeniería Química Metalúrgica","Ingeniería Química Petrolera","Ingeniería Sistemas Ambientales","Ingeniería Sistemas Computacionales","Ingeniería Sistemas Energéticos y Redes Inteligentes","Ingeniería Telemática","Ingeniería Topográfica y Fotogramétrica","Ingeniería Transporte","Matemáticas","Matemáticas Aplicadas","Matemáticas Aplicadas y Computación","Matemáticas para el Desarrollo","Nanotecnología","Tecnología","Tecnologías para la Información en Ciencias","Urbanismo"]
+      },
+      {
+        cat: "🧬 Ciencias Biológicas, Químicas y de la Salud",
+        color: "bg-emerald-100 text-emerald-800",
+        items: ["Agronomía","Bioquímica Diagnóstica","Biología","Ciencia de la Nutrición Humana","Ciencia Forense","Ciencias Agroforestales","Ciencias Agrogenómicas","Ciencias Ambientales","Ciencias Genómicas","Ecología","Enfermería","Enfermería y Obstetricia","Estomatología","Farmacia","Fisioterapia","Investigación Biomédica Básica","Manejo Sustentable de Zonas Costeras","Medicina","Medicina Veterinaria y Zootecnia","Médico Cirujano","Médico Cirujano Homeópata","Médico Cirujano Partero","Neurociencias","Nutrición Humana","Nutriología","Odontología","Optometría","Órtesis y Prótesis","Química","Química de Alimentos","Química Farmacéutica Biológica","Químico Bacteriólogo y Parasitólogo","Químico Farmacéutico Industrial"]
+      },
+      {
+        cat: "🏛️ Ciencias Sociales",
+        color: "bg-purple-100 text-purple-800",
+        items: ["Administración","Administración Agropecuaria","Administración de Archivos y Gestión Documental","Administración Industrial","Administración y Desarrollo Empresarial","Antropología","Bibliotecología y Estudios de la Información","Ciencias de la Comunicación","Ciencias Políticas y Administración Pública","Comunicación","Comunicación Social","Comunicación y Periodismo","Contaduría","Contaduría y Finanzas Públicas","Derecho","Desarrollo Comunitario para el Envejecimiento","Desarrollo Territorial","Economía","Economía Industrial","Estudios Sociales y Gestión Local","Geografía","Geografía Aplicada","Geohistoria","Informática","Mercadotecnia Digital","Movilidad Urbana","Negocios Energéticos Sustentables","Negocios Internacionales","Planeación Territorial","Planificación para el Desarrollo Agropecuario","Política y Gestión Social","Psicología","Relaciones Comerciales","Relaciones Internacionales","Sociología","Sociología Aplicada","Trabajo Social","Turismo y Desarrollo Sostenible"]
+      },
+      {
+        cat: "🎨 Humanidades y Artes",
+        color: "bg-pink-100 text-pink-800",
+        items: ["Arte y Diseño","Artes Visuales","Canto","Composición","Desarrollo y Gestión Interculturales","Diseño de la Comunicación Gráfica","Diseño Gráfico","Diseño Industrial","Diseño y Comunicación Visual","Educación Musical","Enseñanza de Inglés","Enseñanza de Español como Lengua Extranjera","Enseñanza de Inglés como Lengua Extranjera","Estudios Latinoamericanos","Etnomusicología","Filosofía","Historia","Historia del Arte","Instrumentista","Lengua y Literaturas Hispánicas","Lengua y Literaturas Modernas Alemanas","Lengua y Literaturas Modernas Francesas","Lengua y Literaturas Modernas Inglesas","Lengua y Literaturas Modernas Italianas","Lengua y Literaturas Modernas Portuguesas","Letras Clásicas","Lingüística Aplicada","Literatura Dramática y Teatro","Literatura Intercultural","Música y Tecnología Artística","Pedagogía","Piano","Teatro y Actuación","Traducción"]
+      }
     ];
 
-    function getColorClass(color) {
-      const c = {
-        gold: { bg: 'rgba(201,169,110,0.15)', text: '#8B6B3D' },
-        green: { bg: 'rgba(52,211,153,0.15)', text: '#065F46' },
-        purple: { bg: 'rgba(139,92,246,0.12)', text: '#5B21B6' },
-        pink: { bg: 'rgba(236,72,153,0.12)', text: '#9D174D' }
-      };
-      return c[color] || c.gold;
-    }
+    let allCards = [];
 
-    function getIcon(item) {
-      const i = item.toLowerCase();
-      if (i.includes('ingenier') || i.includes('arquitect')) return 'fas fa-drafting-compass';
-      if (i.includes('medic') || i.includes('médic') || i.includes('enfermer')) return 'fas fa-stethoscope';
-      if (i.includes('derecho')) return 'fas fa-balance-scale';
-      if (i.includes('psicolog')) return 'fas fa-brain';
-      if (i.includes('administra') || i.includes('contad')) return 'fas fa-briefcase';
-      if (i.includes('diseño') || i.includes('arte')) return 'fas fa-palette';
-      if (i.includes('músic')) return 'fas fa-music';
-      if (i.includes('biolog') || i.includes('química') || i.includes('farmac')) return 'fas fa-flask';
-      if (i.includes('econom') || i.includes('negocios') || i.includes('comercial')) return 'fas fa-chart-line';
-      return 'fas fa-graduation-cap';
-    }
-
-    function getDescription(item) {
-      const i = item.toLowerCase();
-      if (i.includes('ingenier') && i.includes('civil')) return 'Diseño y construcción de infraestructura';
-      if (i.includes('ingenier') && i.includes('sistemas')) return 'Desarrollo de software y TI';
-      if (i.includes('medicina') || i.includes('médico')) return 'Diagnóstico y tratamiento médico';
-      if (i.includes('derecho')) return 'Ejercicio y consultoría legal';
-      if (i.includes('arquitect')) return 'Diseño de espacios y construcciones';
-      if (i.includes('psicolog')) return 'Salud mental y desarrollo humano';
-      if (i.includes('biolog') || i.includes('ecolog')) return 'Estudio de seres vivos y ecosistemas';
-      if (i.includes('química')) return 'Análisis y transformación de la materia';
-      if (i.includes('administra') || i.includes('contad')) return 'Gestión empresarial y financiera';
-      if (i.includes('econom')) return 'Análisis de sistemas económicos';
-      return 'Profesional titulado con especialización';
-    }
-
-    function getVerificationText(item) {
-      const i = item.toLowerCase();
-      if (i.includes('medic') || i.includes('enfermer') || i.includes('estomat') || i.includes('odont')) return 'Cédula profesional de salud';
-      if (i.includes('ingenier') && i.includes('civil')) return 'Cédula profesional de ingeniería';
-      if (i.includes('derecho')) return 'Cédula profesional de abogacía';
-      if (i.includes('arquitect')) return 'Cédula profesional de arquitectura';
-      if (i.includes('contad')) return 'Cédula profesional de contaduría';
-      if (i.includes('psicolog')) return 'Cédula profesional de psicología';
-      if (i.includes('química') || i.includes('biol')) return 'Cédula profesional de ciencias químicas';
-      return 'Titulación universitaria verificada';
-    }
-
-    function getBadgeText(catName) {
-      const parts = catName.split(' ');
-      if (parts[0].includes('Físico')) return 'Ingeniería';
-      if (parts[0].includes('Ciencias')) return 'Ciencias';
-      if (parts[0].includes('Humanidades')) return 'Artes';
-      return parts[0].replace(/[^a-zA-Z]/g, '');
-    }
-
-    function renderAllCards() {
-      const container = document.getElementById('list');
-      container.innerHTML = '';
-      categories.forEach(cat => {
-        const divider = document.createElement('div');
-        divider.className = 'section-divider col-span-full';
-        divider.innerHTML = `<span class="px-4 font-medium text-lg" style="color:#8B6B3D; background:#FFFBEB;">${cat.name}</span>`;
-        container.appendChild(divider);
-        cat.items.forEach(item => {
-          const color = getColorClass(cat.color);
-          const card = document.createElement('a');
-          card.href = `listing.html?category=${encodeURIComponent(item)}`;
-          card.className = 'category-card rounded-xl p-5 flex flex-col';
-          card.innerHTML = `
-            <div class="flex items-start justify-between mb-4">
-              <div class="category-icon" style="background: ${color.bg}; color: ${color.text};"><i class="${getIcon(item)}"></i></div>
-              <span class="badge ${cat.badge}">${getBadgeText(cat.name)}</span>
-            </div>
-            <h3 class="font-bold text-lg mb-2" style="color:#2D1F0E;">${item}</h3>
-            <p class="text-sm mb-4" style="color:#6B5A4A;">${getDescription(item)}</p>
-            <div class="flex items-center text-xs mt-auto" style="color:#8B7A6A;">
-              <i class="fas fa-certificate mr-2" style="color:#FBBF24;"></i>
-              <span>${getVerificationText(item)}</span>
-            </div>
-          `;
-          container.appendChild(card);
-        });
-      });
-    }
-
-    function filterCards() {
-      const term = document.getElementById('search').value.toLowerCase().trim();
-      const cards = document.querySelectorAll('.category-card');
-      const dividers = document.querySelectorAll('.section-divider');
+    function render(list) {
+      const grid = document.getElementById('categories-grid');
       const noResults = document.getElementById('no-results');
-      let hasVisible = false;
-      cards.forEach(c => c.classList.add('hide-card'));
-      dividers.forEach(d => d.classList.add('hide-divider'));
-      if (term === '') {
-        cards.forEach(c => c.classList.remove('hide-card'));
-        dividers.forEach(d => d.classList.remove('hide-divider'));
-        noResults.classList.add('hidden');
+      grid.innerHTML = '';
+
+      const grouped = {};
+      list.forEach(({ cat, color, item }) => {
+        if (!grouped[cat]) grouped[cat] = { color, items: [] };
+        grouped[cat].items.push(item);
+      });
+
+      if (!Object.keys(grouped).length) {
+        noResults.classList.remove('hidden');
         return;
       }
-      cards.forEach(card => {
-        const title = card.querySelector('h3').textContent.toLowerCase();
-        if (title.includes(term)) {
-          card.classList.remove('hide-card');
-          hasVisible = true;
-          let prev = card.previousElementSibling;
-          while (prev && !prev.classList.contains('section-divider')) prev = prev.previousElementSibling;
-          if (prev && prev.classList.contains('section-divider')) prev.classList.remove('hide-divider');
-        }
-      });
-      noResults.classList.toggle('hidden', hasVisible);
+      noResults.classList.add('hidden');
+
+      for (const [cat, { color, items }] of Object.entries(grouped)) {
+        const section = document.createElement('div');
+        section.innerHTML = `
+          <h2 class="text-lg font-bold text-gray-700 mb-3">${cat}</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"></div>`;
+        const cardGrid = section.querySelector('.grid');
+
+        items.forEach(item => {
+          const a = document.createElement('a');
+          a.href = `listing.html?category=${encodeURIComponent(item)}&section=professionistas`;
+          a.className = 'card bg-white rounded-xl p-4 shadow-sm flex items-center gap-3';
+          a.innerHTML = `
+            <span class="pill ${color}">${cat.slice(0,2)}</span>
+            <span class="text-sm font-medium text-gray-800">${item}</span>
+            <i class="fas fa-chevron-right text-gray-300 ml-auto text-xs"></i>`;
+          cardGrid.appendChild(a);
+        });
+
+        grid.appendChild(section);
+      }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      renderAllCards();
-      let timeout;
-      document.getElementById('search').addEventListener('input', () => { clearTimeout(timeout); timeout = setTimeout(filterCards, 250); });
+    function buildAllCards() {
+      return CATEGORIAS.flatMap(({ cat, color, items }) =>
+        items.map(item => ({ cat, color, item }))
+      );
+    }
+
+    // Búsqueda con debounce
+    let timer;
+    document.getElementById('search').addEventListener('input', function () {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const q = this.value.toLowerCase().trim();
+        render(q ? allCards.filter(c => c.item.toLowerCase().includes(q) || c.cat.toLowerCase().includes(q)) : allCards);
+      }, 200);
     });
+
+    allCards = buildAllCards();
+    render(allCards);
   </script>
 </body>
 </html>
