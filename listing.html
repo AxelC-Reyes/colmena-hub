@@ -11,26 +11,40 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
   <style>
-    .professional-card { transition: all 0.3s ease; border-left: 4px solid transparent; }
-    .professional-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
-    .verified-badge::before { content: '✓'; position: absolute; left: 0; top: 0; width: 16px; height: 16px; background: #10B981; color: white; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; }
-    .verified-badge { position: relative; padding-left: 20px; }
-    .filter-pill { transition: all 0.2s; cursor: pointer; }
-    .filter-pill.active { background: #FBBF24; color: white; }
-    .status-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; padding: 10px 20px; text-align: center; font-size: 14px; display: none; }
-    .status-bar.visible { display: block; }
-    .status-bar.success { background: #10B981; color: white; }
-    .status-bar.error { background: #EF4444; color: white; }
-    .status-bar.warning { background: #F59E0B; color: white; }
+    body { background:#FFFBEB; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; }
+    .professional-card { transition: all 0.3s ease; border-left: 4px solid transparent; background:rgba(255,252,245,0.85); border:1px solid rgba(201,169,110,0.2); box-shadow:0 2px 12px rgba(139,107,61,0.06); }
+    .professional-card:hover { transform:translateY(-4px); border-left-color:#FBBF24; box-shadow:0 12px 30px rgba(251,191,36,0.15); background:rgba(255,252,245,0.98); }
+    .verified-badge::before { content:'✓'; position:absolute; left:0; top:0; width:16px; height:16px; background:#10B981; color:white; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; }
+    .verified-badge { position:relative; padding-left:20px; }
+    .filter-pill { transition:all 0.2s; cursor:pointer; padding:6px 16px; border-radius:999px; font-size:0.875rem; font-weight:500; background:#FEF3C7; color:#92400E; }
+    .filter-pill:hover { background:#FDE68A; }
+    .filter-pill.active { background:#FBBF24; color:white; box-shadow:0 4px 12px rgba(251,191,36,0.3); }
+    .status-bar { position:fixed; top:0; left:0; right:0; z-index:9999; padding:10px 20px; text-align:center; font-size:14px; display:none; }
+    .status-bar.visible { display:block; }
+    .status-bar.success { background:#10B981; color:white; }
+    .status-bar.error { background:#EF4444; color:white; }
+    .status-bar.warning { background:#F59E0B; color:white; }
+    .btn-primary { background:linear-gradient(135deg, #FBBF24, #D97706); color:white; transition:all .3s ease; }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(251,191,36,0.3); }
+    .btn-outline { border:2px solid #FBBF24; color:#92400E; transition:all .3s ease; }
+    .btn-outline:hover { background:#FEF3C7; }
+    .search-input { background:rgba(255,252,245,0.9); border:2px solid rgba(201,169,110,0.3); transition:all .3s ease; }
+    .search-input:focus { border-color:#FBBF24; box-shadow:0 0 0 4px rgba(251,191,36,0.15); outline:none; }
   </style>
 </head>
 <body>
   <div id="statusBar" class="status-bar"><span id="statusText"></span></div>
 
-  <header class="bg-white shadow-sm">
+  <header class="bg-white shadow-sm sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-      <a href="index.html" class="flex items-center space-x-3"><div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center"><i class="fas fa-bee text-white"></i></div><span class="text-lg font-bold">COLMENA HUB</span></a>
-      <a href="apply.html" class="text-sm text-amber-600 hover:text-amber-700"><i class="fas fa-user-plus mr-1"></i>Regístrate</a>
+      <a href="index.html" class="flex items-center gap-3">
+        <img src="colmena-hubLOGO.png" alt="COLMENA HUB" class="h-10 w-auto">
+        <span class="font-bold text-xl text-gray-900">COLMENA HUB</span>
+      </a>
+      <div class="flex items-center gap-3">
+        <a href="professions-list.html" class="text-gray-600 hover:text-amber-600 text-sm"><i class="fas fa-arrow-left mr-1"></i>Volver</a>
+        <a href="apply.html" class="btn-primary px-4 py-2 rounded-lg font-semibold text-sm"><i class="fas fa-user-plus mr-1"></i>Regístrate</a>
+      </div>
     </div>
   </header>
 
@@ -38,66 +52,185 @@
     <div class="mb-8">
       <h1 id="category-header" class="text-3xl font-bold text-gray-900 mb-2">Cargando...</h1>
       <p id="category-description" class="text-gray-600">Buscando profesionales verificados...</p>
-      <div class="mt-6 bg-white rounded-xl p-4 shadow-sm"><div class="relative"><i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i><input type="text" id="search" placeholder="Buscar por nombre..." class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:border-amber-300 focus:ring-2 focus:ring-amber-200 outline-none"></div></div>
+      <div id="type-toggle" class="hidden mt-4 inline-flex bg-white rounded-xl shadow-sm p-1 gap-1 border border-amber-200">
+        <button id="toggle-titulados" class="filter-pill active">🎓 Titulados</button>
+        <button id="toggle-pasantes" class="filter-pill">📚 Pasantes</button>
+      </div>
+      <div class="mt-6 bg-white rounded-xl p-4 shadow-sm border border-amber-200">
+        <div class="relative">
+          <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-amber-400"></i>
+          <input type="text" id="search" placeholder="Buscar por nombre o especialidad..." class="search-input w-full pl-12 pr-4 py-3 rounded-xl text-gray-800">
+        </div>
+      </div>
     </div>
 
     <div id="professionals-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-    <div id="no-results" class="hidden text-center py-12"><i class="fas fa-search text-4xl text-gray-300 mb-4"></i><h3 class="text-xl font-bold text-gray-600">No hay profesionales verificados</h3><p class="text-gray-500 mt-2">Sé el primero en registrarte</p><a href="apply.html" class="inline-block mt-6 bg-amber-500 text-white px-6 py-3 rounded-lg font-medium">Regístrate ahora</a></div>
+    <div id="no-results" class="hidden text-center py-16">
+      <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <i class="fas fa-search text-3xl text-amber-500"></i>
+      </div>
+      <h3 class="text-xl font-bold text-gray-600">No hay profesionales verificados</h3>
+      <p class="text-gray-500 mt-2">Sé el primero en registrarte</p>
+      <a href="apply.html" class="inline-block mt-6 btn-primary px-8 py-3 rounded-xl font-medium shadow-lg"><i class="fas fa-user-plus mr-2"></i>Regístrate ahora</a>
+    </div>
   </main>
 
-  <footer class="bg-gray-50 border-t mt-12"><div class="max-w-7xl mx-auto px-4 py-8 text-center"><p class="text-gray-400 text-sm">© 2025 COLMENA HUB</p></div></footer>
+  <footer class="bg-gray-800 text-white mt-16">
+    <div class="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <img src="colmena-hubLOGO.png" alt="" class="h-8 w-auto opacity-80">
+        <span class="font-bold">COLMENA HUB</span>
+      </div>
+      <p class="text-gray-400 text-sm">© 2025 COLMENA HUB. Todos los derechos reservados.</p>
+    </div>
+  </footer>
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const category = urlParams.get('category') || '';
-    const type     = urlParams.get('type') === 'intern' ? 'intern' : 'professional';
-    const collectionName = type === 'intern' ? 'interns' : 'professionals';
+    const section  = urlParams.get('section') || '';
+    let type = urlParams.get('type') === 'intern' ? 'intern' : 'professional';
     let allProfessionals = [];
     let currentSearch = '';
 
-    function showStatus(message, type = 'info') {
+    function collectionName() { return type === 'intern' ? 'interns' : 'professionals'; }
+
+    function showStatus(message, statusType = 'info') {
       const bar = document.getElementById('statusBar');
       const text = document.getElementById('statusText');
       if (!bar) return;
-      bar.className = `status-bar ${type === 'success' ? 'success' : type === 'error' ? 'error' : 'warning'} visible`;
+      bar.className = `status-bar ${statusType === 'success' ? 'success' : statusType === 'error' ? 'error' : 'warning'} visible`;
       text.textContent = message;
       setTimeout(() => bar.classList.remove('visible'), 3000);
     }
 
-    document.getElementById('category-header').textContent = category || 'Profesionales';
+    function updateHeader() {
+      const suffix = type === 'intern' ? ' (Pasantes)' : '';
+      const displayName = category || 'Profesionales';
+      document.getElementById('category-header').textContent = displayName + suffix;
+      document.getElementById('category-description').textContent = type === 'intern' 
+        ? 'Estudiantes avanzados verificados listos para prácticas profesionales' 
+        : 'Profesionales titulados verificados y certificados';
+    }
+    updateHeader();
+
+    // El toggle Titulados/Pasantes solo aplica a la sección Profesionistas
+    if (section === 'professionistas' && category) {
+      document.getElementById('type-toggle').classList.remove('hidden');
+      document.getElementById('type-toggle').classList.add('inline-flex');
+
+      function refreshToggleUI() {
+        document.getElementById('toggle-titulados').classList.toggle('active', type === 'professional');
+        document.getElementById('toggle-pasantes').classList.toggle('active', type === 'intern');
+      }
+      refreshToggleUI();
+
+      document.getElementById('toggle-titulados').addEventListener('click', () => {
+        if (type === 'professional') return;
+        type = 'professional';
+        refreshToggleUI();
+        updateHeader();
+        loadProfessionals();
+      });
+      document.getElementById('toggle-pasantes').addEventListener('click', () => {
+        if (type === 'intern') return;
+        type = 'intern';
+        refreshToggleUI();
+        updateHeader();
+        loadProfessionals();
+      });
+    }
 
     async function loadProfessionals() {
-      if (!category) { document.getElementById('professionals-list').innerHTML = '<div class="col-span-full text-center py-12 text-gray-500">Categoría no especificada</div>'; return; }
+      if (!category && type !== 'intern') {
+        document.getElementById('professionals-list').innerHTML = '<div class="col-span-full text-center py-12 text-gray-500">Categoría no especificada</div>';
+        return;
+      }
       try {
-        const snap = await DB.collection(collectionName).where('profession', '==', category).where('verified', '==', true).get();
+        let query = DB.collection(collectionName()).where('verified', '==', true);
+        if (category) query = query.where('profession', '==', category);
+        const snap = await query.get();
         allProfessionals = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderProfessionals();
-      } catch (e) { showStatus('Error al cargar profesionales', 'error'); console.error(e); }
+        if (allProfessionals.length === 0) showStatus('No hay profesionales en esta categoría aún', 'warning');
+      } catch (e) { 
+        showStatus('Error al cargar profesionales', 'error'); 
+        console.error(e); 
+        document.getElementById('professionals-list').innerHTML = '<div class="col-span-full text-center py-12 text-gray-500">Error al cargar profesionales</div>';
+      }
     }
 
     function renderProfessionals() {
       const container = document.getElementById('professionals-list');
       const noResults = document.getElementById('no-results');
       let filtered = allProfessionals;
-      if (currentSearch) filtered = allProfessionals.filter(p => p.fullName?.toLowerCase().includes(currentSearch));
-      if (filtered.length === 0) { container.innerHTML = ''; noResults.classList.remove('hidden'); return; }
+      
+      if (currentSearch) {
+        const search = currentSearch.toLowerCase();
+        filtered = allProfessionals.filter(p => 
+          (p.fullName?.toLowerCase() || '').includes(search) || 
+          (p.profession?.toLowerCase() || '').includes(search)
+        );
+      }
+      
+      if (filtered.length === 0) { 
+        container.innerHTML = ''; 
+        noResults.classList.remove('hidden'); 
+        return; 
+      }
       noResults.classList.add('hidden');
+      
       container.innerHTML = filtered.map(p => `
-        <div class="professional-card bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <div class="professional-card rounded-xl p-5">
           <div class="flex items-start mb-4">
-            <div class="w-16 h-16 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 flex items-center justify-center text-white text-2xl font-bold">${(p.fullName?.[0] || 'U').toUpperCase()}</div>
-            <div class="ml-4 flex-1"><h3 class="font-bold text-gray-900 text-lg">${p.fullName || 'Sin nombre'}</h3><p class="text-sm text-gray-600">${p.profession}</p><div class="flex items-center mt-2"><span class="verified-badge text-xs text-green-600">${type === 'intern' ? 'Becario Verificado' : 'Verificado'}</span></div></div>
+            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-2xl font-bold shadow-md flex-shrink-0">
+              ${(p.fullName?.[0] || 'U').toUpperCase()}
+            </div>
+            <div class="ml-4 flex-1">
+              <h3 class="font-bold text-gray-900 text-lg">${p.fullName || 'Sin nombre'}</h3>
+              <p class="text-sm text-amber-700 font-medium">${p.profession}</p>
+              <div class="flex items-center mt-2">
+                <span class="verified-badge text-xs text-green-600 font-medium">
+                  ${type === 'intern' ? '🎓 Pasante Verificado' : '✅ Profesional Verificado'}
+                </span>
+              </div>
+            </div>
           </div>
-          <div class="mb-4"><p class="text-gray-700 text-sm">${p.description || `Profesional especializado en ${p.profession}`}</p></div>
-          <div class="flex flex-wrap gap-2 mb-4"><span class="inline-flex items-center text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full"><i class="fas fa-dollar-sign mr-1"></i>$${p.hourlyRate || 250}/hora</span></div>
-          <div class="flex space-x-3"><a href="profile-view.html?id=${p.id}&type=${type}" class="flex-1 bg-amber-500 text-white text-center py-2 rounded-lg font-medium hover:bg-amber-600">Ver Perfil</a><button onclick="contactProfessional('${p.id}', '${(p.fullName || '').replace(/'/g, "\\'")}')" class="flex-1 border border-amber-500 text-amber-600 py-2 rounded-lg font-medium hover:bg-amber-50">Contactar</button></div>
-        </div>`).join('');
+          <div class="mb-4">
+            <p class="text-gray-600 text-sm">${p.description || `Profesional especializado en ${p.profession}`}</p>
+          </div>
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span class="inline-flex items-center text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium">
+              <i class="fas fa-dollar-sign mr-1"></i>$${p.hourlyRate || 250}/hora
+            </span>
+            ${p.yearsExperience ? `<span class="inline-flex items-center text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-full"><i class="fas fa-briefcase mr-1"></i>${p.yearsExperience} años</span>` : ''}
+          </div>
+          <div class="flex space-x-3">
+            <a href="profile-view.html?id=${p.id}&type=${type}" class="flex-1 btn-primary text-center py-2.5 rounded-xl font-medium">
+              <i class="fas fa-user mr-1"></i>Ver Perfil
+            </a>
+            <button onclick="contactProfessional('${p.id}', '${(p.fullName || '').replace(/'/g, "\\'")}')" class="flex-1 btn-outline py-2.5 rounded-xl font-medium">
+              <i class="fas fa-envelope mr-1"></i>Contactar
+            </button>
+          </div>
+        </div>
+      `).join('');
     }
 
-    function contactProfessional(id, name) { if (!Auth.currentUser) { if(confirm('Inicia sesión para contactar profesionales')) window.location.href='index.html'; return; } alert(`📧 Mensaje enviado a ${name}. Te contactarán pronto.`); }
+    function contactProfessional(id, name) { 
+      if (!Auth.currentUser) { 
+        if(confirm('🔐 Inicia sesión para contactar profesionales')) window.location.href='index.html'; 
+        return; 
+      } 
+      showStatus(`📧 Mensaje enviado a ${name}. Te contactarán pronto.`, 'success');
+    }
 
-    document.getElementById('search').addEventListener('input', e => { currentSearch = e.target.value.toLowerCase().trim(); renderProfessionals(); });
+    document.getElementById('search').addEventListener('input', e => { 
+      currentSearch = e.target.value.toLowerCase().trim(); 
+      renderProfessionals(); 
+    });
+    
     document.addEventListener('DOMContentLoaded', loadProfessionals);
   </script>
 </body>
